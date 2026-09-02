@@ -1,0 +1,10 @@
+# Godot 4+
+.godot/
+/android/
+
+# Editors
+.vscode/
+.idea/
+
+# Local-only working files
+/excluded/
