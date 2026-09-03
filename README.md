@@ -16,33 +16,41 @@ editor binary. `project.godot` already selects the PhysX backend:
 
 Scenes and tests are split by what they need:
 
-- **`cpu/`** — rigid bodies, joints, characters, areas, queries. Works with any
-  `godot_physx` build.
-- **`gpu/`** — GPU particle fluids (`PhysXParticleFluid3D`, `PhysXFluidRenderer`).
-  Needs an engine built with `physx_gpu=yes` and a CUDA device; inert otherwise.
+- **`cpu/`** — rigid bodies, joints, characters, areas, queries, and the CPU
+  cloth solver (`PhysXCloth3D`). Works with any `godot_physx` build.
+- **`gpu/`** — GPU particle fluids (`PhysXParticleFluid3D`). Needs an engine
+  built with `physx_gpu=yes` and a CUDA device; inert otherwise.
+- **`editor/`** — the same features authored as scene nodes rather than code.
+  `cloth.tscn` runs anywhere; `fluid.tscn` needs the GPU build.
 
 ## Demos
 
-The **Nodes** column marks scenes where the PhysX node is placed in the scene
-tree — open one and you can select the node to use its viewport gizmo and
-inspector. The rest build everything from GDScript at runtime.
+`demo/cpu/` and `demo/gpu/` are **runtime demos** — they build the whole scene
+from GDScript and are meant to be played. `demo/editor/` holds **authoring
+demos** — the PhysX object is a real scene node, so you select it to use its
+viewport gizmo and inspector, then press Play.
+
+### `demo/editor/` — author with the node, then play
+
+| Scene | What it shows |
+| --- | --- |
+| `cloth.tscn` | `PhysXCloth3D` flags and a banner as scene nodes: select a cloth to drag its grid handles, move its pins and tune its inspector. A `WindArea` gusts them on Play. |
+| `fluid.tscn` | `PhysXParticleFluid3D` as a scene node: gizmo and inspector for the emitter, plus the GPU isosurface + foam surface. Needs a `physx_gpu=yes` build. |
 
 ### `demo/cpu/`
 
-| Scene | Nodes | What it shows |
-| --- | :---: | --- |
-| `physx_playground.tscn` | | First-person character, a jointed ragdoll, a hinged door, a pendulum row, a 2000-box `MultiMesh` pile, and dangling chains. Left click launches a ragdoll, right click fires a ball with a radial blast. |
-| `physx_showcase.tscn` | | Box stress test with a switchable body count (1k–50k) and an orbiting camera. |
-| `physx_wind.tscn` | | A gusting `WindArea` driving jointed rigid-body pennants and streamers, tumbling debris and a pendulum wind gauge; walk into the volume and it pushes the character too. |
-| `physx_cloth.tscn` | | The same gusting `WindArea`, now driving real `PhysXCloth3D` flags and banners (CPU XPBD). Walkable. |
-| `cloth_showcase.tscn` | ✓ | `PhysXCloth3D` placed as scene nodes: select a cloth to drag its grid handles, move its pins and tune its inspector, then press Play for the wind. |
+| Scene | What it shows |
+| --- | --- |
+| `physx_playground.tscn` | First-person character, a jointed ragdoll, a hinged door, a pendulum row, a 2000-box `MultiMesh` pile, and dangling chains. Left click launches a ragdoll, right click fires a ball with a radial blast. |
+| `physx_showcase.tscn` | Box stress test with a switchable body count (1k–50k) and an orbiting camera. |
+| `physx_wind.tscn` | A gusting `WindArea` driving jointed rigid-body pennants and streamers, tumbling debris and a pendulum wind gauge; walk into the volume and it pushes the character too. |
+| `physx_cloth.tscn` | The same gusting `WindArea`, now driving real `PhysXCloth3D` flags and banners (CPU XPBD). Walkable. |
 
 ### `demo/gpu/`
 
-| Scene | Nodes | What it shows |
-| --- | :---: | --- |
-| `physx_fluid.tscn` | | A faucet streaming GPU fluid into a glass tank, with foam/spray and script-side buoyancy on dropped balls. |
-| `fluid_showcase.tscn` | ✓ | `PhysXParticleFluid3D` placed as a scene node: gizmo and inspector for the emitter and the GPU isosurface + foam surface. |
+| Scene | What it shows |
+| --- | --- |
+| `physx_fluid.tscn` | A faucet streaming GPU fluid into a glass tank, with foam/spray and script-side buoyancy on dropped balls. |
 
 ## Tests
 

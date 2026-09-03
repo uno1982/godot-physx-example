@@ -1,6 +1,6 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene format=3 uid="uid://cs7kkowdolp8d"]
 
-[ext_resource type="Script" path="res://demo/cpu/cloth_showcase.gd" id="1"]
+[ext_resource type="Script" uid="uid://bhp2841wiguuq" path="res://demo/editor/cloth.gd" id="1"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
 
@@ -17,15 +17,16 @@ tonemap_mode = 3
 [sub_resource type="BoxShape3D" id="GroundShape"]
 size = Vector3(24, 1, 24)
 
-[sub_resource type="BoxMesh" id="GroundMesh"]
-size = Vector3(24, 1, 24)
-
 [sub_resource type="StandardMaterial3D" id="Ground_1"]
 albedo_color = Color(0.3, 0.34, 0.3, 1)
 roughness = 0.95
 
-[sub_resource type="BoxShape3D" id="WindShape"]
-size = Vector3(30, 20, 20)
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(24, 1, 24)
+
+[sub_resource type="StandardMaterial3D" id="Grey_1"]
+albedo_color = Color(0.45, 0.45, 0.47, 1)
+roughness = 0.7
 
 [sub_resource type="CylinderMesh" id="PoleMesh"]
 top_radius = 0.04
@@ -33,87 +34,89 @@ bottom_radius = 0.04
 height = 3.4
 
 [sub_resource type="BoxMesh" id="WireMesh"]
-size = Vector3(3.0, 0.04, 0.04)
+size = Vector3(3, 0.04, 0.04)
 
-[sub_resource type="StandardMaterial3D" id="Grey_1"]
-albedo_color = Color(0.45, 0.45, 0.47, 1)
-roughness = 0.7
+[sub_resource type="BoxShape3D" id="WindShape"]
+size = Vector3(30, 20, 20)
 
 [sub_resource type="StandardMaterial3D" id="Flag_1"]
+cull_mode = 2
 albedo_color = Color(0.85, 0.2, 0.2, 1)
 roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xno5d"]
 cull_mode = 2
 
-[node name="ClothShowcase" type="Node3D"]
+[node name="ClothShowcase" type="Node3D" unique_id=954987016]
 script = ExtResource("1")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1273096989]
 environment = SubResource("Env_1")
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=725062065]
 transform = Transform3D(0.7, -0.49, 0.52, 0, 0.73, 0.68, -0.71, -0.48, 0.51, 0, 6, 0)
 shadow_enabled = true
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=978096614]
 transform = Transform3D(0.86, -0.12, 0.49, 0, 0.97, 0.24, -0.5, -0.2, 0.84, 4.6, 2.8, 6.2)
 
-[node name="Ground" type="StaticBody3D" parent="."]
+[node name="Ground" type="StaticBody3D" parent="." unique_id=601045295]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 collision_layer = 17
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1807328830]
 shape = SubResource("GroundShape")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=684276549]
 material_override = SubResource("Ground_1")
 mesh = SubResource("GroundMesh")
 
-[node name="Pole" type="MeshInstance3D" parent="."]
+[node name="Pole" type="MeshInstance3D" parent="." unique_id=1786725159]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.7, 0)
 material_override = SubResource("Grey_1")
 mesh = SubResource("PoleMesh")
 
-[node name="Wire" type="MeshInstance3D" parent="."]
+[node name="Wire" type="MeshInstance3D" parent="." unique_id=1049416792]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 4, 0)
 material_override = SubResource("Grey_1")
 mesh = SubResource("WireMesh")
 
-[node name="Wind" type="Area3D" parent="."]
+[node name="Wind" type="Area3D" parent="." unique_id=1393008413]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9, 0)
-gravity_space_override = 0
 wind_force_magnitude = 9.0
 wind_attenuation_factor = 0.2
 wind_source_path = NodePath("Source")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Wind"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wind" unique_id=84771716]
 shape = SubResource("WindShape")
 
-[node name="Source" type="Marker3D" parent="Wind"]
-transform = Transform3D(-4.37114e-8, 0, -1, 0, 1, 0, 1, 0, -4.37114e-8, 14, 0, 0)
+[node name="Source" type="Marker3D" parent="Wind" unique_id=951325469]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 14, 0, 0)
 
-[node name="Flag" type="PhysXCloth3D" parent="."]
+[node name="Flag" type="PhysXCloth3D" parent="." unique_id=1536679770]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 2.5, 0)
 material_override = SubResource("Flag_1")
 grid_columns = 26
 grid_rows = 16
 grid_size = Vector2(1.6, 1)
 bend_stiffness = 0.15
+wind_area = NodePath("../Wind")
 wind_turbulence = 0.7
 pin_mode = 4
-wind_area = NodePath("../Wind")
 
-[node name="Banner" type="PhysXCloth3D" parent="."]
+[node name="Banner" type="PhysXCloth3D" parent="." unique_id=1933079936]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 2.9, 0)
+material_override = SubResource("StandardMaterial3D_xno5d")
 grid_columns = 18
 grid_rows = 22
 grid_size = Vector2(1.1, 2.2)
 density = 0.4
-wind_turbulence = 0.5
 wind_area = NodePath("../Wind")
+wind_turbulence = 0.5
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=815935787]
 
-[node name="Label" type="Label" parent="HUD"]
+[node name="Label" type="Label" parent="HUD" unique_id=1251803564]
 offset_left = 16.0
 offset_top = 12.0
 offset_right = 520.0
