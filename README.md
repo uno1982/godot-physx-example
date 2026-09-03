@@ -14,14 +14,16 @@ editor binary. `project.godot` already selects the PhysX backend:
 3d/physics_engine="PhysX"
 ```
 
-Scenes and tests are split by what they need:
+Scenes and tests are grouped by what they need:
 
-- **`cpu/`** — rigid bodies, joints, characters, areas, queries, and the CPU
-  cloth solver (`PhysXCloth3D`). Works with any `godot_physx` build.
+- **`cpu/`** — rigid bodies, joints, characters, areas, queries. Works with any
+  `godot_physx` build.
 - **`gpu/`** — GPU particle fluids (`PhysXParticleFluid3D`). Needs an engine
   built with `physx_gpu=yes` and a CUDA device; inert otherwise.
-- **`editor/`** — the same features authored as scene nodes rather than code.
-  `cloth.tscn` runs anywhere; `fluid.tscn` needs the GPU build.
+
+`PhysXCloth3D` runs on the GPU (a PhysX deformable surface) when CUDA is present
+and falls back to a built-in CPU solver otherwise, like GPU rigid dynamics — so
+its scenes appear under both.
 
 ## Demos
 
@@ -34,8 +36,9 @@ viewport gizmo and inspector, then press Play.
 
 | Scene | What it shows |
 | --- | --- |
-| `cloth.tscn` | `PhysXCloth3D` flags and a banner as scene nodes: select a cloth to drag its grid handles, move its pins and tune its inspector. A `WindArea` gusts them on Play. |
-| `fluid.tscn` | `PhysXParticleFluid3D` as a scene node: gizmo and inspector for the emitter, plus the GPU isosurface + foam surface. Needs a `physx_gpu=yes` build. |
+| `cpu/cloth.tscn` | `PhysXCloth3D` flags and a banner as scene nodes: select a cloth to drag its grid handles, move its pins and tune its inspector. A `WindArea` gusts them on Play. Runs anywhere. |
+| `gpu/cloth.tscn` | A 48×48 `PhysXCloth3D` sheet draping over a sphere plus a wind-blown flag — the resolution and drape the GPU deformable surface allows. SPACE drops a ball. Falls back to the CPU solver without CUDA. |
+| `gpu/fluid.tscn` | `PhysXParticleFluid3D` as a scene node: gizmo and inspector for the emitter, plus the GPU isosurface + foam surface. Needs a `physx_gpu=yes` build. |
 
 ### `demo/cpu/`
 
