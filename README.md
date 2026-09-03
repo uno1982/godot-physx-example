@@ -23,19 +23,26 @@ Scenes and tests are split by what they need:
 
 ## Demos
 
+The **Nodes** column marks scenes where the PhysX node is placed in the scene
+tree — open one and you can select the node to use its viewport gizmo and
+inspector. The rest build everything from GDScript at runtime.
+
 ### `demo/cpu/`
 
-| Scene | What it shows |
-| --- | --- |
-| `physx_playground.tscn` | First-person character, a jointed ragdoll, a hinged door, a pendulum row, a 2000-box `MultiMesh` pile, and dangling chains. Left click launches a ragdoll, right click fires a ball with a radial blast. |
-| `physx_showcase.tscn` | Box stress test with a switchable body count (1k–50k) and an orbiting camera. |
-| `physx_wind.tscn` | A gusting `WindArea` driving cloth pennants, streamers, tumbling debris and a pendulum wind gauge; walk into the volume and it pushes the character too. |
+| Scene | Nodes | What it shows |
+| --- | :---: | --- |
+| `physx_playground.tscn` | | First-person character, a jointed ragdoll, a hinged door, a pendulum row, a 2000-box `MultiMesh` pile, and dangling chains. Left click launches a ragdoll, right click fires a ball with a radial blast. |
+| `physx_showcase.tscn` | | Box stress test with a switchable body count (1k–50k) and an orbiting camera. |
+| `physx_wind.tscn` | | A gusting `WindArea` driving jointed rigid-body pennants and streamers, tumbling debris and a pendulum wind gauge; walk into the volume and it pushes the character too. |
+| `physx_cloth.tscn` | | The same gusting `WindArea`, now driving real `PhysXCloth3D` flags and banners (CPU XPBD). Walkable. |
+| `cloth_showcase.tscn` | ✓ | `PhysXCloth3D` placed as scene nodes: select a cloth to drag its grid handles, move its pins and tune its inspector, then press Play for the wind. |
 
 ### `demo/gpu/`
 
-| Scene | What it shows |
-| --- | --- |
-| `physx_fluid.tscn` | A faucet streaming GPU fluid into a glass tank, with foam/spray and script-side buoyancy on dropped balls. |
+| Scene | Nodes | What it shows |
+| --- | :---: | --- |
+| `physx_fluid.tscn` | | A faucet streaming GPU fluid into a glass tank, with foam/spray and script-side buoyancy on dropped balls. |
+| `fluid_showcase.tscn` | ✓ | `PhysXParticleFluid3D` placed as a scene node: gizmo and inspector for the emitter and the GPU isosurface + foam surface. |
 
 ## Tests
 
