@@ -96,6 +96,7 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 14, 0,
 [node name="Flag" type="PhysXCloth3D" parent="." unique_id=1536679770]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 2.5, 0)
 material_override = SubResource("Flag_1")
+simulation_mode = 2
 grid_columns = 26
 grid_rows = 16
 grid_size = Vector2(1.6, 1)
@@ -107,6 +108,7 @@ pin_mode = 4
 [node name="Banner" type="PhysXCloth3D" parent="." unique_id=1933079936]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 2.9, 0)
 material_override = SubResource("StandardMaterial3D_xno5d")
+simulation_mode = 2
 grid_columns = 18
 grid_rows = 22
 grid_size = Vector2(1.1, 2.2)

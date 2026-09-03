@@ -1,0 +1,135 @@
+[gd_scene format=3 uid="uid://k8itsp302sb8"]
+
+[ext_resource type="Script" uid="uid://m5crlusbpvmb" path="res://demo/editor/gpu/cloth.gd" id="1_1504v"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
+
+[sub_resource type="Sky" id="Sky_2"]
+sky_material = SubResource("Sky_1")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_2")
+ambient_light_source = 3
+ambient_light_energy = 0.55
+tonemap_mode = 3
+
+[sub_resource type="BoxShape3D" id="GroundShape"]
+size = Vector3(24, 1, 24)
+
+[sub_resource type="StandardMaterial3D" id="Ground_1"]
+albedo_color = Color(0.3, 0.34, 0.3, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(24, 1, 24)
+
+[sub_resource type="SphereShape3D" id="BallShape"]
+radius = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Grey_1"]
+albedo_color = Color(0.5, 0.5, 0.52, 1)
+roughness = 0.6
+
+[sub_resource type="SphereMesh" id="BallMesh"]
+radius = 0.9
+height = 1.8
+
+[sub_resource type="CylinderMesh" id="PoleMesh"]
+top_radius = 0.04
+bottom_radius = 0.04
+height = 3.6
+
+[sub_resource type="BoxShape3D" id="WindShape"]
+size = Vector3(30, 20, 20)
+
+[sub_resource type="StandardMaterial3D" id="Cloth_1"]
+cull_mode = 2
+albedo_color = Color(0.25, 0.45, 0.8, 1)
+roughness = 0.85
+
+[node name="ClothGpuShowcase" type="Node3D" unique_id=131284419]
+script = ExtResource("1_1504v")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=722748442]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=2091218001]
+transform = Transform3D(0.7, -0.49, 0.52, 0, 0.73, 0.68, -0.71, -0.48, 0.51, 0, 6, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=382252402]
+transform = Transform3D(0.83, -0.15, 0.53, 0, 0.96, 0.28, -0.55, -0.23, 0.8, 4.8, 3.4, 6)
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=1955939469]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+collision_layer = 17
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=891981799]
+shape = SubResource("GroundShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=2142502789]
+material_override = SubResource("Ground_1")
+mesh = SubResource("GroundMesh")
+
+[node name="Ball" type="StaticBody3D" parent="." unique_id=589884808]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ball" unique_id=560687156]
+shape = SubResource("BallShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ball" unique_id=2041677179]
+material_override = SubResource("Grey_1")
+mesh = SubResource("BallMesh")
+
+[node name="Pole" type="MeshInstance3D" parent="." unique_id=1709665190]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1.8, -1)
+material_override = SubResource("Grey_1")
+mesh = SubResource("PoleMesh")
+
+[node name="Wind" type="Area3D" parent="." unique_id=1489647066]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9, 0)
+wind_force_magnitude = 9.0
+wind_attenuation_factor = 0.2
+wind_source_path = NodePath("Source")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wind" unique_id=376022635]
+shape = SubResource("WindShape")
+
+[node name="Source" type="Marker3D" parent="Wind" unique_id=1497002313]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 14, 0, 0)
+
+[node name="Sheet" type="PhysXCloth3D" parent="." unique_id=325677328]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 3, 0)
+material_override = SubResource("Cloth_1")
+simulation_mode = 2
+grid_columns = 48
+grid_rows = 48
+grid_size = Vector2(3, 3)
+bend_stiffness = 0.06
+wind_enabled = false
+pin_mode = 0
+
+[node name="Flag" type="PhysXCloth3D" parent="." unique_id=1537661871]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9, 3.2, -1)
+material_override = SubResource("Cloth_1")
+simulation_mode = 2
+grid_columns = 30
+grid_rows = 18
+grid_size = Vector2(1.8, 1.1)
+bend_stiffness = 0.12
+wind_area = NodePath("../Wind")
+wind_turbulence = 0.7
+pin_mode = 4
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1016983535]
+
+[node name="Label" type="Label" parent="HUD" unique_id=986041447]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 540.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
