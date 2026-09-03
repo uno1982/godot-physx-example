@@ -213,6 +213,7 @@ func _banner(wire_point: Vector3, col: Color) -> void:
 	cloth.grid_rows = 24
 	cloth.grid_size = Vector2(1.1, h)
 	cloth.position = wire_point - Vector3(0, h * 0.5, 0) # top edge on the wire
+	cloth.rotation_degrees = Vector3(0, 90, 0) # width runs along the wire (Z), face toward the wind
 	cloth.pin_mode = PhysXCloth3D.PIN_TOP_EDGE
 	cloth.wind_turbulence = 0.4
 	cloth.stiffness = 0.9
