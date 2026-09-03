@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="godotphysx"
-run/main_scene="res://demo/physx_playground.tscn"
+run/main_scene="res://demo/cpu/physx_playground.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

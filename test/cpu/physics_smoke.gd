@@ -6,7 +6,7 @@ extends SceneTree
 # engine drive physics, and asserts the body falls and then settles resting on
 # the floor. Engine-agnostic -- select the backend with:
 #
-#   godot --headless --path . --script res://test/physics_smoke.gd -- --engine=PhysX
+#   godot --headless --path . --script res://test/cpu/physics_smoke.gd -- --engine=PhysX
 #
 # (or "Jolt Physics" / "GodotPhysics"; default = project setting). Exit 0 = pass.
 

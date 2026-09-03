@@ -14,7 +14,16 @@ editor binary. `project.godot` already selects the PhysX backend:
 3d/physics_engine="PhysX"
 ```
 
-## Demos (`demo/`)
+Scenes and tests are split by what they need:
+
+- **`cpu/`** — rigid bodies, joints, characters, areas, queries. Works with any
+  `godot_physx` build.
+- **`gpu/`** — GPU particle fluids (`PhysXParticleFluid3D`, `PhysXFluidRenderer`).
+  Needs an engine built with `physx_gpu=yes` and a CUDA device; inert otherwise.
+
+## Demos
+
+### `demo/cpu/`
 
 | Scene | What it shows |
 | --- | --- |
@@ -22,16 +31,24 @@ editor binary. `project.godot` already selects the PhysX backend:
 | `physx_showcase.tscn` | Box stress test with a switchable body count (1k–50k) and an orbiting camera. |
 | `physx_wind.tscn` | A gusting `WindArea` driving cloth pennants, streamers, tumbling debris and a pendulum wind gauge; walk into the volume and it pushes the character too. |
 
-## Tests (`test/`)
+### `demo/gpu/`
+
+| Scene | What it shows |
+| --- | --- |
+| `physx_fluid.tscn` | A faucet streaming GPU fluid into a glass tank, with foam/spray and script-side buoyancy on dropped balls. |
+
+## Tests
 
 Headless pass/fail scripts, one behaviour each:
 
 ```
-godot --headless --path . --script res://test/physics_smoke.gd
+godot --headless --path . --script res://test/cpu/physics_smoke.gd
 ```
 
-`physics_smoke`, `sleep_test`, `query_test`, `contact_test`, `property_test`,
-`area_test`, `area_override_test`, `mesh_shape_test`, `joint_test`,
-`character_test`, `pendulum_gravity_test`, `chain_force_test`,
-`determinism_test`. `physics_bench.gd` is a step-time benchmark across body
-counts (run once per engine, flipping `physics/3d/physics_engine`).
+- **`test/cpu/`** — `physics_smoke`, `sleep_test`, `query_test`, `contact_test`,
+  `property_test`, `area_test`, `area_override_test`, `mesh_shape_test`,
+  `joint_test`, `character_test`, `pendulum_gravity_test`, `chain_force_test`,
+  `determinism_test`. `physics_bench.gd` is a step-time benchmark across body
+  counts (run once per engine, flipping `physics/3d/physics_engine`).
+- **`test/gpu/`** — `particle_fluid_test`, `particle_emit_test`,
+  `particle_foam_test`. These `SKIP` (exit 0) on a build without GPU particles.

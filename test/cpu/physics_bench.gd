@@ -3,7 +3,7 @@ extends SceneTree
 # Headless physics benchmark: pile up N dynamic boxes on a static floor, let them
 # collide and settle, and measure the engine-side physics step time.
 #
-#   godot --headless --path . --script res://test/physics_bench.gd
+#   godot --headless --path . --script res://test/cpu/physics_bench.gd
 #
 # The physics backend is whatever project.godot selects (locked at startup), so
 # run once per engine, flipping physics/3d/physics_engine between runs.
