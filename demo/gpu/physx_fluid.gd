@@ -97,15 +97,19 @@ func _spawn_fluid() -> void:
 	_fluid.emission_radius = 0.06
 	_fluid.emission_velocity = Vector3(0.4, -2.5, 0.4)
 	_fluid.emitting = true
+	_fluid.surface_mesh = true # PhysX GPU isosurface -> smooth water mesh
 	# Foam/spray where the stream hits the pool and where balls splash.
 	_fluid.foam_enabled = true
 	_fluid.foam_particle_count = 30000
 	_fluid.foam_lifetime = 1.6
 	_fluid.foam_threshold = 120.0
 	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.15, 0.45, 0.9)
-	m.metallic = 0.1
-	m.roughness = 0.15
+	m.albedo_color = Color(0.12, 0.4, 0.62, 0.55)
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.metallic = 0.15
+	m.roughness = 0.05
+	m.refraction_enabled = true
+	m.refraction_scale = 0.06
 	_fluid.material_override = m
 	add_child(_fluid)
 
