@@ -1,6 +1,6 @@
 extends Node3D
 
-# Cloth showcase for the PhysX module (CPU XPBD path -- works on any GPU).
+# Cloth + wind demo for the PhysX module (CPU XPBD path -- works on any GPU).
 #
 # A gusting WindArea drives a row of PhysXCloth3D flags and hanging banners; the
 # cloth reads the area's wind directly. A jointed string pendulum doubles as a

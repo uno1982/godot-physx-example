@@ -1,6 +1,6 @@
 extends Node3D
 
-# Node-based editor showcase for PhysXCloth3D. Every piece -- the wind volume,
+# Node-authored cloth demo -- select a cloth to use its gizmo and inspector. Every piece -- the wind volume,
 # the flag and the banner -- is a real scene node, so you can select a cloth,
 # drag its grid handles, move its pins and tweak its inspector in the editor.
 # Press Play and the wind gusts.
