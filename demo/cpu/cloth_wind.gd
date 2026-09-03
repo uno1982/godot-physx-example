@@ -4,12 +4,13 @@ extends Node3D
 #
 # A gusting WindArea drives a row of PhysXCloth3D flags and hanging banners; the
 # cloth reads the area's wind directly. A jointed string pendulum doubles as a
-# wind gauge, and light crates tumble downwind. Walk into the volume and the
-# gust shoves you too.
+# wind gauge, light crates tumble downwind and leaves drift through. Walk into
+# the volume and the gust shoves you too.
 #
 # Controls:
 #   W A S D / arrows  move        SPACE  jump        mouse  look
 #   F                 toggle wind        [ / ]  weaker / stronger gusts
+#   G                 dump more leaves
 #   R                 reset               ESC   release mouse / quit
 
 const SPEED := 5.0
@@ -31,6 +32,7 @@ var _t := 0.0
 var _root: Node3D
 var _gauge: RigidBody3D
 var _gauge_anchor := Vector3(-7, 5.5, 4)
+var _leaves: Array[RigidBody3D] = []
 var _hud: Label
 
 func _ready() -> void:
@@ -147,6 +149,35 @@ func _reset_scene() -> void:
 		crate.mass = s * s * s * 8.0
 		crate.position = Vector3(randf_range(12, 22), s * 0.5 + 0.1, randf_range(-10, 10))
 		_root.add_child(crate)
+
+	_leaves.clear()
+	_spawn_debris(35)
+
+# Thin leaves that drift downwind and get recycled to the upwind edge once they
+# blow out of the play area, so there's always something in the air.
+func _spawn_debris(n: int) -> void:
+	for i in n:
+		var leaf := RigidBody3D.new()
+		var sz := Vector3(randf_range(0.15, 0.35), 0.03, randf_range(0.15, 0.35))
+		_visual_box(leaf, sz, Color.from_hsv(randf_range(0.06, 0.13), 0.75, 0.55))
+		_col_box(leaf, sz)
+		leaf.collision_layer = 2
+		leaf.collision_mask = 3 # ground + other leaves only
+		leaf.mass = 0.12
+		leaf.position = Vector3(randf_range(16, 24), randf_range(1.5, 7), randf_range(-9, 9))
+		leaf.angular_velocity = Vector3(randf_range(-4, 4), randf_range(-4, 4), randf_range(-4, 4))
+		_root.add_child(leaf)
+		_leaves.append(leaf)
+
+func _recycle_leaves() -> void:
+	for leaf in _leaves:
+		if not is_instance_valid(leaf):
+			continue
+		var p := leaf.global_position
+		if p.x < -40.0 or p.y < -3.0 or absf(p.z) > 24.0:
+			leaf.global_position = Vector3(randf_range(20, 26), randf_range(2, 8), randf_range(-9, 9))
+			leaf.linear_velocity = Vector3.ZERO
+			leaf.angular_velocity = Vector3(randf_range(-4, 4), randf_range(-4, 4), randf_range(-4, 4))
 
 func _flag(base: Vector3, col: Color) -> void:
 	var pole := _static_box(base + Vector3(0, 3, 0), Vector3(0.1, 6, 0.1), _grey())
@@ -265,6 +296,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_base_gust = maxf(0.0, _base_gust - 3.0)
 			KEY_BRACKETRIGHT:
 				_base_gust = minf(28.0, _base_gust + 3.0)
+			KEY_G:
+				_spawn_debris(40)
 			KEY_R:
 				_reset_scene()
 			KEY_ESCAPE:
@@ -285,6 +318,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		_gust = lerp(_gust, 0.0, 0.1)
 	_wind.wind_force_magnitude = _gust
+	_recycle_leaves()
 
 	var input := Vector3.ZERO
 	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
@@ -312,5 +346,5 @@ func _process(_dt: float) -> void:
 	if is_instance_valid(_gauge):
 		var down := _gauge.global_position - _gauge_anchor
 		lean = rad_to_deg(down.angle_to(Vector3.DOWN))
-	_hud.text = "PhysX cloth in wind (CPU XPBD)   F wind %s   [ ] gust %.0f   R reset   ESC\ngust: %4.1f   gauge lean: %4.1f°   FPS: %d" % [
-		("ON" if _wind_on else "OFF"), _base_gust, _gust, lean, Engine.get_frames_per_second()]
+	_hud.text = "PhysX cloth in wind (CPU XPBD)   F wind %s   [ ] gust %.0f   G leaves   R reset   ESC\ngust: %4.1f   gauge lean: %4.1f°   leaves: %d   FPS: %d" % [
+		("ON" if _wind_on else "OFF"), _base_gust, _gust, lean, _leaves.size(), Engine.get_frames_per_second()]
