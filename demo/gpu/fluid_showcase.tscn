@@ -112,15 +112,21 @@ mesh = SubResource("WallMeshZ")
 [node name="PhysXParticleFluid3D" type="PhysXParticleFluid3D" parent="." unique_id=1059495939]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.033325717, 2.2, 0.0061337203)
 material_override = SubResource("Water_1")
-particle_count = 60000
+particle_count = 50000
 particle_size = 0.04
 spawn_region_size = Vector3(1.060083, 1.6, 0.9984375)
 spawn_on_ready = false
 emitting = true
-emission_rate = 9000.0
+emission_rate = 6000.0
 emission_velocity = Vector3(0.35, -2.5, 0.35)
 surface_mesh = true
 surface_anisotropy = true
+foam_enabled = true
+foam_particle_count = 2000
+foam_lifetime = 0.01
+foam_threshold = 220.0
+foam_buoyancy = 1.0
+foam_size = 0.009
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=757669545]
 
