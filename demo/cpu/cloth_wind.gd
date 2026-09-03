@@ -126,9 +126,9 @@ func _reset_scene() -> void:
 		_flag(Vector3(-6 + i * 4.0, 0, -6), Color.from_hsv(0.03 + i * 0.11, 0.7, 0.95))
 
 	# Hanging banners off a high wire, pinned along their top edge.
-	var wire := _static_box(Vector3(8, 7.6, 0), Vector3(0.05, 0.05, 18), _grey())
+	var wire := _static_box(Vector3(8, 6.0, 0), Vector3(0.05, 0.05, 18), _grey())
 	for i in 4:
-		_banner(Vector3(8, 7.55, -6.5 + i * 4.3), Color.from_hsv(0.55 + i * 0.06, 0.5, 0.95))
+		_banner(Vector3(8, 6.0, -6.5 + i * 4.3), Color.from_hsv(0.55 + i * 0.06, 0.5, 0.95))
 
 	# Wind gauge: a heavy bob on a short string; its lean reads out force.
 	var anchor := _static_box(_gauge_anchor, Vector3(0.12, 0.12, 0.12), _grey())
@@ -183,18 +183,20 @@ func _flag(base: Vector3, col: Color) -> void:
 	var pole := _static_box(base + Vector3(0, 3, 0), Vector3(0.1, 6, 0.1), _grey())
 	pole.collision_layer = 1
 
+	var w := 2.0
 	var cloth := PhysXCloth3D.new()
-	cloth.grid_columns = 26
-	cloth.grid_rows = 16
-	cloth.grid_size = Vector2(1.6, 1.0)
+	cloth.grid_columns = 28
+	cloth.grid_rows = 18
+	cloth.grid_size = Vector2(w, 1.3)
 	# Pin the +X edge at the pole so the flag streams downwind (toward -X).
-	cloth.position = base + Vector3(-0.8, 5.0, 0)
+	cloth.position = base + Vector3(-w * 0.5, 5.2, 0)
 	cloth.pin_mode = PhysXCloth3D.PIN_RIGHT_EDGE
 	cloth.wind_turbulence = 0.7
 	cloth.stiffness = 0.9
-	cloth.shear_stiffness = 0.7
-	cloth.bend_stiffness = 0.2
+	cloth.shear_stiffness = 0.6
+	cloth.bend_stiffness = 0.12
 	cloth.damping = 0.02
+	cloth.drag = 1.5
 	cloth.collision_mask = GROUND_LAYER # ignore the pole, still land on the ground
 	var m := StandardMaterial3D.new()
 	m.albedo_color = col
@@ -204,16 +206,21 @@ func _flag(base: Vector3, col: Color) -> void:
 	_root.add_child(cloth)
 	cloth.wind_area = cloth.get_path_to(_wind)
 
-func _banner(top: Vector3, col: Color) -> void:
+func _banner(wire_point: Vector3, col: Color) -> void:
+	var h := 2.6
 	var cloth := PhysXCloth3D.new()
-	cloth.grid_columns = 20
-	cloth.grid_rows = 22
-	cloth.grid_size = Vector2(1.2, 2.4)
-	cloth.position = top + Vector3(0, -1.2, 0) # centre, top edge at the wire
+	cloth.grid_columns = 16
+	cloth.grid_rows = 24
+	cloth.grid_size = Vector2(1.1, h)
+	cloth.position = wire_point - Vector3(0, h * 0.5, 0) # top edge on the wire
 	cloth.pin_mode = PhysXCloth3D.PIN_TOP_EDGE
-	cloth.wind_turbulence = 0.5
-	cloth.stiffness = 0.92
-	cloth.bend_stiffness = 0.15
+	cloth.wind_turbulence = 0.4
+	cloth.stiffness = 0.9
+	cloth.bend_stiffness = 0.1
+	cloth.damping = 0.08
+	cloth.density = 0.6 # heavy fabric: hangs and ripples instead of flying up
+	cloth.drag = 0.55
+	cloth.lift = 0.15
 	cloth.collision_mask = GROUND_LAYER
 	var m := StandardMaterial3D.new()
 	m.albedo_color = col
