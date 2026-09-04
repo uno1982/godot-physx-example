@@ -134,14 +134,18 @@ func _plank(idx: int) -> RigidBody3D:
 	mi.material_override = _mat(Color(0.55, 0.38, 0.22) if idx % 2 else Color(0.47, 0.31, 0.17))
 	rb.add_child(mi)
 	var px := -_span * 0.5 + (idx + 0.5) * PLANK_LEN
-	rb.position = Vector3(px, DECK_Y - _sag_at(px), 0)
+	# Offset by half the plank thickness so the top face sits at the deck line
+	# (flush with the cliff shelves at the ends).
+	rb.position = Vector3(px, DECK_Y - _sag_at(px) - 0.07, 0)
 	_root.add_child(rb)
 	return rb
 
 func _build_bridge() -> void:
 	var half := _span * 0.5
-	var abut_l := _static_box(Vector3(-half - 0.45, DECK_Y - _sag_at(half) - 0.1, 0), Vector3(0.5, 0.5, DECK_W + 0.6), Color(0.34, 0.34, 0.37))
-	var abut_r := _static_box(Vector3(half + 0.45, DECK_Y - _sag_at(half) - 0.1, 0), Vector3(0.5, 0.5, DECK_W + 0.6), Color(0.34, 0.34, 0.37))
+	# Abutments: sunk so their tops are below the deck -- they exist to anchor the
+	# end pins, not to be walked on (that lip is what you'd trip over).
+	var abut_l := _static_box(Vector3(-half - 0.45, DECK_Y - 0.6, 0), Vector3(0.5, 1.0, DECK_W + 0.6), Color(0.34, 0.34, 0.37))
+	var abut_r := _static_box(Vector3(half + 0.45, DECK_Y - 0.6, 0), Vector3(0.5, 1.0, DECK_W + 0.6), Color(0.34, 0.34, 0.37))
 
 	var prev: Node3D = abut_l
 	for i in PLANKS:
@@ -149,10 +153,10 @@ func _build_bridge() -> void:
 		_planks.append(p)
 		var jx := -half + i * PLANK_LEN
 		for dz in [-DECK_W * 0.5 + 0.15, DECK_W * 0.5 - 0.15]:
-			_pin(prev, p, Vector3(jx, DECK_Y - _sag_at(jx), dz))
+			_pin(prev, p, Vector3(jx, DECK_Y - _sag_at(jx) - 0.07, dz))
 		prev = p
 	for dz in [-DECK_W * 0.5 + 0.15, DECK_W * 0.5 - 0.15]:
-		_pin(prev, abut_r, Vector3(half, DECK_Y - _sag_at(half), dz))
+		_pin(prev, abut_r, Vector3(half, DECK_Y - _sag_at(half) - 0.07, dz))
 
 	_rope_l = _make_rope_mesh()
 	_rope_r = _make_rope_mesh()
@@ -208,7 +212,8 @@ func _build_character() -> void:
 	cap.height = 1.8
 	cs.shape = cap
 	_char.add_child(cs)
-	_char.position = Vector3(-_span * 0.5 - 5, DECK_Y + 2.0, 0)
+	_char.position = Vector3(-_span * 0.5 - 4, DECK_Y + 1.2, 0)
+	_char.floor_snap_length = 0.5
 	add_child(_char)
 	_cam = Camera3D.new()
 	_cam.position = Vector3(0, 0.7, 0)
