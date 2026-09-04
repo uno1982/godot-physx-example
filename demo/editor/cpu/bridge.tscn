@@ -1,0 +1,303 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://demo/editor/cpu/bridge.gd" id="1"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
+
+[sub_resource type="Sky" id="Sky_2"]
+sky_material = SubResource("Sky_1")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_2")
+ambient_light_source = 3
+ambient_light_energy = 0.5
+tonemap_mode = 3
+
+[sub_resource type="BoxShape3D" id="BlockShape"]
+size = Vector3(6, 3, 5)
+
+[sub_resource type="BoxMesh" id="BlockMesh"]
+size = Vector3(6, 3, 5)
+
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.42, 0.4, 0.37, 1)
+roughness = 0.9
+
+[sub_resource type="BoxShape3D" id="PlankShape"]
+size = Vector3(1.85, 0.15, 3)
+
+[sub_resource type="BoxMesh" id="PlankMesh"]
+size = Vector3(1.85, 0.15, 3)
+
+[sub_resource type="StandardMaterial3D" id="Wood0"]
+albedo_color = Color(0.55, 0.38, 0.22, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Wood1"]
+albedo_color = Color(0.47, 0.31, 0.17, 1)
+roughness = 0.85
+
+[sub_resource type="BoxShape3D" id="CrateShape"]
+size = Vector3(0.55, 0.55, 0.55)
+
+[sub_resource type="BoxMesh" id="CrateMesh"]
+size = Vector3(0.55, 0.55, 0.55)
+
+[sub_resource type="StandardMaterial3D" id="Crate0"]
+albedo_color = Color(0.8, 0.6, 0.3, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Crate1"]
+albedo_color = Color(0.4, 0.55, 0.75, 1)
+roughness = 0.8
+
+[node name="BridgeShowcase" type="Node3D"]
+script = ExtResource("1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.7, -0.49, 0.52, 0, 0.73, 0.68, -0.71, -0.48, 0.51, 0, 6, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.82, -0.16, 0.55, 0, 0.96, 0.28, -0.57, -0.23, 0.79, 7, 5.4, 9)
+current = true
+
+[node name="LeftBlock" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75, 1.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftBlock"]
+shape = SubResource("BlockShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftBlock"]
+material_override = SubResource("Stone")
+mesh = SubResource("BlockMesh")
+
+[node name="RightBlock" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.75, 1.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightBlock"]
+shape = SubResource("BlockShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightBlock"]
+material_override = SubResource("Stone")
+mesh = SubResource("BlockMesh")
+
+[node name="Deck" type="Node3D" parent="."]
+
+[node name="Plank0" type="RigidBody3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 2.87, 0)
+mass = 6.0
+can_sleep = false
+angular_damp = 1.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Deck/Plank0"]
+shape = SubResource("PlankShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Deck/Plank0"]
+material_override = SubResource("Wood0")
+mesh = SubResource("PlankMesh")
+
+[node name="Plank1" type="RigidBody3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2.8, 0)
+mass = 6.0
+can_sleep = false
+angular_damp = 1.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Deck/Plank1"]
+shape = SubResource("PlankShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Deck/Plank1"]
+material_override = SubResource("Wood1")
+mesh = SubResource("PlankMesh")
+
+[node name="Plank2" type="RigidBody3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.78, 0)
+mass = 6.0
+can_sleep = false
+angular_damp = 1.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Deck/Plank2"]
+shape = SubResource("PlankShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Deck/Plank2"]
+material_override = SubResource("Wood0")
+mesh = SubResource("PlankMesh")
+
+[node name="Plank3" type="RigidBody3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
+mass = 6.0
+can_sleep = false
+angular_damp = 1.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Deck/Plank3"]
+shape = SubResource("PlankShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Deck/Plank3"]
+material_override = SubResource("Wood1")
+mesh = SubResource("PlankMesh")
+
+[node name="Plank4" type="RigidBody3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 2.87, 0)
+mass = 6.0
+can_sleep = false
+angular_damp = 1.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Deck/Plank4"]
+shape = SubResource("PlankShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Deck/Plank4"]
+material_override = SubResource("Wood0")
+mesh = SubResource("PlankMesh")
+
+[node name="J0" type="Generic6DOFJoint3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.75, 3, 0)
+node_a = NodePath("../../LeftBlock")
+node_b = NodePath("../Plank0")
+linear_limit_x/enabled = true
+linear_limit_y/enabled = true
+linear_limit_z/enabled = true
+angular_limit_x/enabled = true
+angular_limit_x/upper_angle = 0.0
+angular_limit_x/lower_angle = 0.0
+angular_limit_y/enabled = true
+angular_limit_y/upper_angle = 0.0
+angular_limit_y/lower_angle = 0.0
+angular_spring_z/enabled = true
+angular_spring_z/stiffness = 250.0
+angular_spring_z/damping = 30.0
+
+[node name="J1" type="Generic6DOFJoint3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.25, 2.83, 0)
+node_a = NodePath("../Plank0")
+node_b = NodePath("../Plank1")
+linear_limit_x/enabled = true
+linear_limit_y/enabled = true
+linear_limit_z/enabled = true
+angular_limit_x/enabled = true
+angular_limit_x/upper_angle = 0.0
+angular_limit_x/lower_angle = 0.0
+angular_limit_y/enabled = true
+angular_limit_y/upper_angle = 0.0
+angular_limit_y/lower_angle = 0.0
+angular_spring_z/enabled = true
+angular_spring_z/stiffness = 250.0
+angular_spring_z/damping = 30.0
+
+[node name="J2" type="Generic6DOFJoint3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 2.79, 0)
+node_a = NodePath("../Plank1")
+node_b = NodePath("../Plank2")
+linear_limit_x/enabled = true
+linear_limit_y/enabled = true
+linear_limit_z/enabled = true
+angular_limit_x/enabled = true
+angular_limit_x/upper_angle = 0.0
+angular_limit_x/lower_angle = 0.0
+angular_limit_y/enabled = true
+angular_limit_y/upper_angle = 0.0
+angular_limit_y/lower_angle = 0.0
+angular_spring_z/enabled = true
+angular_spring_z/stiffness = 250.0
+angular_spring_z/damping = 30.0
+
+[node name="J3" type="Generic6DOFJoint3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.79, 0)
+node_a = NodePath("../Plank2")
+node_b = NodePath("../Plank3")
+linear_limit_x/enabled = true
+linear_limit_y/enabled = true
+linear_limit_z/enabled = true
+angular_limit_x/enabled = true
+angular_limit_x/upper_angle = 0.0
+angular_limit_x/lower_angle = 0.0
+angular_limit_y/enabled = true
+angular_limit_y/upper_angle = 0.0
+angular_limit_y/lower_angle = 0.0
+angular_spring_z/enabled = true
+angular_spring_z/stiffness = 250.0
+angular_spring_z/damping = 30.0
+
+[node name="J4" type="Generic6DOFJoint3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 2.83, 0)
+node_a = NodePath("../Plank3")
+node_b = NodePath("../Plank4")
+linear_limit_x/enabled = true
+linear_limit_y/enabled = true
+linear_limit_z/enabled = true
+angular_limit_x/enabled = true
+angular_limit_x/upper_angle = 0.0
+angular_limit_x/lower_angle = 0.0
+angular_limit_y/enabled = true
+angular_limit_y/upper_angle = 0.0
+angular_limit_y/lower_angle = 0.0
+angular_spring_z/enabled = true
+angular_spring_z/stiffness = 250.0
+angular_spring_z/damping = 30.0
+
+[node name="J5" type="Generic6DOFJoint3D" parent="Deck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.75, 3, 0)
+node_a = NodePath("../Plank4")
+node_b = NodePath("../../RightBlock")
+linear_limit_x/enabled = true
+linear_limit_y/enabled = true
+linear_limit_z/enabled = true
+angular_limit_x/enabled = true
+angular_limit_x/upper_angle = 0.0
+angular_limit_x/lower_angle = 0.0
+angular_limit_y/enabled = true
+angular_limit_y/upper_angle = 0.0
+angular_limit_y/lower_angle = 0.0
+angular_spring_z/enabled = true
+angular_spring_z/stiffness = 250.0
+angular_spring_z/damping = 30.0
+
+[node name="Crates" type="Node3D" parent="."]
+
+[node name="Crate0" type="RigidBody3D" parent="Crates"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, 3.1, 0.1)
+mass = 4.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Crates/Crate0"]
+shape = SubResource("CrateShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Crates/Crate0"]
+material_override = SubResource("Crate0")
+mesh = SubResource("CrateMesh")
+
+[node name="Crate1" type="RigidBody3D" parent="Crates"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 3.66, -0.1)
+mass = 4.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Crates/Crate1"]
+shape = SubResource("CrateShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Crates/Crate1"]
+material_override = SubResource("Crate1")
+mesh = SubResource("CrateMesh")
+
+[node name="Crate2" type="RigidBody3D" parent="Crates"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 4.22, 0.2)
+mass = 4.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Crates/Crate2"]
+shape = SubResource("CrateShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Crates/Crate2"]
+material_override = SubResource("Crate0")
+mesh = SubResource("CrateMesh")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 640.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18

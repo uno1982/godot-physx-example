@@ -1,7 +1,11 @@
 extends SceneTree
 
 # Minimal CharacterBody3D walk check on the PhysX backend: a capsule on a big
-# static box, driven +X for 2 s. It must actually travel.
+# thick static box, driven +X for 2 s. It must actually travel.
+#
+# Note: the controller holds velocity.y at 0 on the floor. A constant downward
+# "stick" velocity there fights the backend's depenetration on thick box shapes
+# and jams horizontal motion -- keep grounded adherence to floor snap.
 
 var _char: CharacterBody3D
 var _t := 0
@@ -37,7 +41,7 @@ func _physics_process(delta: float) -> bool:
 	var v := _char.velocity
 	v.x = 5.0
 	if _char.is_on_floor():
-		v.y = -1.0
+		v.y = 0.0
 	else:
 		v.y -= 18.0 * delta
 	_char.velocity = v

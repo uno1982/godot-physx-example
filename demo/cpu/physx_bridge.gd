@@ -213,7 +213,10 @@ func _build_character() -> void:
 	cs.shape = cap
 	_char.add_child(cs)
 	_char.position = Vector3(-_span * 0.5 - 4, DECK_Y + 1.2, 0)
-	_char.floor_snap_length = 0.5
+	# No floor snap: snapping the capsule down onto the light plank deck every
+	# frame slowly ratchets the whole span into the gorge. The deck is gentle
+	# enough that not sticking to it costs nothing.
+	_char.floor_snap_length = 0.0
 	add_child(_char)
 	_cam = Camera3D.new()
 	_cam.position = Vector3(0, 0.7, 0)
@@ -260,7 +263,10 @@ func _physics_process(delta: float) -> void:
 	v.x = dir.x * SPEED
 	v.z = dir.z * SPEED
 	if _char.is_on_floor():
-		v.y = JUMP if Input.is_key_pressed(KEY_SPACE) else -2.0
+		# No downward "stick" velocity -- floor snap keeps the capsule grounded,
+		# and a constant push would slowly drive the light plank deck into the
+		# gorge and lurch the camera on every landing.
+		v.y = JUMP if Input.is_key_pressed(KEY_SPACE) else 0.0
 	else:
 		v.y -= GRAVITY * delta
 	_char.velocity = v
