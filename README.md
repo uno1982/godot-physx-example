@@ -48,7 +48,7 @@ viewport gizmo and inspector, then press Play.
 | `physx_showcase.tscn` | Box stress test with a switchable body count (1k–50k) and an orbiting camera. |
 | `physx_wind.tscn` | A gusting `WindArea` driving jointed rigid-body pennants and streamers, tumbling debris and a pendulum wind gauge; walk into the volume and it pushes the character too. |
 | `cloth_wind.tscn` | The same gusting `WindArea`, now driving real `PhysXCloth3D` flags and banners (CPU XPBD), with tumbling crates and drifting leaves. Walkable. |
-| `physx_bridge.tscn` | A walkable suspension bridge: a plank deck chained with `Generic6DOFJoint3D` (rigid links + angular springs) hung from two pinned cable runs. Drop a crate pile mid-span and it sags and holds. |
+| `physx_bridge.tscn` | A walkable rope bridge: a chain of plank `RigidBody3D` bodies pin-jointed end to end and anchored to a stone abutment at each side, sagging into a catenary. Walk across, drop a crate pile mid-span (`C`) and it dips and holds. |
 
 ### `demo/gpu/`
 

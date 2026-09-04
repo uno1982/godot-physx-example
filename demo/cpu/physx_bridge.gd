@@ -1,19 +1,16 @@
 extends Node3D
 
-# Suspension-bridge showcase for the PhysX backend's joint solver.
+# Rope-bridge showcase for the PhysX backend's joints.
 #
-# The deck is a run of plank RigidBody3D segments chained end-to-end with
-# Generic6DOFJoint3D. Each joint locks the three linear axes (rigid pin) and adds
-# angular springs that pull the plank back toward straight -- so the span holds a
-# catenary under load and springs back when you take the load off, instead of
-# drifting apart the way a bare PGS pin chain does under sustained weight.
-#
-# Two suspension cables (thin segment chains, pinned at the tower tops) carry
-# vertical hangers down to the deck edges for the real support and the look.
+# The deck is a single chain of plank RigidBody3D bodies, pin-jointed end to end
+# and anchored to a stone abutment at each side. It sags into a catenary under
+# its own weight and sags further under the crates or the character, then rides
+# back up -- a plain PGS pin chain, kept to one clean load path so the solver
+# stays happy. Two rope meshes are drawn along the deck edges purely for looks.
 #
 # Controls:
-#   W A S D / arrows  move        SPACE  jump / (hold) also drops crates
-#   mouse             look        C     dump a crate pile mid-span
+#   W A S D / arrows  move        SPACE  jump        mouse  look
+#   C                 drop a crate pile mid-span
 #   R                 reset       ESC   release mouse / quit
 
 const SPEED := 5.0
@@ -21,11 +18,11 @@ const JUMP := 6.0
 const MOUSE_SENS := 0.0025
 const GRAVITY := 18.0
 
-const PLANKS := 20
-const PLANK_LEN := 1.1
-const PLANK_W := 3.0
+const PLANKS := 11
+const PLANK_LEN := 1.3
+const DECK_W := 3.4
 const DECK_Y := 4.0
-const TOWER_H := 5.5
+const SAG_MAX := 1.0
 
 var _span := PLANKS * PLANK_LEN
 var _char: CharacterBody3D
@@ -35,6 +32,8 @@ var _pitch := 0.0
 var _root: Node3D
 var _hud: Label
 var _planks: Array[RigidBody3D] = []
+var _rope_l: MeshInstance3D
+var _rope_r: MeshInstance3D
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -65,9 +64,9 @@ func _ready() -> void:
 	env.environment = e
 	add_child(env)
 
-# --- environment -------------------------------------------------------------
+# --- helpers ---------------------------------------------------------------
 
-func _mat(col: Color, rough := 0.8) -> StandardMaterial3D:
+func _mat(col: Color, rough := 0.85) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = col
 	m.roughness = rough
@@ -90,134 +89,101 @@ func _static_box(pos: Vector3, size: Vector3, col: Color) -> StaticBody3D:
 	_root.add_child(sb)
 	return sb
 
+func _pin(a: Node3D, b: Node3D, at: Vector3) -> void:
+	var j := PinJoint3D.new()
+	j.position = at
+	j.set_param(PinJoint3D.PARAM_BIAS, 0.3)
+	j.set_param(PinJoint3D.PARAM_DAMPING, 0.7)
+	_root.add_child(j)
+	j.node_a = j.get_path_to(a)
+	j.node_b = j.get_path_to(b)
+
+# Pre-sagged rest shape so the deck starts near equilibrium.
+func _sag_at(x: float) -> float:
+	var t := x / (_span * 0.5)
+	return SAG_MAX * (1.0 - t * t)
+
+# --- environment ---------------------------------------------------------------
+
 func _build_environment() -> void:
 	var half := _span * 0.5
-	# Two cliff shelves with a gorge between them.
-	_static_box(Vector3(-half - 6, DECK_Y - 3.0, 0), Vector3(12, 6, 20), Color(0.45, 0.4, 0.35))
-	_static_box(Vector3(half + 6, DECK_Y - 3.0, 0), Vector3(12, 6, 20), Color(0.45, 0.4, 0.35))
-	# Gorge floor, well below the deck -- a dropped crate that misses is gone.
-	_static_box(Vector3(0, DECK_Y - 14.0, 0), Vector3(_span + 40, 2, 40), Color(0.2, 0.25, 0.3))
-
-func _tower(x: float) -> void:
-	for z in [-PLANK_W * 0.5 - 0.2, PLANK_W * 0.5 + 0.2]:
-		_static_box(Vector3(x, DECK_Y + TOWER_H * 0.5 - 0.4, z), Vector3(0.5, TOWER_H, 0.5), Color(0.3, 0.3, 0.33))
+	_static_box(Vector3(-half - 6, DECK_Y - 3.0, 0), Vector3(12, 6, 26), Color(0.46, 0.41, 0.36))
+	_static_box(Vector3(half + 6, DECK_Y - 3.0, 0), Vector3(12, 6, 26), Color(0.46, 0.41, 0.36))
+	_static_box(Vector3(0, DECK_Y - 18.0, 0), Vector3(_span + 44, 2, 44), Color(0.19, 0.24, 0.29))
+	for x in [-half - 0.9, half + 0.9]:
+		for z in [-DECK_W * 0.5 - 0.2, DECK_W * 0.5 + 0.2]:
+			_static_box(Vector3(x, DECK_Y + 1.4, z), Vector3(0.6, 4.0, 0.6), Color(0.34, 0.34, 0.37))
 
 # --- bridge -----------------------------------------------------------------
 
 func _plank(idx: int) -> RigidBody3D:
 	var rb := RigidBody3D.new()
-	rb.mass = 3.0
+	rb.mass = 1.2
 	rb.can_sleep = false
+	rb.linear_damp = 0.6
+	rb.angular_damp = 1.5
 	var cs := CollisionShape3D.new()
 	var b := BoxShape3D.new()
-	b.size = Vector3(PLANK_LEN * 0.96, 0.14, PLANK_W)
+	b.size = Vector3(PLANK_LEN * 0.94, 0.14, DECK_W)
 	cs.shape = b
 	rb.add_child(cs)
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
 	bm.size = b.size
 	mi.mesh = bm
-	mi.material_override = _mat(Color(0.55, 0.38, 0.22) if idx % 2 else Color(0.5, 0.34, 0.2))
+	mi.material_override = _mat(Color(0.55, 0.38, 0.22) if idx % 2 else Color(0.47, 0.31, 0.17))
 	rb.add_child(mi)
-	rb.position = Vector3(-_span * 0.5 + (idx + 0.5) * PLANK_LEN, DECK_Y, 0)
+	var px := -_span * 0.5 + (idx + 0.5) * PLANK_LEN
+	rb.position = Vector3(px, DECK_Y - _sag_at(px), 0)
 	_root.add_child(rb)
 	return rb
-
-func _deck_joint(a: Node3D, b: Node3D, at: Vector3) -> void:
-	var j := Generic6DOFJoint3D.new()
-	j.position = at
-	_root.add_child(j)
-	# Rigid in translation.
-	for ax in ["x", "y", "z"]:
-		j.set("linear_limit_%s/enabled" % ax, true)
-		j.set("linear_limit_%s/lower_distance" % ax, 0.0)
-		j.set("linear_limit_%s/upper_distance" % ax, 0.0)
-	# Angular springs: let the deck hinge a little but pull back to flat.
-	for ax in ["x", "y", "z"]:
-		j.set("angular_spring_%s/enabled" % ax, true)
-		j.set("angular_spring_%s/stiffness" % ax, 40.0)
-		j.set("angular_spring_%s/damping" % ax, 8.0)
-		j.set("angular_spring_%s/equilibrium_point" % ax, 0.0)
-	j.node_a = j.get_path_to(a)
-	j.node_b = j.get_path_to(b)
-
-func _cable_segment(pos: Vector3) -> RigidBody3D:
-	var rb := RigidBody3D.new()
-	rb.mass = 0.5
-	rb.can_sleep = false
-	var cs := CollisionShape3D.new()
-	var cap := CapsuleShape3D.new()
-	cap.radius = 0.05
-	cap.height = PLANK_LEN
-	cs.shape = cap
-	cs.rotation = Vector3(0, 0, PI * 0.5)
-	rb.add_child(cs)
-	var mi := MeshInstance3D.new()
-	var cm := CapsuleMesh.new()
-	cm.radius = 0.05
-	cm.height = PLANK_LEN
-	mi.mesh = cm
-	mi.rotation = Vector3(0, 0, PI * 0.5)
-	mi.material_override = _mat(Color(0.15, 0.15, 0.16), 0.4)
-	rb.add_child(mi)
-	rb.position = pos
-	rb.collision_layer = 0
-	rb.collision_mask = 0
-	_root.add_child(rb)
-	return rb
-
-func _pin(a: Node3D, b: Node3D, at: Vector3) -> void:
-	var j := PinJoint3D.new()
-	j.position = at
-	j.set_param(PinJoint3D.PARAM_BIAS, 0.9)
-	j.set_param(PinJoint3D.PARAM_DAMPING, 1.0)
-	_root.add_child(j)
-	j.node_a = j.get_path_to(a)
-	j.node_b = j.get_path_to(b)
-
-func _cable(z: float) -> void:
-	var half := _span * 0.5
-	var tower_top := DECK_Y + TOWER_H - 0.4
-	var anchor_l := _static_box(Vector3(-half, tower_top, z), Vector3(0.3, 0.3, 0.3), Color(0.3, 0.3, 0.33))
-	var anchor_r := _static_box(Vector3(half, tower_top, z), Vector3(0.3, 0.3, 0.3), Color(0.3, 0.3, 0.33))
-	var prev: Node3D = anchor_l
-	var segs: Array[RigidBody3D] = []
-	for i in PLANKS:
-		var t := (i + 0.5) / float(PLANKS)
-		# A shallow parabolic sag between the tower tops.
-		var sag := 2.6 * (1.0 - pow(2.0 * t - 1.0, 2.0))
-		var seg := _cable_segment(Vector3(-half + (i + 0.5) * PLANK_LEN, tower_top - sag, z))
-		_pin(prev, seg, Vector3(-half + i * PLANK_LEN, seg.position.y, z))
-		prev = seg
-		segs.append(seg)
-	_pin(prev, anchor_r, Vector3(half, tower_top, z))
-	# Vertical hangers: each cable segment holds up the matching plank edge.
-	for i in PLANKS:
-		_pin(segs[i], _planks[i], Vector3(_planks[i].position.x, DECK_Y + 0.07, z))
 
 func _build_bridge() -> void:
 	var half := _span * 0.5
-	_tower(-half)
-	_tower(half)
-	var abut_l := _static_box(Vector3(-half - 0.5, DECK_Y, 0), Vector3(0.4, 0.4, PLANK_W), Color(0.3, 0.3, 0.33))
-	var abut_r := _static_box(Vector3(half + 0.5, DECK_Y, 0), Vector3(0.4, 0.4, PLANK_W), Color(0.3, 0.3, 0.33))
+	var abut_l := _static_box(Vector3(-half - 0.45, DECK_Y - _sag_at(half) - 0.1, 0), Vector3(0.5, 0.5, DECK_W + 0.6), Color(0.34, 0.34, 0.37))
+	var abut_r := _static_box(Vector3(half + 0.45, DECK_Y - _sag_at(half) - 0.1, 0), Vector3(0.5, 0.5, DECK_W + 0.6), Color(0.34, 0.34, 0.37))
 
 	var prev: Node3D = abut_l
 	for i in PLANKS:
 		var p := _plank(i)
-		_deck_joint(prev, p, Vector3(-half + i * PLANK_LEN, DECK_Y, 0))
-		prev = p
 		_planks.append(p)
-	_deck_joint(prev, abut_r, Vector3(half, DECK_Y, 0))
+		var jx := -half + i * PLANK_LEN
+		for dz in [-DECK_W * 0.5 + 0.15, DECK_W * 0.5 - 0.15]:
+			_pin(prev, p, Vector3(jx, DECK_Y - _sag_at(jx), dz))
+		prev = p
+	for dz in [-DECK_W * 0.5 + 0.15, DECK_W * 0.5 - 0.15]:
+		_pin(prev, abut_r, Vector3(half, DECK_Y - _sag_at(half), dz))
 
-	_cable(-PLANK_W * 0.5 - 0.1)
-	_cable(PLANK_W * 0.5 + 0.1)
+	_rope_l = _make_rope_mesh()
+	_rope_r = _make_rope_mesh()
+	_root.add_child(_rope_l)
+	_root.add_child(_rope_r)
+
+func _make_rope_mesh() -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = ImmediateMesh.new()
+	var m := _mat(Color(0.14, 0.11, 0.08), 0.7)
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mi.material_override = m
+	return mi
+
+func _redraw_rope(mi: MeshInstance3D, z: float) -> void:
+	var im: ImmediateMesh = mi.mesh
+	im.clear_surfaces()
+	im.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	var half := _span * 0.5
+	im.surface_add_vertex(Vector3(-half - 0.45, DECK_Y - _sag_at(half), z))
+	for p in _planks:
+		if is_instance_valid(p):
+			im.surface_add_vertex(p.global_position + Vector3(0, 0.12, z))
+	im.surface_add_vertex(Vector3(half + 0.45, DECK_Y - _sag_at(half), z))
+	im.surface_end()
 
 func _crate_pile(center: Vector3, n: int) -> void:
 	for i in n:
 		var rb := RigidBody3D.new()
-		var s := randf_range(0.35, 0.6)
-		rb.mass = s * s * s * 20.0
+		var s := randf_range(0.3, 0.5)
+		rb.mass = s * s * s * 10.0
 		var cs := CollisionShape3D.new()
 		var b := BoxShape3D.new()
 		b.size = Vector3(s, s, s)
@@ -227,9 +193,9 @@ func _crate_pile(center: Vector3, n: int) -> void:
 		var bm := BoxMesh.new()
 		bm.size = b.size
 		mi.mesh = bm
-		mi.material_override = _mat(Color.from_hsv(randf(), 0.35, 0.9))
+		mi.material_override = _mat(Color.from_hsv(randf(), 0.4, 0.9))
 		rb.add_child(mi)
-		rb.position = center + Vector3(randf_range(-0.8, 0.8), 1.5 + i * 0.7, randf_range(-0.8, 0.8))
+		rb.position = center + Vector3(randf_range(-0.7, 0.7), 1.2 + i * 0.55, randf_range(-0.7, 0.7))
 		_root.add_child(rb)
 
 # --- character --------------------------------------------------------------
@@ -242,7 +208,7 @@ func _build_character() -> void:
 	cap.height = 1.8
 	cs.shape = cap
 	_char.add_child(cs)
-	_char.position = Vector3(-_span * 0.5 - 4, DECK_Y + 4.0, 0)
+	_char.position = Vector3(-_span * 0.5 - 5, DECK_Y + 2.0, 0)
 	add_child(_char)
 	_cam = Camera3D.new()
 	_cam.position = Vector3(0, 0.7, 0)
@@ -289,14 +255,17 @@ func _physics_process(delta: float) -> void:
 	v.x = dir.x * SPEED
 	v.z = dir.z * SPEED
 	if _char.is_on_floor():
-		v.y = JUMP if Input.is_key_pressed(KEY_SPACE) else -0.1
+		v.y = JUMP if Input.is_key_pressed(KEY_SPACE) else -2.0
 	else:
 		v.y -= GRAVITY * delta
 	_char.velocity = v
 	_char.move_and_slide()
 
 func _process(_dt: float) -> void:
-	var mid_sag := DECK_Y - _planks[PLANKS / 2].global_position.y
+	_redraw_rope(_rope_l, -DECK_W * 0.5 + 0.15)
+	_redraw_rope(_rope_r, DECK_W * 0.5 - 0.15)
+	var mid := _planks[PLANKS / 2]
+	var sag := (DECK_Y - mid.global_position.y) if is_instance_valid(mid) else 0.0
 	_hud.text = "%s   |   WASD move  SPACE jump  C crates  R reset  ESC\nmid-span sag: %.2f m     FPS: %d" % [
 		ProjectSettings.get_setting("physics/3d/physics_engine", "?"),
-		mid_sag, Engine.get_frames_per_second()]
+		sag, Engine.get_frames_per_second()]
