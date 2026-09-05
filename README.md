@@ -47,7 +47,8 @@ viewport gizmo and inspector, then press Play.
 | Scene | What it shows |
 | --- | --- |
 | `physx_playground.tscn` | First-person character, a jointed ragdoll, a hinged door, a pendulum row, a 2000-box `MultiMesh` pile, and dangling chains. Left click launches a ragdoll, right click fires a ball with a radial blast. |
-| `physx_showcase.tscn` | Box stress test with a switchable body count (1k–50k) and an orbiting camera. |
+| `physx_showcase.tscn` | Box stress test with a switchable body count (1k–50k) and an orbiting camera. Each box is a `RigidBody3D` node. |
+| `physx_rid_showcase.tscn` | The same stress test, but every box is a bare `PhysicsServer3D` RID body (one shared shape, no nodes) — much lighter at high counts. Use it against `physx_showcase` to see the per-node cost. |
 | `physx_wind.tscn` | A gusting `WindArea` driving jointed rigid-body pennants and streamers, tumbling debris and a pendulum wind gauge; walk into the volume and it pushes the character too. |
 | `cloth_wind.tscn` | The same gusting `WindArea`, now driving real `PhysXCloth3D` flags and banners (CPU XPBD), with tumbling crates and drifting leaves. Walkable. |
 | `physx_bridge.tscn` | A walkable rope bridge: a chain of plank `RigidBody3D` bodies pin-jointed end to end and anchored to a stone abutment at each side, sagging into a catenary. Walk across, drop a crate pile mid-span (`C`) and it dips and holds. |
@@ -73,3 +74,18 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   counts (run once per engine, flipping `physics/3d/physics_engine`).
 - **`test/gpu/`** — `particle_fluid_test`, `particle_emit_test`,
   `particle_foam_test`. These `SKIP` (exit 0) on a build without GPU particles.
+
+Both `physx_showcase` and `physx_rid_showcase` also take a headless benchmark
+mode — no window, no rendering — that prints physics step time and rate:
+
+```
+godot --headless --path . demo/cpu/physx_rid_showcase.tscn --fixed-fps 60 -- bench count=25000 frames=600
+```
+
+## License
+
+This project (scenes, scripts, tests) is under the MIT License — see
+[LICENSE](LICENSE). Copyright (c) 2026 Wild Ox Studios.
+
+It targets the `godot_physx` engine module, which links NVIDIA PhysX 5
+(BSD-3-Clause); that licensing lives with the engine build, not here.
