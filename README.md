@@ -41,6 +41,7 @@ viewport gizmo and inspector, then press Play.
 | `gpu/fluid.tscn` | `PhysXParticleFluid3D` as a scene node: gizmo and inspector for the emitter, plus the GPU isosurface + foam surface. Needs a `physx_gpu=yes` build. |
 | `cpu/bridge.tscn` | A rope bridge built entirely from stock nodes — `RigidBody3D` planks joined by `Generic6DOFJoint3D` (linear axes locked, angular Z a spring). Select a `Deck/J*` joint to see the spring config and its limit gizmo. Play and it settles under the crates; `C` drops more. |
 | `cpu/debris.tscn` | `PhysXChunkEmitter3D` as a scene node: select it to tune chunk size, impulse, spread and budget in the inspector. A small shooting range — walk in, left-click a wall or the floor and real rigid-body chunks fly out, bounce and settle. |
+| `cpu/soft_body.tscn` | Stock `SoftBody3D` blobs (sphere, subdivided box) on the PhysX backend — select one to paint pinned vertices with its gizmo and tune `pressure_coefficient` / `linear_stiffness` / `total_mass` in the inspector. Press Play, `SPACE` drops a heavy ball on them. |
 
 ### `demo/cpu/`
 
@@ -52,6 +53,7 @@ viewport gizmo and inspector, then press Play.
 | `physx_wind.tscn` | A gusting `WindArea` driving jointed rigid-body pennants and streamers, tumbling debris and a pendulum wind gauge; walk into the volume and it pushes the character too. |
 | `cloth_wind.tscn` | The same gusting `WindArea`, now driving real `PhysXCloth3D` flags and banners (CPU XPBD), with tumbling crates and drifting leaves. Walkable. |
 | `physx_bridge.tscn` | A walkable rope bridge: a chain of plank `RigidBody3D` bodies pin-jointed end to end and anchored to a stone abutment at each side, sagging into a catenary. Walk across, drop a crate pile mid-span (`C`) and it dips and holds. |
+| `physx_soft_body.tscn` | A soft-body marble run — batches of stock `SoftBody3D` blobs pour down a chute, bounce and squash down a stair section and out into a catch basin. Free-fly camera (`WASD` + mouse), `F` drops more onto the running pile so the count/FPS climb, `C` clears, `B` rolls a heavy ball in. Headless `bench` mode. |
 
 ### `demo/gpu/`
 
@@ -70,6 +72,7 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
 - **`test/cpu/`** — `physics_smoke`, `sleep_test`, `query_test`, `contact_test`,
   `property_test`, `area_test`, `area_override_test`, `mesh_shape_test`,
   `joint_test`, `character_test`, `pendulum_gravity_test`, `chain_force_test`,
+  `soft_body_test`, `soft_body_spawn_test`, `soft_body_cascade_test`,
   `determinism_test`. `physics_bench.gd` is a step-time benchmark across body
   counts (run once per engine, flipping `physics/3d/physics_engine`).
 - **`test/gpu/`** — `particle_fluid_test`, `particle_emit_test`,
