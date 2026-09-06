@@ -36,6 +36,8 @@ func _bounds(sb: SoftBody3D) -> AABB:
 	return PhysicsServer3D.soft_body_get_bounds(sb.get_physics_rid())
 
 func _initialize() -> void:
+	# These test the CPU XPBD path specifically; pin GPU auto off.
+	ProjectSettings.set_setting("physics/physx_3d/soft_body/mode", 1)
 	print("[soft] engine = ", ProjectSettings.get_setting("physics/3d/physics_engine", "?"))
 	var root := Node3D.new()
 

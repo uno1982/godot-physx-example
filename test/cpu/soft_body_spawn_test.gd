@@ -18,6 +18,8 @@ var _settle_drift := 0.0
 var _fail := ""
 
 func _initialize() -> void:
+	# These test the CPU XPBD path specifically; pin GPU auto off.
+	ProjectSettings.set_setting("physics/physx_3d/soft_body/mode", 1)
 	print("[sbspawn] engine = ", ProjectSettings.get_setting("physics/3d/physics_engine", "?"))
 	var root := Node3D.new()
 

@@ -9,6 +9,8 @@ var _t := 0
 var _root: Node
 
 func _initialize() -> void:
+	# These test the CPU XPBD path specifically; pin GPU auto off.
+	ProjectSettings.set_setting("physics/physx_3d/soft_body/mode", 1)
 	_root = load("res://demo/cpu/physx_soft_body.tscn").instantiate()
 	get_root().add_child(_root)
 	print("[sbcascade] engine = ", ProjectSettings.get_setting("physics/3d/physics_engine", "?"))
