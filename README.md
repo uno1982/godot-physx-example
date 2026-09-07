@@ -43,6 +43,7 @@ viewport gizmo and inspector, then press Play.
 | `cpu/debris.tscn` | `PhysXChunkEmitter3D` as a scene node: select it to tune chunk size, impulse, spread and budget in the inspector. A small shooting range — walk in, left-click a wall or the floor and real rigid-body chunks fly out, bounce and settle. |
 | `cpu/soft_body.tscn` | Stock `SoftBody3D` blobs (sphere, subdivided box) on the PhysX backend — select one to paint pinned vertices with its gizmo and tune `pressure_coefficient` / `linear_stiffness` / `total_mass` in the inspector. Press Play, `SPACE` drops a heavy ball on them. |
 | `cpu/heightmap.tscn` | Stock `HeightMapShape3D` terrain — a `@tool` script generates the collision and the matching visible mesh from noise, so selecting `Terrain/CollisionShape3D` shows the real height-field gizmo in the editor; the exported noise params rebuild it live. Play to walk the terrain (`WASD`, `SPACE` jump) and `B` rolls a row of balls down a slope. |
+| `cpu/shape_scale.tscn` | Walk a capsule character over collision shapes with non-uniform node scale baked into the geometry — stretched box platforms, a chamfered-box convex ramp, a trimesh hump, a scaled sphere dome and a scaled height-field mound. Select a piece and stretch its transform in the inspector, then press Play. |
 
 ### `demo/cpu/`
 
@@ -75,7 +76,9 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   `joint_test`, `character_test`, `pendulum_gravity_test`, `chain_force_test`,
   `heightmap_test`, `heightmap_character_test` (walk terrain, no facet snag),
   `heightmap_edge_test` / `heightmap_crash_repro` (bodies off the height-field
-  rim — regressions for the GPU boundary crash), `soft_body_test`,
+  rim — regressions for the GPU boundary crash), `shape_scale_test` /
+  `shape_scale_walk_test` (non-uniform scale baked into box / convex / trimesh /
+  height-field shapes), `soft_body_test`,
   `soft_body_spawn_test`, `soft_body_cascade_test`, `determinism_test`.
   `physics_bench.gd` is a step-time benchmark across body counts (run once per
   engine, flipping `physics/3d/physics_engine`). `heightmap_runtime_probe.tscn`

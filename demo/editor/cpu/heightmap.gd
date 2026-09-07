@@ -11,9 +11,9 @@ extends Node3D
 #   W A S D / arrows  move    SPACE  jump    mouse  look
 #   B   drop a row of balls up the hill        R  reset      ESC  quit
 
-# HeightMapShape3D is fixed at 1 unit per sample, so `grid` is also the terrain
-# size in metres. (Scaling the body would only stretch the visual mesh, not the
-# PhysX height field.)
+# HeightMapShape3D is 1 unit per sample; this demo keeps it 1:1 with metres so
+# `grid` doubles as the terrain size. Scaling the Terrain body works too now --
+# the module bakes node scale into the PhysX height field.
 @export var grid: int = 101 : set = _set_grid
 @export var height: float = 11.0 : set = _set_height
 @export var feature_scale: float = 0.018 : set = _set_feature

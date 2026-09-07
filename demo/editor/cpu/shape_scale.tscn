@@ -1,0 +1,136 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://demo/editor/cpu/shape_scale.gd" id="1"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
+
+[sub_resource type="Sky" id="Sky_2"]
+sky_material = SubResource("Sky_1")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_2")
+ambient_light_source = 3
+ambient_light_energy = 0.4
+tonemap_mode = 3
+
+[sub_resource type="CapsuleShape3D" id="Cap_1"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="BoxShape3D" id="Ground_1"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="BoxMesh" id="GroundMesh_1"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="StandardMaterial3D" id="GroundMat_1"]
+albedo_color = Color(0.3, 0.32, 0.34, 1)
+
+[sub_resource type="BoxShape3D" id="Box_1"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxM_1"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="BoxMat_1"]
+albedo_color = Color(0.55, 0.47, 0.4, 1)
+
+[sub_resource type="SphereShape3D" id="Sph_1"]
+radius = 1.0
+
+[sub_resource type="SphereMesh" id="SphM_1"]
+radius = 1.0
+height = 2.0
+
+[sub_resource type="LabelSettings" id="Lbl_1"]
+font_size = 18
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[node name="ShapeScale" type="Node3D"]
+script = ExtResource("1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.7, -0.42, 0.57, 0, 0.8, 0.6, -0.71, -0.42, 0.56, 0, 20, 0)
+shadow_enabled = true
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("Cap_1")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+current = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("Ground_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("GroundMesh_1")
+material_override = SubResource("GroundMat_1")
+
+[node name="PlatformLow" type="StaticBody3D" parent="."]
+transform = Transform3D(5, 0, 0, 0, 0.6, 0, 0, 0, 4, -8, 0.3, 4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformLow"]
+shape = SubResource("Box_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlatformLow"]
+mesh = SubResource("BoxM_1")
+material_override = SubResource("BoxMat_1")
+
+[node name="PlatformMid" type="StaticBody3D" parent="."]
+transform = Transform3D(4, 0, 0, 0, 1.6, 0, 0, 0, 4, -14, 0.8, 4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformMid"]
+shape = SubResource("Box_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlatformMid"]
+mesh = SubResource("BoxM_1")
+material_override = SubResource("BoxMat_1")
+
+[node name="RampToLow" type="StaticBody3D" parent="."]
+transform = Transform3D(5, 0, 0, 0, 0.386, -1.035, 0, 0.104, 3.864, -8, 0.35, 9)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RampToLow"]
+shape = SubResource("Box_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RampToLow"]
+mesh = SubResource("BoxM_1")
+material_override = SubResource("BoxMat_1")
+
+[node name="SphereDome" type="StaticBody3D" parent="."]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 8, -2.2, 4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SphereDome"]
+shape = SubResource("Sph_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SphereDome"]
+mesh = SubResource("SphM_1")
+
+[node name="ConvexRamp" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+
+[node name="TrimeshHump" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 8)
+
+[node name="HeightfieldMound" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 2)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 780.0
+offset_bottom = 60.0
+label_settings = SubResource("Lbl_1")
