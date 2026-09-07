@@ -42,6 +42,7 @@ viewport gizmo and inspector, then press Play.
 | `cpu/bridge.tscn` | A rope bridge built entirely from stock nodes — `RigidBody3D` planks joined by `Generic6DOFJoint3D` (linear axes locked, angular Z a spring). Select a `Deck/J*` joint to see the spring config and its limit gizmo. Play and it settles under the crates; `C` drops more. |
 | `cpu/debris.tscn` | `PhysXChunkEmitter3D` as a scene node: select it to tune chunk size, impulse, spread and budget in the inspector. A small shooting range — walk in, left-click a wall or the floor and real rigid-body chunks fly out, bounce and settle. |
 | `cpu/soft_body.tscn` | Stock `SoftBody3D` blobs (sphere, subdivided box) on the PhysX backend — select one to paint pinned vertices with its gizmo and tune `pressure_coefficient` / `linear_stiffness` / `total_mass` in the inspector. Press Play, `SPACE` drops a heavy ball on them. |
+| `cpu/heightmap.tscn` | Stock `HeightMapShape3D` terrain — a `@tool` script generates the collision and the matching visible mesh from noise, so selecting `Terrain/CollisionShape3D` shows the real height-field gizmo in the editor; the exported noise params rebuild it live. Play to walk the terrain (`WASD`, `SPACE` jump) and `B` rolls a row of balls down a slope. |
 
 ### `demo/cpu/`
 
@@ -72,11 +73,17 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
 - **`test/cpu/`** — `physics_smoke`, `sleep_test`, `query_test`, `contact_test`,
   `property_test`, `area_test`, `area_override_test`, `mesh_shape_test`,
   `joint_test`, `character_test`, `pendulum_gravity_test`, `chain_force_test`,
-  `soft_body_test`, `soft_body_spawn_test`, `soft_body_cascade_test`,
-  `determinism_test`. `physics_bench.gd` is a step-time benchmark across body
-  counts (run once per engine, flipping `physics/3d/physics_engine`).
+  `heightmap_test`, `heightmap_character_test` (walk terrain, no facet snag),
+  `heightmap_edge_test` / `heightmap_crash_repro` (bodies off the height-field
+  rim — regressions for the GPU boundary crash), `soft_body_test`,
+  `soft_body_spawn_test`, `soft_body_cascade_test`, `determinism_test`.
+  `physics_bench.gd` is a step-time benchmark across body counts (run once per
+  engine, flipping `physics/3d/physics_engine`). `heightmap_runtime_probe.tscn`
+  is a **windowed** run (not `--script`) — the GPU boundary crash only faults
+  reliably with a renderer sharing the GPU.
 - **`test/gpu/`** — `particle_fluid_test`, `particle_emit_test`,
-  `particle_foam_test`. These `SKIP` (exit 0) on a build without GPU particles.
+  `particle_foam_test`, `soft_body_gpu_test` (`PxDeformableVolume` — fall,
+  collide, deform, impulse, pin). These `SKIP` (exit 0) without a CUDA device.
 
 Both `physx_showcase` and `physx_rid_showcase` also take a headless benchmark
 mode — no window, no rendering — that prints physics step time and rate:
