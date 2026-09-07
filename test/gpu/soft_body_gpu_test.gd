@@ -8,8 +8,10 @@ extends SceneTree
 var _floor_a: SoftBody3D
 var _stack_lo: SoftBody3D
 var _stack_hi: SoftBody3D
+var _pinned: SoftBody3D
 var _t := 0
 var _tgs := false
+var _punched_x := 0.0
 
 func _blob(pos: Vector3) -> SoftBody3D:
 	var sb := SoftBody3D.new()
@@ -50,7 +52,20 @@ func _initialize() -> void:
 	_stack_hi = _blob(Vector3(6, 4.2, 0))
 	root.add_child(_stack_hi)
 
+	_pinned = _blob(Vector3(0, 5, -6))
+	root.add_child(_pinned)
+
 	get_root().add_child(root)
+	call_deferred("_pin_top", _pinned)
+
+func _pin_top(sb: SoftBody3D) -> void:
+	var verts: PackedVector3Array = sb.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var top := -1e9
+	for v in verts:
+		top = maxf(top, v.y)
+	for i in verts.size():
+		if verts[i].y >= top - 0.15:
+			sb.set_point_pinned(i, true)
 
 func _finite(v: Vector3) -> bool:
 	return is_finite(v.x) and is_finite(v.y) and is_finite(v.z)
@@ -65,12 +80,18 @@ func _physics_process(_d: float) -> bool:
 			quit(0)
 			return true
 
+	if _t == 90:
+		# Punch the free body sideways -- central impulse on the GPU volume.
+		_punched_x = PhysicsServer3D.soft_body_get_bounds(_floor_a.get_physics_rid()).get_center().x
+		PhysicsServer3D.soft_body_apply_central_impulse(_floor_a.get_physics_rid(), Vector3(24, 8, 0))
+
 	if _t < 360:
 		return false
 
 	var fa := PhysicsServer3D.soft_body_get_bounds(_floor_a.get_physics_rid())
 	var lo := PhysicsServer3D.soft_body_get_bounds(_stack_lo.get_physics_rid())
 	var hi := PhysicsServer3D.soft_body_get_bounds(_stack_hi.get_physics_rid())
+	var pin := PhysicsServer3D.soft_body_get_bounds(_pinned.get_physics_rid())
 	var fc := fa.get_center()
 	if not _finite(fc) or fa.size.length() > 20.0:
 		print("[sbgpu] FAIL: volume exploded / non-finite (%s size %s)" % [fc, fa.size])
@@ -84,6 +105,12 @@ func _physics_process(_d: float) -> bool:
 	elif fa.size.y > 1.55 or fa.size.y < 0.5:
 		print("[sbgpu] FAIL: volume did not deform sanely (height %.2f)" % fa.size.y)
 		quit(1)
+	elif fc.x - _punched_x < 3.0:
+		print("[sbgpu] FAIL: central impulse had no effect (moved %.2f m in x)" % (fc.x - _punched_x))
+		quit(1)
+	elif pin.position.y < 2.5:
+		print("[sbgpu] FAIL: pinned volume sagged (bottom y = %.2f)" % pin.position.y)
+		quit(1)
 	else:
 		var gap := hi.get_center().y - lo.get_center().y
 		var soft_soft := "n/a (PGS)"
@@ -93,6 +120,7 @@ func _physics_process(_d: float) -> bool:
 				quit(1)
 				return true
 			soft_soft = "stacked, gap=%.2f" % gap
-		print("[sbgpu] PASS  (fell to y=%.2f, height=%.2f; soft-vs-soft: %s)" % [fc.y, fa.size.y, soft_soft])
+		print("[sbgpu] PASS  (fell to y=%.2f, deformed to h=%.2f, punched +%.1f m; pin held at y=%.2f; soft-vs-soft: %s)" % [
+			fc.y, fa.size.y, fc.x - _punched_x, pin.position.y, soft_soft])
 		quit(0)
 	return true

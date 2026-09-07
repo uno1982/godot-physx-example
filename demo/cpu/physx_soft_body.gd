@@ -95,15 +95,26 @@ func _build_world() -> void:
 	var cz := 0.0 # cursor: z of the current segment's top edge
 	var cy := 24.0 # cursor: y of the track surface there
 
-	# Hopper: a boxed-in tray tilted toward the course so the poured wave feeds
-	# itself onto chute 1. Full-width floor + tall walls -- nothing escapes here.
-	var hz := cz + 3.0
-	_add_ramp(Vector3(0, cy + 0.3, hz), Vector3(trk + 1.0, 0.6, 7.0), -14.0, 0.0, mat)
-	_add_box(Vector3(0, cy + 2.5, hz + 3.6), Vector3(trk + 3, 6, 0.6), mat, Basis()) # back
-	_add_box(Vector3(trk * 0.5 + 1.2, cy + 2.2, hz), Vector3(0.6, 5, 7.6), mat, Basis()) # right
-	_add_box(Vector3(-trk * 0.5 - 1.2, cy + 2.2, hz), Vector3(0.6, 5, 7.6), mat, Basis()) # left
-	_spawn_y = cy + 4.5
-	_spawn_z = hz + 1.5
+	# Hopper: a steep feed ramp at the same pitch as chute 1, its lower end
+	# tucked under chute 1's top so the surface is continuous -- no lip for a
+	# blob to hang on. Rails on three sides.
+	var hop_ang := 40.0 # match chute 1
+	var hop_len := 8.0
+	var ca := deg_to_rad(hop_ang)
+	# low end 1.2 m past the cursor (-Z) and 0.9 m below it, so chute 1 overlaps.
+	var lo_z := cz - 1.2
+	var lo_y := cy - 0.9
+	var hz := lo_z + cos(ca) * hop_len * 0.5
+	var hy := lo_y + sin(ca) * hop_len * 0.5
+	_add_ramp(Vector3(0, hy, hz), Vector3(trk + 1.0, 0.6, hop_len), -hop_ang, 0.0, rmat)
+	_add_ramp(Vector3(trk * 0.5 + 0.6, hy + 1.0, hz), Vector3(0.6, 2.4, hop_len), -hop_ang, 0.0, mat)
+	_add_ramp(Vector3(-trk * 0.5 - 0.6, hy + 1.0, hz), Vector3(0.6, 2.4, hop_len), -hop_ang, 0.0, mat)
+	# Backstop at the high end.
+	var top_z := lo_z + cos(ca) * hop_len
+	var top_y := lo_y + sin(ca) * hop_len
+	_add_box(Vector3(0, top_y + 1.2, top_z + 0.4), Vector3(trk + 2, 4, 0.6), mat, Basis())
+	_spawn_z = lo_z + cos(ca) * hop_len * 0.72
+	_spawn_y = lo_y + sin(ca) * hop_len * 0.72 + 3.0
 
 	# Chute 1: long and steep -- the wave builds speed and squashes flat.
 	var c := _add_chute(cz, cy, 13.0, 40.0, trk, rail, rmat, mat)
