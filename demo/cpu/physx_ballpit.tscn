@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3 uid="uid://d00ip7aq4rk15"]
+
+[ext_resource type="Script" uid="uid://c1q5ii48qmdes" path="res://demo/cpu/physx_ballpit.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kbafm"]
+cull_mode = 2
+albedo_color = Color(0.85, 0.4, 0.35, 1)
+roughness = 0.5
+
+[sub_resource type="SphereMesh" id="SphereMesh_8556u"]
+radius = 0.7
+height = 1.4
+radial_segments = 28
+rings = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dej7c"]
+cull_mode = 2
+albedo_color = Color(0.4, 0.6, 0.85, 1)
+roughness = 0.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_hungn"]
+size = Vector3(1.3, 1.3, 1.3)
+subdivide_width = 4
+subdivide_height = 4
+subdivide_depth = 4
+
+[node name="BallPit" type="Node3D"]
+script = ExtResource("1")
+
+[node name="SphereBlob" type="SoftBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.230691, 3, 0)
+material_override = SubResource("StandardMaterial3D_kbafm")
+mesh = SubResource("SphereMesh_8556u")
+simulation_precision = 12
+total_mass = 3.0
+linear_stiffness = 0.85
+pressure_coefficient = 60.0
+
+[node name="BoxBlob" type="SoftBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 3.413394, 0)
+material_override = SubResource("StandardMaterial3D_dej7c")
+mesh = SubResource("BoxMesh_hungn")
+simulation_precision = 12
+total_mass = 2.5
+linear_stiffness = 0.9
+pressure_coefficient = 50.0

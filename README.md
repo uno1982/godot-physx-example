@@ -56,6 +56,7 @@ viewport gizmo and inspector, then press Play.
 | `cloth_wind.tscn` | The same gusting `WindArea`, now driving real `PhysXCloth3D` flags and banners (CPU XPBD), with tumbling crates and drifting leaves. Walkable. |
 | `physx_bridge.tscn` | A walkable rope bridge: a chain of plank `RigidBody3D` bodies pin-jointed end to end and anchored to a stone abutment at each side, sagging into a catenary. Walk across, drop a crate pile mid-span (`C`) and it dips and holds. |
 | `physx_soft_body.tscn` | A soft-body marble run — batches of stock `SoftBody3D` blobs pour down a chute, bounce and squash down a stair section and out into a catch basin. Free-fly camera (`WASD` + mouse), `F` drops more onto the running pile so the count/FPS climb, `C` clears, `B` rolls a heavy ball in. Headless `bench` mode. |
+| `physx_ballpit.tscn` | A FleX-style ball pit — 5k–20k small rigid spheres (bare `PhysicsServer3D` RID bodies, one shared shape, `MultiMesh`-drawn) piling in a dark pit on the GPU solver. Wade a capsule character through them (`WASD`, `SHIFT` sprint, `SPACE` hop) and they scatter; `F` flings a wrecking ball, `G` pours a fresh wave, `1`–`4` set the count. |
 
 ### `demo/gpu/`
 
@@ -78,7 +79,8 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   `heightmap_edge_test` / `heightmap_crash_repro` (bodies off the height-field
   rim — regressions for the GPU boundary crash), `shape_scale_test` /
   `shape_scale_walk_test` (non-uniform scale baked into box / convex / trimesh /
-  height-field shapes), `soft_body_test`,
+  height-field shapes), `ballpit_test` (12k rigid spheres pile in a pit, a
+  wrecking ball plows in), `soft_body_test`,
   `soft_body_spawn_test`, `soft_body_cascade_test`, `determinism_test`.
   `physics_bench.gd` is a step-time benchmark across body counts (run once per
   engine, flipping `physics/3d/physics_engine`). `heightmap_runtime_probe.tscn`
