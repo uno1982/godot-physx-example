@@ -5,10 +5,11 @@ extends Node3D
 # check they never punch through the steps. Runtime-built; one MultiMesh-free
 # pile of stock SoftBody3D nodes on the PhysX backend.
 #
-#   WASD + mouse   free-fly camera   (Space/Ctrl up-down, Shift = faster)
+#   WASD    free-fly camera    (Space/Ctrl up-down, Shift = faster)
+#   RMB (hold)  mouse-look       LMB  radial impulse blast at the cursor
 #   F      drop another batch onto the running pile (count keeps climbing)
 #   1..4   drop a batch of 12 / 24 / 40 / 64
-#   B  roll a heavy ball in    C  clear the blobs    R  reset    Tab  free mouse    ESC  quit
+#   B  roll a heavy ball in    C  clear the blobs    R  reset    ESC  quit
 #
 # Headless benchmark (no window/rendering):
 #   godot --headless --path . demo/cpu/physx_soft_body.tscn --fixed-fps 60 -- bench count=40 frames=600
@@ -52,8 +53,7 @@ func _ready() -> void:
 			_bench_frames = int(arg.substr(7))
 	_build_world()
 	_spawn_wave(_count)
-	if not _bench:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	# Mouse stays free; hold RMB to look around, LMB blasts at the cursor.
 
 func _build_world() -> void:
 	var env := WorldEnvironment.new()
@@ -315,6 +315,8 @@ func _roll_ball() -> void:
 	_ball.angular_velocity = Vector3.ZERO
 	_ball.global_position = Vector3(randf_range(-2, 2), 8.5, 1.0)
 
+const KILL_Y := -30.0 # anything below the whole course is gone
+
 func _physics_process(_delta: float) -> void:
 	_phys_frame += 1
 	# Once each batch has been placed, shove it down the course -- toward -Z,
@@ -331,6 +333,18 @@ func _physics_process(_delta: float) -> void:
 				PhysicsServer3D.soft_body_apply_central_impulse(sb.get_physics_rid(),
 					Vector3(randf_range(-0.6, 0.6), -1.0, -5.5) * m)
 	_launch_batches = still
+
+	# Kill floor: recycle any blob that fell off the course, so it stops
+	# simulating (and dragging on the physics step) forever.
+	if _phys_frame % 12 == 0 and not _blobs.is_empty():
+		var kept: Array[SoftBody3D] = []
+		for sb in _blobs:
+			if PhysicsServer3D.soft_body_get_bounds(sb.get_physics_rid()).get_center().y < KILL_Y:
+				sb.queue_free()
+			else:
+				kept.append(sb)
+		if kept.size() != _blobs.size():
+			_blobs = kept
 
 func _process(delta: float) -> void:
 	if not _bench:
@@ -355,7 +369,7 @@ func _process(delta: float) -> void:
 		if PhysicsServer3D.soft_body_get_bounds(sb.get_physics_rid()).get_center().y < 2.0:
 			settled += 1
 	var cap := "  (max)" if _blobs.size() >= MAX_BLOBS else ""
-	_hud.text = "SoftBody3D marble run (PhysX)   WASD + mouse fly · Space/Ctrl up-down · Shift fast\nF drop %d more · 1-4 drop 12/24/40/64 · B ball · C clear · R reset · Tab mouse · ESC\nblobs: %d%s   in the basin: %d   physics: %.1f ms   FPS: %d" % [
+	_hud.text = "SoftBody3D marble run (PhysX)   WASD fly · Space/Ctrl up-down · Shift fast · hold RMB to look\nLMB blast at cursor · F drop %d more · 1-4 drop 12/24/40/64 · B ball · C clear · R reset · ESC\nblobs: %d%s   in the basin: %d   physics: %.1f ms   FPS: %d" % [
 		_batch, _blobs.size(), cap, settled, _phys_ms, Engine.get_frames_per_second()]
 
 const FLY_SPEED := 14.0
@@ -373,10 +387,43 @@ func _fly_camera(delta: float) -> void:
 	_cam.rotation = Vector3(_cam_pitch, _cam_yaw, 0.0)
 	_cam.position += (_cam.transform.basis * mv).normalized() * spd * delta if mv != Vector3.ZERO else Vector3.ZERO
 
+func _blast(center: Vector3, strength: float, radius: float) -> void:
+	# Radial impulse on every blob in range -- pushes them away from `center`
+	# and up. Exercises soft_body_apply_central_impulse on whichever backend
+	# each blob resolved to.
+	for sb in _blobs:
+		var c := PhysicsServer3D.soft_body_get_bounds(sb.get_physics_rid()).get_center()
+		var d := c - center
+		var dist := d.length()
+		if dist > radius:
+			continue
+		var dir := (d / dist + Vector3.UP * 0.5).normalized() if dist > 0.05 else Vector3.UP
+		var falloff := 1.0 - dist / radius
+		PhysicsServer3D.soft_body_apply_central_impulse(sb.get_physics_rid(),
+			dir * strength * falloff * sb.total_mass)
+
+func _blast_at_screen(screen_pos: Vector2) -> void:
+	# Ray through the cursor; blast at the first static hit, or 12 m out.
+	var from := _cam.project_ray_origin(screen_pos)
+	var dir := _cam.project_ray_normal(screen_pos)
+	var params := PhysicsRayQueryParameters3D.create(from, from + dir * 80.0)
+	var hit := get_world_3d().direct_space_state.intersect_ray(params)
+	var at: Vector3 = hit.position if hit else from + dir * 12.0
+	_blast(at, 9.0, 6.0)
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		# Hold RMB to mouse-look; capture so the cursor doesn't hit a screen edge.
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if event.pressed else Input.MOUSE_MODE_VISIBLE
+	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_cam_yaw -= event.relative.x * MOUSE_SENS
 		_cam_pitch = clampf(_cam_pitch - event.relative.y * MOUSE_SENS, -1.5, 1.5)
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		# While looking (RMB held) the cursor is hidden -- blast down the centre.
+		var p: Vector2 = event.position
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			p = get_viewport().get_visible_rect().size * 0.5
+		_blast_at_screen(p)
 	elif event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_F: _spawn_wave(_batch, false)
@@ -387,6 +434,4 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_2: _drop(COUNTS[1])
 			KEY_3: _drop(COUNTS[2])
 			KEY_4: _drop(COUNTS[3])
-			KEY_TAB:
-				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 			KEY_ESCAPE: get_tree().quit()
