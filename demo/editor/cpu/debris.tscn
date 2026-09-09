@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bt3icywyc1aoj" path="res://demo/editor/cpu/debris.gd" id="1"]
 [ext_resource type="Script" uid="uid://giri0h0owpcn" path="res://demo/common/physx_vortex_3d.gd" id="2"]
+[ext_resource type="Material" uid="uid://b8go3rem4w0yb" path="res://demo/common/materials/fluid_water_red.tres" id="3_jb1rs"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
 
@@ -129,3 +130,24 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 18
+
+[node name="PhysXParticleFluid3D" type="PhysXParticleFluid3D" parent="." unique_id=1201826848]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.033325717, 2.2123258, 0.0061337203)
+material_override = ExtResource("3_jb1rs")
+particle_count = 20000
+particle_size = 0.02
+mpm_domain_size = Vector3(5, 20, 5)
+mpm_colliders = Array[NodePath]([NodePath("../Ground"), NodePath("../Debris")])
+mpm_auto_colliders = true
+spawn_region_size = Vector3(1.06, 1.3912094, 0.998)
+spawn_on_ready = false
+emitting = true
+emission_radius = 0.111
+emission_velocity = Vector3(0.35, -2.5, 0.35)
+surface_mesh = true
+surface_anisotropy = true
+foam_particle_count = 50
+foam_lifetime = 0.01
+foam_threshold = 220.0
+foam_buoyancy = 1.0
+foam_size = 0.009
