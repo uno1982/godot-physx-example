@@ -25,23 +25,23 @@ albedo_color = Color(0.2, 0.21, 0.22, 1)
 size = Vector3(48, 0.7, 48)
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
-size = Vector3(4.9, 0.7, 4.9)
+size = Vector3(4.9, 0.7, 6.8912597)
 
 [sub_resource type="StandardMaterial3D" id="Stone"]
 albedo_color = Color(0.36, 0.37, 0.4, 1)
 roughness = 0.95
 
 [sub_resource type="BoxMesh" id="FloorMesh"]
-size = Vector3(4.9, 0.7, 4.9)
+size = Vector3(4.9, 0.7, 6.978906)
 
 [sub_resource type="BoxShape3D" id="WallShapeX"]
-size = Vector3(0.35, 1.9, 4.9)
+size = Vector3(0.35, 1.9, 7.1028504)
 
 [sub_resource type="BoxMesh" id="WallMeshX"]
-size = Vector3(0.35, 1.9, 4.9)
+size = Vector3(0.35, 1.9, 6.891504)
 
 [sub_resource type="BoxShape3D" id="WallShapeZ"]
-size = Vector3(4.9, 1.9, 0.35)
+size = Vector3(4.9, 1.9, 0.36152345)
 
 [sub_resource type="BoxMesh" id="WallMeshZ"]
 size = Vector3(4.9, 1.9, 0.35)
@@ -52,6 +52,8 @@ albedo_color = Color(0.82, 0.68, 0.44, 1)
 [sub_resource type="CapsuleShape3D" id="CharShape"]
 radius = 0.36
 height = 1.8
+
+[sub_resource type="SphereShape3D" id="PlowShape"]
 
 [sub_resource type="StandardMaterial3D" id="Skin"]
 albedo_color = Color(0.05, 0.6, 0.85, 1)
@@ -107,9 +109,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.35, 0)
 collision_layer = 33
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Pit/Floor" unique_id=1394817576]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5763427)
 shape = SubResource("FloorShape")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Pit/Floor" unique_id=2098930555]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5320312)
 material_override = SubResource("Stone")
 mesh = SubResource("FloorMesh")
 
@@ -118,9 +122,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.275, 0.6, 0)
 collision_layer = 33
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Pit/WallLeft" unique_id=427563605]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.56358624)
 shape = SubResource("WallShapeX")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Pit/WallLeft" unique_id=855797463]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.3428223)
 material_override = SubResource("Stone")
 mesh = SubResource("WallMeshX")
 
@@ -129,9 +135,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.275, 0.6, 0)
 collision_layer = 33
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Pit/WallRight" unique_id=932263205]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5003327)
 shape = SubResource("WallShapeX")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Pit/WallRight" unique_id=377914768]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.65292954)
 material_override = SubResource("Stone")
 mesh = SubResource("WallMeshX")
 
@@ -140,9 +148,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -2.275)
 collision_layer = 33
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Pit/WallBack" unique_id=1758171383]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.6533542)
 shape = SubResource("WallShapeZ")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Pit/WallBack" unique_id=1308955408]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.6617928)
 material_override = SubResource("Stone")
 mesh = SubResource("WallMeshZ")
 
@@ -151,25 +161,26 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 2.275)
 collision_layer = 33
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Pit/WallFront" unique_id=60469886]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.6530094)
 shape = SubResource("WallShapeZ")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Pit/WallFront" unique_id=468040200]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.64813876)
 material_override = SubResource("Stone")
 mesh = SubResource("WallMeshZ")
 
 [node name="Sand" type="PhysXGranular3D" parent="." unique_id=1652226977]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.050514698, 1, -0.5339539)
 material_override = SubResource("Sand")
 solver = 1
 particle_count = 70000
 particle_size = 0.028
-mpm_domain_size = Vector3(4.3, 2.4, 4.3)
-mpm_colliders = Array[NodePath]([NodePath("../Pit/Floor"), NodePath("../Pit/WallLeft"), NodePath("../Pit/WallRight"), NodePath("../Pit/WallBack"), NodePath("../Pit/WallFront"), NodePath("../Player")])
-mpm_auto_colliders = true
-spawn_region_size = Vector3(3.7, 1.3, 3.7)
-emitting = true
-friction = 44.0
+mpm_domain_size = Vector3(6, 2.4, 8)
+mpm_colliders = Array[NodePath]([NodePath("../Pit/Floor"), NodePath("../Pit/WallLeft"), NodePath("../Pit/WallRight"), NodePath("../Pit/WallBack"), NodePath("../Pit/WallFront"), NodePath("../Player/Plow")])
+spawn_region_size = Vector3(3.9969726, 1.3, 6.206885)
+friction = 34.0
 grain_cohesion = 0.004
+density = 500.0
 
 [node name="Player" type="RigidBody3D" parent="." unique_id=297399802]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
@@ -181,6 +192,15 @@ linear_damp = 0.1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=733821047]
 shape = SubResource("CharShape")
+
+[node name="Plow" type="AnimatableBody3D" parent="Player" unique_id=733821048]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.55, 0)
+collision_layer = 2
+collision_mask = 0
+sync_to_physics = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/Plow" unique_id=733821049]
+shape = SubResource("PlowShape")
 
 [node name="Skin" type="Node3D" parent="Player" unique_id=158986014]
 
