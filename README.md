@@ -81,7 +81,10 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   `shape_scale_walk_test` (non-uniform scale baked into box / convex / trimesh /
   height-field shapes), `ballpit_test` (12k rigid spheres pile in a pit, a
   wrecking ball plows in), `soft_body_test`,
-  `soft_body_spawn_test`, `soft_body_cascade_test`, `determinism_test`.
+  `soft_body_spawn_test`, `soft_body_cascade_test`, `determinism_test`,
+  `ragdoll_skeletal_test` (a rigged humanoid `Skeleton3D` +
+  `PhysicalBoneSimulator3D` ragdoll: shove it, it must fall, keep its joints
+  connected and never NaN).
   `physics_bench.gd` is a step-time benchmark across body counts (run once per
   engine, flipping `physics/3d/physics_engine`). `heightmap_runtime_probe.tscn`
   is a **windowed** run (not `--script`) — the GPU boundary crash only faults
