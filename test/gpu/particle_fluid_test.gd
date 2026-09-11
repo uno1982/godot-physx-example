@@ -5,6 +5,7 @@ extends SceneTree
 # drops toward the floor and stabilizes). GPU-only -- skips cleanly otherwise.
 
 var _fluid: PhysXParticleFluid3D
+var _floor: StaticBody3D
 var _tick := 0
 var _y_at_60 := 0.0
 
@@ -25,13 +26,30 @@ func _initialize() -> void:
 	floor_body.add_child(fc)
 	floor_body.position = Vector3(0, -0.5, 0)
 	root.add_child(floor_body)
+	_floor = floor_body
 
 	_fluid = PhysXParticleFluid3D.new()
 	_fluid.particle_count = 4000
 	_fluid.particle_size = 0.08
 	_fluid.spawn_region_size = Vector3(1.0, 1.0, 1.0)
 	_fluid.position = Vector3(0, 4, 0)
+	# The MPM path's implicit floor sits mpm_domain_size.y/2 below the spawn
+	# point regardless of mpm_colliders -- the default has to cover the actual
+	# drop (spawn y=4 to the floor at y=0) or particles freeze on that plane
+	# well above the real floor. See PhysXParticleFluid3D.mpm_domain_size doc.
+	_fluid.mpm_domain_size = Vector3(3, 9, 3)
 	root.add_child(_fluid)
+	# The MPM fallback path (Auto without CUDA, e.g. enhanced_determinism=true)
+	# only collides with what it's told to -- wire the real floor in so a
+	# MPM-resolved run tests against it instead of the implicit domain-bottom
+	# floor plane (mpm_domain_size.y below spawn). get_path() needs the node's
+	# tree entry to have fully propagated, which hasn't happened yet inside
+	# _initialize() -- deferred to the first physics tick instead.
+	call_deferred("_wire_mpm_collider")
+
+func _wire_mpm_collider() -> void:
+	if _fluid != null and _floor != null:
+		_fluid.mpm_colliders = [_floor.get_path()]
 
 func _physics_process(_d: float) -> bool:
 	_tick += 1
