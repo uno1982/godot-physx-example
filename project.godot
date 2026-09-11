@@ -25,6 +25,7 @@ window/stretch/aspect="expand"
 [physics]
 
 3d/physics_engine="PhysX"
+physx_3d/simulation/enhanced_determinism=true
 jolt_physics_3d/limits/temporary_memory_buffer_size=1024
 jolt_physics_3d/limits/max_bodies=120000
 jolt_physics_3d/limits/max_body_pairs=2000000
