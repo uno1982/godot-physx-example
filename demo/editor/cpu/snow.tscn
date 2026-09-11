@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://oylhlqryca4t"]
 
-[ext_resource type="Script" uid="uid://dmvjbh0kuw5ng" path="res://demo/editor/gpu/snow.gd" id="1"]
+[ext_resource type="Script" uid="uid://dmvjbh0kuw5ng" path="res://demo/editor/cpu/snow.gd" id="1"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
 sky_top_color = Color(0.36, 0.45, 0.6, 1)
