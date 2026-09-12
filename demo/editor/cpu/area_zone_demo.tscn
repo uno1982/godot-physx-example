@@ -1,0 +1,130 @@
+[gd_scene format=3 uid="uid://c8nq4x7p6vqml"]
+
+[ext_resource type="Script" uid="uid://b2rxntahi7bam" path="res://demo/common/area_zone_rig.gd" id="1"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(40, 0.1, 40)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.2, 0.2, 0.22, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(40, 0.1, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_zone_a"]
+size = Vector3(6, 6, 6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_zone_a"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(0.25, 0.8, 1, 0.35)
+
+[sub_resource type="BoxMesh" id="BoxMesh_zone_a"]
+size = Vector3(6, 6, 6)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_zone_b"]
+radius = 3.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_zone_b"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(0.25, 0.8, 1, 0.35)
+
+[sub_resource type="SphereMesh" id="SphereMesh_zone_b"]
+radius = 3.5
+height = 7.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_probe"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_probe"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_probe"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.02, 0.02, 0.03, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.3, 0.3, 0.35, 1)
+tonemap_mode = 3
+
+[node name="AreaZoneDemo" type="Node3D" unique_id=1158417077]
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1663078458]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866, 0, -0.866, 0.5, 0, 0, 0)
+light_energy = 0.8
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=271147970]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=185409469]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+mesh = SubResource("BoxMesh_ground")
+surface_material_override/0 = SubResource("Mat_ground")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1078041263]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="ZoneA" type="Area3D" parent="." unique_id=336445777]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 5.1291094, -10.416035)
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneA" unique_id=1052947717]
+shape = SubResource("BoxShape3D_zone_a")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZoneA" unique_id=490140833]
+material_override = SubResource("Mat_zone_a")
+mesh = SubResource("BoxMesh_zone_a")
+
+[node name="ZoneB" type="Area3D" parent="." unique_id=1282392795]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 3.5, -12.639008)
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneB" unique_id=352401648]
+shape = SubResource("SphereShape3D_zone_b")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZoneB" unique_id=1957607859]
+material_override = SubResource("Mat_zone_b")
+mesh = SubResource("SphereMesh_zone_b")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=766351026]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 4)
+script = ExtResource("1")
+probe_path = NodePath("Probe")
+status_label_path = NodePath("../HUD/StatusLabel")
+
+[node name="Probe" type="Area3D" parent="Camera3D" unique_id=1052311673]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Camera3D/Probe" unique_id=217754118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.1516619)
+shape = SubResource("BoxShape3D_probe")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Camera3D/Probe" unique_id=864561583]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.143404)
+material_override = SubResource("Mat_probe")
+mesh = SubResource("BoxMesh_probe")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=104417348]
+environment = SubResource("Environment_1")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1818397069]
+
+[node name="StatusLabel" type="Label" parent="HUD" unique_id=301870450]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 500.0
+offset_bottom = 60.0
+theme_override_font_sizes/font_size = 24
+text = "outside any zone"
+
+[node name="Hint" type="Label" parent="HUD" unique_id=1166819275]
+offset_left = 16.0
+offset_top = 60.0
+offset_right = 600.0
+offset_bottom = 90.0
+text = "WASD + hold RMB to fly. Fly the white probe box into a blue zone."
