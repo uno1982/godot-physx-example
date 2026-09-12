@@ -1,0 +1,250 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/editor/gpu/gas_showcase.gd" id="1"]
+[ext_resource type="Gradient" path="res://demo/editor/gpu/fire_ramp.tres" id="2"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
+
+[sub_resource type="Sky" id="Sky_2"]
+sky_material = SubResource("Sky_1")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_2")
+ambient_light_source = 3
+ambient_light_energy = 0.5
+tonemap_mode = 3
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0
+volumetric_fog_length = 20.0
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(3, 0.02, 3)
+
+[sub_resource type="StandardMaterial3D" id="GroundMat"]
+shading_mode = 0
+albedo_color = Color(0.15, 0.25, 0.12, 1)
+
+[sub_resource type="GradientTexture1D" id="GradTex_Sparks"]
+gradient = ExtResource("2")
+
+[sub_resource type="StandardMaterial3D" id="SparkMat"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+billboard_mode = 1
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="QuadMesh" id="SparkMesh"]
+size = Vector2(0.06, 0.06)
+material = SubResource("SparkMat")
+
+[sub_resource type="ParticleProcessMaterial" id="SparkProcess"]
+direction = Vector3(0, 1, 0)
+spread = 35.0
+initial_velocity_min = 1.2
+initial_velocity_max = 2.2
+gravity = Vector3(0, -1.5, 0)
+scale_min = 0.6
+scale_max = 1.4
+color_ramp = SubResource("GradTex_Sparks")
+
+[sub_resource type="Animation" id="Animation_ignite"]
+resource_name = "ignite"
+length = 3.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/path = NodePath("PhysXGas3D/Cap0:enabled")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("PhysXGas3D/Cap0:radius")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(1, 1.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.08, 0.28]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("PhysXGas3D/Cap0:divergence")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(1, 1.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 2.0]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("PhysXGas3D/Cap1:enabled")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 1, 3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("PhysXGas3D/Cap1:radius")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(1, 1.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.08, 0.28]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("PhysXGas3D/Cap1:divergence")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(1, 1.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 2.0]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("PhysXGas3D/Cap2:enabled")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 1, 3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("PhysXGas3D/Cap2:radius")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(1, 1.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.08, 0.28]
+}
+tracks/8/type = "value"
+tracks/8/path = NodePath("PhysXGas3D/Cap2:divergence")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(1, 1.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 2.0]
+}
+tracks/9/type = "value"
+tracks/9/path = NodePath("Sparks:emitting")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0, 1, 2.9),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimLib_1"]
+_data = {
+"ignite": SubResource("Animation_ignite")
+}
+
+[node name="GasAnimPlayerDemo" type="Node3D"]
+script = ExtResource("1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.788, -0.492, 0.371, 0, 0.6, 0.8, -0.616, -0.63, 0.473, 0, 3, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9, 0.45, 0, -0.45, 0.9, 0, 1.4, 4.5)
+current = true
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.0, 0)
+mesh = SubResource("GroundMesh")
+material_override = SubResource("GroundMat")
+
+[node name="PhysXGas3D" type="PhysXGas3D" parent="."]
+domain_size = Vector3(2.0, 3.2, 2.0)
+cell_size = 0.06
+emitters = Array[NodePath]([NodePath("Stem"), NodePath("Cap0"), NodePath("Cap1"), NodePath("Cap2")])
+buoyancy = 6.0
+vorticity_strength = 14.0
+dissipation = 0.998
+fog_density = 22.0
+fire_look = true
+fire_color_ramp = ExtResource("2")
+fire_emission_strength = 7.0
+
+[node name="Stem" type="PhysXGasEmitter3D" parent="PhysXGas3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, 0)
+enabled = true
+radius = 0.18
+velocity = Vector3(0, 2.6, 0)
+density = 2.2
+
+[node name="Cap0" type="PhysXGasEmitter3D" parent="PhysXGas3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.9, 0)
+enabled = false
+radius = 0.08
+velocity = Vector3(1.0, -0.4, 0.0)
+density = 1.6
+
+[node name="Cap1" type="PhysXGasEmitter3D" parent="PhysXGas3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.175, 0.9, 0.303)
+enabled = false
+radius = 0.08
+velocity = Vector3(-0.5, -0.4, 0.866)
+density = 1.6
+
+[node name="Cap2" type="PhysXGasEmitter3D" parent="PhysXGas3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.175, 0.9, -0.303)
+enabled = false
+radius = 0.08
+velocity = Vector3(-0.5, -0.4, -0.866)
+density = 1.6
+
+[node name="Sparks" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+emitting = false
+amount = 60
+lifetime = 1.2
+one_shot = true
+explosiveness = 0.6
+process_material = SubResource("SparkProcess")
+draw_pass_1 = SubResource("SparkMesh")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimLib_1")
+}
+autoplay = "ignite"
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 640.0
+offset_bottom = 70.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+text = "PhysXGas3D + GPUParticles3D, driven entirely by AnimationPlayer (no per-effect scripting)
+WASD fly - Space/Ctrl up-down - Shift fast - hold RMB to look"
