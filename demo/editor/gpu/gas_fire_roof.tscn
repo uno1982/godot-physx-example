@@ -1,0 +1,116 @@
+[gd_scene format=3 uid="uid://dit4yw1rqcayg"]
+
+[ext_resource type="Script" uid="uid://dy3ph81t2g6fg" path="res://demo/common/fly_camera_node.gd" id="1"]
+[ext_resource type="Shader" uid="uid://pl1xhtlb8v23" path="res://demo/editor/gpu/fire_volumetric.gdshader" id="2"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.02, 0.02, 0.03, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.25, 0.25, 0.3, 1)
+ambient_light_energy = 0.5
+tonemap_mode = 3
+glow_enabled = true
+glow_intensity = 1.2
+glow_bloom = 0.25
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0
+volumetric_fog_anisotropy = 0.65
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(8, 0.1, 8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.2, 0.2, 0.22, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_roof"]
+size = Vector3(2.7867584, 0.15, 4.8742676)
+
+[sub_resource type="StandardMaterial3D" id="Mat_roof"]
+albedo_color = Color(0.35, 0.3, 0.28, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_roof"]
+size = Vector3(2.8016968, 0.3, 4.8808594)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fire"]
+size = Vector3(1, 1.6, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fire"]
+noise_type = 3
+seed = 7
+frequency = 0.08
+fractal_octaves = 4
+fractal_lacunarity = 2.1
+fractal_gain = 0.55
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_fire"]
+width = 32
+height = 32
+depth = 32
+noise = SubResource("FastNoiseLite_fire")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fire"]
+render_priority = 0
+shader = ExtResource("2")
+shader_parameter/noise_tex = SubResource("NoiseTexture3D_fire")
+shader_parameter/noise_scale = 1.6
+shader_parameter/scroll_speed = 0.6
+shader_parameter/box_half_extents = Vector3(0.5, 0.8, 0.5)
+shader_parameter/raymarch_steps = 32
+shader_parameter/density_mult = 4.0
+shader_parameter/emission_strength = 3.0
+shader_parameter/color_core = Color(1, 0.95, 0.6, 1)
+shader_parameter/color_mid = Color(1, 0.45, 0.08, 1)
+shader_parameter/color_outer = Color(0.35, 0.05, 0, 1)
+
+[node name="GasFireRoof" type="Node3D" unique_id=236386463]
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1690983756]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 0, 0)
+light_energy = 0.8
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=603887154]
+transform = Transform3D(0.9077775, -0.016101846, 0.4191429, 0, 0.9992629, 0.03838781, -0.41945207, -0.034847587, 0.90710837, 3, 2.2, 6.5)
+script = ExtResource("1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1214713105]
+environment = SubResource("Environment_1")
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1321272993]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+mesh = SubResource("BoxMesh_ground")
+surface_material_override/0 = SubResource("Mat_ground")
+
+[node name="Roof" type="MeshInstance3D" parent="." unique_id=455954188]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.021507263, 3.1609573, -0.10241699)
+mesh = SubResource("BoxMesh_roof")
+surface_material_override/0 = SubResource("Mat_roof")
+
+[node name="RoofCollider" type="CollisionShape3D" parent="." unique_id=772477902]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.020055532, 3.1902153, -0.061831474)
+shape = SubResource("BoxShape3D_roof")
+
+[node name="Fire" type="MeshInstance3D" parent="." unique_id=61994534]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97339684, 0)
+mesh = SubResource("BoxMesh_fire")
+surface_material_override/0 = SubResource("ShaderMaterial_fire")
+
+[node name="Gas" type="PhysXGas3D" parent="." unique_id=549990497]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0681744, 0)
+domain_size = Vector3(9, 4.2, 9)
+cell_size = 0.2
+emitters = Array[NodePath]([NodePath("Emitter")])
+emitter_velocity = Vector3(0, 100, 0)
+buoyancy = 20.0
+vorticity_strength = 11.0
+dissipation = 0.9965
+colliders = Array[NodePath]([NodePath("../RoofCollider")])
+fog_density = 18.3
+
+[node name="Emitter" type="PhysXGasEmitter3D" parent="Gas" unique_id=139189790]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.9, 0)
+radius = 0.3
+velocity = Vector3(0, 100, 0)
+density = 4.0
+divergence = 0.9

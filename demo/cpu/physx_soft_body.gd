@@ -20,12 +20,13 @@ const COLORS := [
 	Color(0.9, 0.7, 0.3), Color(0.7, 0.45, 0.85), Color(0.4, 0.8, 0.78),
 ]
 
+const FlyCamera = preload("res://demo/common/fly_camera.gd")
+
 var _count := 24
 var _batch := 24 # blobs per F / per number-key drop
 var _blobs: Array[SoftBody3D] = []
 var _stage: Node3D
-var _cam_yaw := 0.0
-var _cam_pitch := 0.0
+var _fly: FlyCamera
 var _mouse_captured := true
 var _spawn_z := 3.0
 var _spawn_y := 10.0
@@ -161,8 +162,7 @@ func _build_world() -> void:
 	# Free-fly camera; start well back and above the basin looking up the run.
 	_cam.position = Vector3(6.0, cy + 16.0, cz - 20.0)
 	_cam.look_at(Vector3(0.0, s_my, s_mz))
-	_cam_yaw = _cam.rotation.y
-	_cam_pitch = _cam.rotation.x
+	_fly = FlyCamera.new(_cam, FLY_SPEED)
 
 	_ball = RigidBody3D.new()
 	_ball.mass = 1200.0
@@ -348,7 +348,7 @@ func _physics_process(_delta: float) -> void:
 
 func _process(delta: float) -> void:
 	if not _bench:
-		_fly_camera(delta)
+		_fly.process(delta)
 	_phys_ms = lerp(_phys_ms, Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0, 0.1)
 
 	if _bench:
@@ -373,19 +373,6 @@ func _process(delta: float) -> void:
 		_batch, _blobs.size(), cap, settled, _phys_ms, Engine.get_frames_per_second()]
 
 const FLY_SPEED := 14.0
-const MOUSE_SENS := 0.0025
-
-func _fly_camera(delta: float) -> void:
-	var mv := Vector3.ZERO
-	if Input.is_key_pressed(KEY_W): mv.z -= 1
-	if Input.is_key_pressed(KEY_S): mv.z += 1
-	if Input.is_key_pressed(KEY_A): mv.x -= 1
-	if Input.is_key_pressed(KEY_D): mv.x += 1
-	if Input.is_key_pressed(KEY_SPACE): mv.y += 1
-	if Input.is_key_pressed(KEY_CTRL): mv.y -= 1
-	var spd := FLY_SPEED * (3.0 if Input.is_key_pressed(KEY_SHIFT) else 1.0)
-	_cam.rotation = Vector3(_cam_pitch, _cam_yaw, 0.0)
-	_cam.position += (_cam.transform.basis * mv).normalized() * spd * delta if mv != Vector3.ZERO else Vector3.ZERO
 
 func _blast(center: Vector3, strength: float, radius: float) -> void:
 	# Radial impulse on every blob in range -- pushes them away from `center`
@@ -412,13 +399,9 @@ func _blast_at_screen(screen_pos: Vector2) -> void:
 	_blast(at, 9.0, 6.0)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
-		# Hold RMB to mouse-look; capture so the cursor doesn't hit a screen edge.
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if event.pressed else Input.MOUSE_MODE_VISIBLE
-	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		_cam_yaw -= event.relative.x * MOUSE_SENS
-		_cam_pitch = clampf(_cam_pitch - event.relative.y * MOUSE_SENS, -1.5, 1.5)
-	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if _fly.handle_input(event):
+		return
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		# While looking (RMB held) the cursor is hidden -- blast down the centre.
 		var p: Vector2 = event.position
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
