@@ -1,0 +1,107 @@
+[gd_scene format=3 uid="uid://bj15skgwot1pe"]
+
+[ext_resource type="Script" uid="uid://difqpqirs8p4d" path="res://demo/common/liquid_flamethrower_rig.gd" id="1"]
+[ext_resource type="Material" uid="uid://doslebht1q3ly" path="res://demo/common/materials/fluid_fire.tres" id="2"]
+[ext_resource type="VoxelGIData" uid="uid://dh0vl65dggyo2" path="res://demo/common/flamethrower_liquid.VoxelGI_data.res" id="3_vwf3b"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(20, 0.1, 20)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.2, 0.2, 0.22, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(20, 0.1, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_target"]
+size = Vector3(3, 3, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_target"]
+albedo_color = Color(0.4, 0.35, 0.3, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_target"]
+size = Vector3(3, 3, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wh2v7"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.02, 0.02, 0.03, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.25, 0.25, 0.3, 1)
+tonemap_mode = 3
+ssr_enabled = true
+ssao_enabled = true
+sdfgi_use_occlusion = true
+glow_enabled = true
+glow_normalized = true
+glow_intensity = 1.2
+glow_bloom = 0.25
+
+[node name="FlamethrowerLiquid" type="Node3D" unique_id=275314955]
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=2057403971]
+transform = Transform3D(1, 0, 0, 0, 0.50000024, 0.8660253, 0, -0.8660253, 0.50000024, 0, 0, 0)
+visible = false
+light_energy = 0.8
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=1292724458]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=32800758]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+mesh = SubResource("BoxMesh_ground")
+surface_material_override/0 = SubResource("Mat_ground")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1390787461]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="Target" type="StaticBody3D" parent="." unique_id=1991317811]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Target" unique_id=732237682]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -8)
+mesh = SubResource("BoxMesh_target")
+surface_material_override/0 = SubResource("Mat_target")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Target" unique_id=890748669]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -8)
+shape = SubResource("BoxShape3D_target")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=2032535373]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5999999, 4)
+script = ExtResource("1")
+fluid_path = NodePath("Muzzle")
+
+[node name="Muzzle" type="PhysXParticleFluid3D" parent="Camera3D" unique_id=814825110]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.20000005, -1)
+material_override = ExtResource("2")
+gi_mode = 2
+solver = 2
+particle_count = 15000
+particle_size = 0.02
+mpm_domain_size = Vector3(5, 20, 12)
+mpm_substeps = 4
+mpm_colliders = Array[NodePath]([NodePath("../../Target"), NodePath("../../Ground")])
+mpm_auto_colliders = true
+spawn_region_size = Vector3(0.3, 0.3, 0.3)
+spawn_on_ready = false
+emission_rate = 1500.0
+emission_radius = 0.172
+emission_velocity = Vector3(0, 0, -9)
+surface_mesh = true
+viscosity = 0.207
+surface_tension = 0.097
+cohesion = 0.1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1031360389]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.15169, 0.47170937, 0)
+material_override = ExtResource("2")
+mesh = SubResource("BoxMesh_wh2v7")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1380625320]
+environment = SubResource("Environment_1")
+
+[node name="VoxelGI" type="VoxelGI" parent="." unique_id=457517632]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7720032, -0.03845215)
+size = Vector3(20, 5.444519, 25.2146)
+data = ExtResource("3_vwf3b")
