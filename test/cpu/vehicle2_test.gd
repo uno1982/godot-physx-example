@@ -27,6 +27,33 @@ func _initialize() -> void:
 	_car.position = _start_pos
 	root.add_child(_car)
 
+	# Chassis: a real CollisionShape3D child (BoxShape3D only), same
+	# structure as VehicleBody3D's own chassis shape -- must be added before
+	# the wheels below, since the 4th wheel's own registration is what
+	# triggers the actual build, and it needs the chassis shape to already
+	# be there.
+	var chassis_cs := CollisionShape3D.new()
+	var chassis_shape := BoxShape3D.new()
+	chassis_shape.size = Vector3(1.9, 0.8, 3.7)
+	chassis_cs.shape = chassis_shape
+	chassis_cs.position = Vector3(0, 0.4, 0)
+	_car.add_child(chassis_cs)
+
+	# Wheels: same layout as the probe's own hardcoded sedan default (half-
+	# track 0.75m, wheelbase 2.7m), now as real PhysXVehicleWheel3D children
+	# instead of flat scalar properties on the body.
+	var wheel_positions := {
+		"FL": Vector3(-0.75, 0.05, 1.35),
+		"FR": Vector3(0.75, 0.05, 1.35),
+		"RL": Vector3(-0.75, 0.05, -1.35),
+		"RR": Vector3(0.75, 0.05, -1.35),
+	}
+	for key in wheel_positions:
+		var w := PhysXVehicleWheel3D.new()
+		w.position = wheel_positions[key]
+		w.use_as_steering = key.begins_with("F")
+		_car.add_child(w)
+
 	await process_frame
 	print("[vehicle2] ready, start_pos=", _start_pos)
 	physics_frame.connect(_tick)
