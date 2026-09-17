@@ -16,20 +16,30 @@ func _physics_process(_delta: float) -> void:
 		steer = 0.0
 		return
 
-	var t := 0.0
+	# W always drives forward. S brakes while still moving forward (matching
+	# a real car -- you brake to a stop before a gear can safely reverse),
+	# then switches to real reverse (PxVehicleDirectDriveTransmissionCommandState
+	# .eREVERSE, a gear-level throttle-sign flip, not a raw negative throttle)
+	# once forward speed has actually dropped near zero.
 	if Input.is_key_pressed(KEY_W):
-		t += 1.0
-	if Input.is_key_pressed(KEY_S):
-		t -= 1.0
-	# PxVehicleCommandState.throttle has no reverse sense of its own (gear is
-	# separate) -- this rig only ever runs in forward gear, so W drives
-	# forward and S just brakes/idles rather than reversing. Matches this
-	# demo's actual use (drive forward around the same track as the Godot
-	# car) without wiring a full gear-shift control just for this comparison.
-	throttle = maxf(t, 0.0)
-	brake = maxf(-t, 0.0)
+		reverse = false
+		throttle = 1.0
+		brake = 0.0
+	elif Input.is_key_pressed(KEY_S):
+		if not reverse and get_forward_speed() > 0.5:
+			throttle = 0.0
+			brake = 1.0
+		else:
+			reverse = true
+			throttle = 1.0
+			brake = 0.0
+	else:
+		throttle = 0.0
+		brake = 0.0
+
 	if Input.is_key_pressed(KEY_SPACE):
 		brake = 1.0
+		throttle = 0.0
 
 	var s := 0.0
 	if Input.is_key_pressed(KEY_A):

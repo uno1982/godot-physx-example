@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://ccjeodbmnmb0i" path="res://demo/common/vehicle_rig.gd" id="1_rig"]
 [ext_resource type="Script" uid="uid://bm7xdpv63vo8c" path="res://demo/common/vehicle_chase_camera.gd" id="2_chase_cam"]
-[ext_resource type="Script" path="res://demo/common/physx_vehicle_rig.gd" id="3_physx_rig"]
-[ext_resource type="Script" path="res://demo/common/vehicle_swap.gd" id="4_swap"]
+[ext_resource type="Script" uid="uid://do613d8qiqent" path="res://demo/common/physx_vehicle_rig.gd" id="3_physx_rig"]
+[ext_resource type="Script" uid="uid://dpweuxojcewh6" path="res://demo/common/vehicle_swap.gd" id="4_swap"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -97,8 +97,8 @@ metallic = 0.3
 roughness = 0.35
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_physx_wheel"]
-top_radius = 0.35
-bottom_radius = 0.35
+top_radius = 0.4
+bottom_radius = 0.4
 height = 0.3
 radial_segments = 16
 
@@ -243,20 +243,22 @@ transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_wheel")
 
 [node name="PhysXCar" type="PhysXVehicle3D" parent="." unique_id=100000010]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.4672737, 0)
 script = ExtResource("3_physx_rig")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PhysXCar" unique_id=100000016]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3465581, 0)
 shape = SubResource("BoxShape3D_physx_chassis")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar" unique_id=100000011]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3316338, 0)
 mesh = SubResource("BoxMesh_physx_chassis")
 surface_material_override/0 = SubResource("Mat_physx_chassis")
 
 [node name="WheelFL" type="PhysXVehicleWheel3D" parent="PhysXCar" unique_id=100000012]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0.05, 1.35)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, -0.094331205, 1.35)
+radius = 0.4
+tire_friction = 1.5
 use_as_steering = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar/WheelFL" unique_id=100000017]
@@ -264,7 +266,9 @@ transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_physx_wheel")
 
 [node name="WheelFR" type="PhysXVehicleWheel3D" parent="PhysXCar" unique_id=100000013]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0.05, 1.35)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, -0.094331205, 1.35)
+radius = 0.4
+tire_friction = 1.5
 use_as_steering = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar/WheelFR" unique_id=100000018]
@@ -272,14 +276,18 @@ transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_physx_wheel")
 
 [node name="WheelRL" type="PhysXVehicleWheel3D" parent="PhysXCar" unique_id=100000014]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0.05, -1.35)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, -0.094331205, -1.35)
+radius = 0.4
+tire_friction = 1.5
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar/WheelRL" unique_id=100000019]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_physx_wheel")
 
 [node name="WheelRR" type="PhysXVehicleWheel3D" parent="PhysXCar" unique_id=100000015]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0.05, -1.35)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, -0.094331205, -1.35)
+radius = 0.4
+tire_friction = 1.5
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar/WheelRR" unique_id=100000020]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
