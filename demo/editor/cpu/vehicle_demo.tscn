@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://ccjeodbmnmb0i" path="res://demo/common/vehicle_rig.gd" id="1_rig"]
 [ext_resource type="Script" uid="uid://bm7xdpv63vo8c" path="res://demo/common/vehicle_chase_camera.gd" id="2_chase_cam"]
+[ext_resource type="Script" path="res://demo/common/physx_vehicle_rig.gd" id="3_physx_rig"]
+[ext_resource type="Script" path="res://demo/common/vehicle_swap.gd" id="4_swap"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -83,7 +85,26 @@ bottom_radius = 0.4
 height = 0.3
 radial_segments = 16
 
+[sub_resource type="BoxMesh" id="BoxMesh_physx_chassis"]
+size = Vector3(1.9, 0.8, 3.7)
+
+[sub_resource type="StandardMaterial3D" id="Mat_physx_chassis"]
+albedo_color = Color(0.1, 0.35, 0.8, 1)
+metallic = 0.3
+roughness = 0.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_physx_wheel"]
+top_radius = 0.35
+bottom_radius = 0.35
+height = 0.3
+radial_segments = 16
+
 [node name="VehicleDemo" type="Node3D" unique_id=767780711]
+script = ExtResource("4_swap")
+godot_car_path = NodePath("Car")
+physx_car_path = NodePath("PhysXCar")
+camera_path = NodePath("ChaseCamera")
+hud_label_path = NodePath("HUD/Hint")
 
 [node name="Sun" type="DirectionalLight3D" parent="." unique_id=1487640454]
 transform = Transform3D(1, 0, 0, 0, 0.6, 0.8, 0, -0.8, 0.6, 0, 0, 0)
@@ -218,6 +239,31 @@ damping_relaxation = 2.0
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_wheel")
 
+[node name="PhysXCar" type="PhysXVehicle3D" parent="." unique_id=100000010]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.6, 0)
+script = ExtResource("3_physx_rig")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar" unique_id=100000011]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_physx_chassis")
+surface_material_override/0 = SubResource("Mat_physx_chassis")
+
+[node name="WheelFL" type="MeshInstance3D" parent="PhysXCar" unique_id=100000012]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, -1.05, -0.4, 1.35)
+mesh = SubResource("CylinderMesh_physx_wheel")
+
+[node name="WheelFR" type="MeshInstance3D" parent="PhysXCar" unique_id=100000013]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 1.05, -0.4, 1.35)
+mesh = SubResource("CylinderMesh_physx_wheel")
+
+[node name="WheelRL" type="MeshInstance3D" parent="PhysXCar" unique_id=100000014]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, -1.05, -0.4, -1.35)
+mesh = SubResource("CylinderMesh_physx_wheel")
+
+[node name="WheelRR" type="MeshInstance3D" parent="PhysXCar" unique_id=100000015]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 1.05, -0.4, -1.35)
+mesh = SubResource("CylinderMesh_physx_wheel")
+
 [node name="ChaseCamera" type="Node3D" parent="." unique_id=598304933]
 physics_interpolation_mode = 2
 script = ExtResource("2_chase_cam")
@@ -238,4 +284,4 @@ offset_left = 16.0
 offset_top = 16.0
 offset_right = 500.0
 offset_bottom = 46.0
-text = "W/S throttle-reverse, A/D steer, Space brake. Mouse: look around (Esc to release)"
+text = "Driving: Godot VehicleBody3D (stock)  |  W/S throttle-reverse, A/D steer, Space brake, Tab swap car, Mouse look (Esc to release)"

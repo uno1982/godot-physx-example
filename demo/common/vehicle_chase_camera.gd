@@ -36,6 +36,12 @@ func _ready() -> void:
 		global_position = _target.global_position + Vector3(0, height, 0)
 	rotation = Vector3(pitch, yaw, 0.0)
 
+# For swapping which car the camera follows at runtime (see vehicle_swap.gd)
+# -- target_path alone only takes effect in _ready(), so switching targets
+# later needs a real setter, not just reassigning the exported path.
+func set_target(p_target: Node3D) -> void:
+	_target = p_target
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		yaw -= event.relative.x * mouse_sensitivity

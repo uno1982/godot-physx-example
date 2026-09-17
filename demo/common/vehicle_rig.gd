@@ -15,7 +15,19 @@ extends VehicleBody3D
 @export var max_steer_angle := 0.6 # radians, ~34 degrees
 @export var steer_speed := 2.0 # radians/sec toward the target angle
 
+# Only the active car reads keyboard input -- the demo has two cars sharing
+# one set of controls (see vehicle_swap.gd), so the inactive one must relax
+# its own inputs to a neutral idle instead of coasting on whatever was last
+# held down before the swap.
+var active := true
+
 func _physics_process(delta: float) -> void:
+	if not active:
+		engine_force = 0.0
+		brake = 0.0
+		steering = move_toward(steering, 0.0, steer_speed * delta)
+		return
+
 	var throttle := 0.0
 	if Input.is_key_pressed(KEY_W):
 		throttle += 1.0
