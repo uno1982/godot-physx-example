@@ -5,15 +5,17 @@ extends PhysXVehicle3D
 # VehicleBody3D's raw engine_force/steering -- different units, same keys,
 # so the two cars feel directly comparable side by side.
 
+@export var steer_speed := 2.0 # normalized steering input/sec toward the target
+
 # Only the active car reads keyboard input -- see vehicle_rig.gd's own note
 # on why the inactive one must relax to neutral instead of coasting.
 var active := false
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if not active:
 		throttle = 0.0
 		brake = 0.0
-		steer = 0.0
+		steer = move_toward(steer, 0.0, steer_speed * delta)
 		return
 
 	# W always drives forward. S brakes while still moving forward (matching
@@ -46,4 +48,4 @@ func _physics_process(_delta: float) -> void:
 		s += 1.0
 	if Input.is_key_pressed(KEY_D):
 		s -= 1.0
-	steer = s
+	steer = move_toward(steer, s, steer_speed * delta)
