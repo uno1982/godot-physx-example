@@ -251,7 +251,6 @@ mesh = SubResource("CylinderMesh_wheel")
 [node name="PhysXCar" type="PhysXVehicle3D" parent="." unique_id=100000010 groups=["car"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4602594, 0.40732563, -24.651382)
 moment_of_inertia = Vector3(2000, 2000, 1000)
-ackermann_strength = 0.0
 script = ExtResource("3_physx_rig")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="PhysXCar" unique_id=272459946]
