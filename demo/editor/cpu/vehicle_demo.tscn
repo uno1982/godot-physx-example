@@ -358,7 +358,7 @@ transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_physx_wheel")
 
 [node name="Motorcycle" type="VehicleBody3D" parent="." unique_id=100000021 groups=["car"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0.6, -24.651382)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.033285, 0.46279025, -24.651382)
 center_of_mass_mode = 1
 script = ExtResource("5_moto_rig")
 max_engine_force = 200.0
@@ -402,7 +402,7 @@ transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_moto_wheel")
 
 [node name="PhysXMotorcycle" type="PhysXMotorcycle3D" parent="." unique_id=100000028 groups=["car"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.6, -24.651382)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.24892348, -24.651382)
 script = ExtResource("6_physx_moto_rig")
 steer_speed = 5.0
 
