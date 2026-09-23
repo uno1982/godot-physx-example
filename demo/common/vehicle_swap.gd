@@ -1,13 +1,15 @@
 extends Node3D
-# Root script for vehicle_demo.tscn: both cars (stock VehicleBody3D vs. the
-# PhysX-specific PhysXVehicle3D) sit on the same track so they're directly
-# comparable, and one control set + camera swaps between them with a single
-# key -- rather than two separate demo scenes compared from memory.
+# Root script for vehicle_demo.tscn: four vehicles -- stock VehicleBody3D car,
+# PhysXVehicle3D car, stock VehicleBody3D motorcycle, PhysXMotorcycle3D
+# motorcycle -- all sit on the same track so they're directly comparable, and
+# one control set + camera cycles between them with a single key.
 #
-#   Tab   swap control/camera focus between the two cars
+#   Tab   cycle control/camera focus between the four vehicles
 
 @export var godot_car_path: NodePath
 @export var physx_car_path: NodePath
+@export var godot_motorcycle_path: NodePath
+@export var physx_motorcycle_path: NodePath
 @export var camera_path: NodePath
 @export var hud_label_path: NodePath
 @export var wall_path: NodePath
@@ -15,23 +17,25 @@ extends Node3D
 @export var impact_distance := 4.5
 @export var screenshot_path := "res://excluded/wall_impact.png"
 
-var _godot_car: Node3D
-var _physx_car: Node3D
+var _vehicles: Array[Node3D] = []
+var _hints: Array[String] = []
+var _active_index := 0
 var _camera: Node3D
 var _hud_label: Label
-var _active_is_physx := false
 
 var _wall: Node3D
 var _screenshot_cam: Camera3D
 var _play_cam: Camera3D
 var _impact_captured := false
 
-const HINT_GODOT := "Driving: Godot VehicleBody3D (stock)  |  W/S throttle-reverse, A/D steer, Space brake, Tab swap car, P screenshot, Mouse look (Esc to release)"
-const HINT_PHYSX := "Driving: PhysX PhysXVehicle3D  |  W/S throttle-brake, A/D steer, Space brake, Tab swap car, P screenshot, Mouse look (Esc to release)"
+const HINT_GODOT_CAR := "Driving: Godot VehicleBody3D car (stock)  |  W/S throttle-reverse, A/D steer, Space brake, Tab cycle vehicle, P screenshot, Mouse look (Esc to release)"
+const HINT_PHYSX_CAR := "Driving: PhysX PhysXVehicle3D car  |  W/S throttle-brake, A/D steer, Space brake, Tab cycle vehicle, P screenshot, Mouse look (Esc to release)"
+const HINT_GODOT_MOTO := "Driving: Godot VehicleBody3D motorcycle (stock, script-side lean balance)  |  W/S throttle-reverse, A/D steer+lean, Space brake, Tab cycle vehicle"
+const HINT_PHYSX_MOTO := "Driving: PhysX PhysXMotorcycle3D  |  W/S throttle-brake, A/D steer+lean, Space brake, Tab cycle vehicle"
 
 func _ready() -> void:
-	_godot_car = get_node(godot_car_path)
-	_physx_car = get_node(physx_car_path)
+	_vehicles = [get_node(godot_car_path), get_node(physx_car_path), get_node(godot_motorcycle_path), get_node(physx_motorcycle_path)]
+	_hints = [HINT_GODOT_CAR, HINT_PHYSX_CAR, HINT_GODOT_MOTO, HINT_PHYSX_MOTO]
 	_camera = get_node(camera_path)
 	_hud_label = get_node(hud_label_path)
 	_apply_active()
@@ -47,25 +51,24 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	if _impact_captured or not _wall or not _screenshot_cam:
 		return
-	var active_car: Node3D = _physx_car if _active_is_physx else _godot_car
-	if active_car.global_position.distance_to(_wall.global_position) <= impact_distance:
+	var active_vehicle: Node3D = _vehicles[_active_index]
+	if active_vehicle.global_position.distance_to(_wall.global_position) <= impact_distance:
 		_impact_captured = true
 		_capture_impact_screenshot()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_TAB:
-			_active_is_physx = not _active_is_physx
+			_active_index = (_active_index + 1) % _vehicles.size()
 			_apply_active()
 		elif event.keycode == KEY_P:
 			_capture_impact_screenshot()
 
 func _apply_active() -> void:
-	_godot_car.active = not _active_is_physx
-	_physx_car.active = _active_is_physx
-	var target: Node3D = _physx_car if _active_is_physx else _godot_car
-	_camera.set_target(target)
-	_hud_label.text = HINT_PHYSX if _active_is_physx else HINT_GODOT
+	for i in _vehicles.size():
+		_vehicles[i].active = (i == _active_index)
+	_camera.set_target(_vehicles[_active_index])
+	_hud_label.text = _hints[_active_index]
 
 func _capture_impact_screenshot() -> void:
 	if not _screenshot_cam:

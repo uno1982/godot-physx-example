@@ -28,14 +28,19 @@ func _physics_process(delta: float) -> void:
 		steering = move_toward(steering, 0.0, steer_speed * delta)
 		return
 
-	var throttle := 0.0
-	if Input.is_key_pressed(KEY_W):
-		throttle += 1.0
-	if Input.is_key_pressed(KEY_S):
-		throttle -= 1.0
-	engine_force = throttle * max_engine_force
-
+	# Same fix as vehicle_motorcycle_rig.gd: throttle and brake used to be
+	# computed fully independently, so holding W while pressing Space kept
+	# full engine force fighting the brake the whole time (felt like "the
+	# brake doesn't work" if W was ever held down together with Space).
 	brake = max_brake_force if Input.is_key_pressed(KEY_SPACE) else 0.0
+
+	var throttle := 0.0
+	if brake <= 0.0:
+		if Input.is_key_pressed(KEY_W):
+			throttle += 1.0
+		if Input.is_key_pressed(KEY_S):
+			throttle -= 1.0
+	engine_force = throttle * max_engine_force
 
 	var steer_input := 0.0
 	if Input.is_key_pressed(KEY_A):
