@@ -1,15 +1,17 @@
 extends Node3D
-# Root script for vehicle_demo.tscn: four vehicles -- stock VehicleBody3D car,
+# Root script for vehicle_demo.tscn: five vehicles -- stock VehicleBody3D car,
 # PhysXVehicle3D car, stock VehicleBody3D motorcycle, PhysXMotorcycle3D
-# motorcycle -- all sit on the same track so they're directly comparable, and
-# one control set + camera cycles between them with a single key.
+# motorcycle, PhysXTank3D -- all sit on the same track so they're directly
+# comparable, and one control set + camera cycles between them with a single
+# key.
 #
-#   Tab   cycle control/camera focus between the four vehicles
+#   Tab   cycle control/camera focus between the five vehicles
 
 @export var godot_car_path: NodePath
 @export var physx_car_path: NodePath
 @export var godot_motorcycle_path: NodePath
 @export var physx_motorcycle_path: NodePath
+@export var physx_tank_path: NodePath
 @export var camera_path: NodePath
 @export var hud_label_path: NodePath
 @export var wall_path: NodePath
@@ -32,10 +34,11 @@ const HINT_GODOT_CAR := "Driving: Godot VehicleBody3D car (stock)  |  W/S thrott
 const HINT_PHYSX_CAR := "Driving: PhysX PhysXVehicle3D car  |  W/S throttle-brake, A/D steer, Space brake, Tab cycle vehicle, P screenshot, Mouse look (Esc to release)"
 const HINT_GODOT_MOTO := "Driving: Godot VehicleBody3D motorcycle (stock, script-side lean balance)  |  W/S throttle-reverse, A/D steer+lean, Space brake, Tab cycle vehicle"
 const HINT_PHYSX_MOTO := "Driving: PhysX PhysXMotorcycle3D  |  W/S throttle-brake, A/D steer+lean, Space brake, Tab cycle vehicle"
+const HINT_PHYSX_TANK := "Driving: PhysX PhysXTank3D  |  W/S drive, A/D pivot (skid-steer), Space brake, Left click fire, Tab cycle vehicle"
 
 func _ready() -> void:
-	_vehicles = [get_node(godot_car_path), get_node(physx_car_path), get_node(godot_motorcycle_path), get_node(physx_motorcycle_path)]
-	_hints = [HINT_GODOT_CAR, HINT_PHYSX_CAR, HINT_GODOT_MOTO, HINT_PHYSX_MOTO]
+	_vehicles = [get_node(godot_car_path), get_node(physx_car_path), get_node(godot_motorcycle_path), get_node(physx_motorcycle_path), get_node(physx_tank_path)]
+	_hints = [HINT_GODOT_CAR, HINT_PHYSX_CAR, HINT_GODOT_MOTO, HINT_PHYSX_MOTO, HINT_PHYSX_TANK]
 	_camera = get_node(camera_path)
 	_hud_label = get_node(hud_label_path)
 	_apply_active()
@@ -48,13 +51,17 @@ func _ready() -> void:
 	# screenshot swaps to screenshot_cam, so normal driving resumes.
 	_play_cam = get_viewport().get_camera_3d()
 
-func _physics_process(_delta: float) -> void:
-	if _impact_captured or not _wall or not _screenshot_cam:
-		return
-	var active_vehicle: Node3D = _vehicles[_active_index]
-	if active_vehicle.global_position.distance_to(_wall.global_position) <= impact_distance:
-		_impact_captured = true
-		_capture_impact_screenshot()
+# Left as a commented-out example of how to trigger a screenshot (or any
+# other one-shot reaction) directly off a destruction event -- proximity to
+# the wall here, but the same pattern applies to PhysXDestructible3D signals
+# like a chunk breaking off. P still captures a screenshot manually below.
+#func _physics_process(_delta: float) -> void:
+#	if _impact_captured or not _wall or not _screenshot_cam:
+#		return
+#	var active_vehicle: Node3D = _vehicles[_active_index]
+#	if active_vehicle.global_position.distance_to(_wall.global_position) <= impact_distance:
+#		_impact_captured = true
+#		_capture_impact_screenshot()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
