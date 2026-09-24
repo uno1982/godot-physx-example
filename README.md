@@ -76,8 +76,8 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   `property_test`, `area_test`, `area_override_test`, `mesh_shape_test`,
   `joint_test`, `character_test`, `pendulum_gravity_test`, `chain_force_test`,
   `heightmap_test`, `heightmap_character_test` (walk terrain, no facet snag),
-  `heightmap_edge_test` / `heightmap_crash_repro` (bodies off the height-field
-  rim — regressions for the GPU boundary crash), `shape_scale_test` /
+  `heightmap_edge_test` (bodies off the height-field rim — regression for the
+  GPU boundary crash), `shape_scale_test` /
   `shape_scale_walk_test` (non-uniform scale baked into box / convex / trimesh /
   height-field shapes), `ballpit_test` (12k rigid spheres pile in a pit, a
   wrecking ball plows in), `soft_body_test`,
