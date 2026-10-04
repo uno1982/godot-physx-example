@@ -16,14 +16,45 @@ size = Vector3(1.3, 0.75, 4.1)
 render_priority = -1
 shader = ExtResource("4_mask_shader")
 
+[sub_resource type="Gradient" id="Gradient_jet_fade"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 0.5, 0.96, 0.98, 1, 0.4, 0.96, 0.98, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_jet_fade"]
+gradient = SubResource("Gradient_jet_fade")
+
+[sub_resource type="Curve" id="Curve_jet_taper"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.45, 0.9), -0.5, -0.5, 0, 0, Vector2(1, 0.15), -2.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_jet_taper"]
+curve = SubResource("Curve_jet_taper")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bow_starboard"]
+emission_shape = 5
+emission_point_texture = ExtResource("5_sb_points")
+emission_normal_texture = ExtResource("6_sb_normals")
+emission_point_count = 64
+inherit_velocity_ratio = 0.3
+direction = Vector3(0, 0, 1)
+spread = 8.0
+initial_velocity_min = 3.5
+initial_velocity_max = 5.5
+scale_min = 0.4
+scale_max = 1.3
+scale_curve = SubResource("CurveTexture_jet_taper")
+color_ramp = SubResource("GradientTexture1D_jet_fade")
+collision_mode = 1
+collision_friction = 0.05
+collision_bounce = 0.08
+collision_use_scale = true
+
 [sub_resource type="Gradient" id="Gradient_drop"]
 offsets = PackedFloat32Array(0, 0.35, 1)
 colors = PackedColorArray(1, 1, 1, 0.9, 1, 1, 1, 0.45, 1, 1, 1, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_drop"]
 gradient = SubResource("Gradient_drop")
-width = 64
-height = 64
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0.5, 0)
@@ -47,61 +78,33 @@ particles_anim_loop = false
 material = SubResource("StandardMaterial3D_spray")
 size = Vector2(0.09, 0.09)
 
-[sub_resource type="Curve" id="Curve_jet_taper"]
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.45, 0.9), -0.5, -0.5, 0, 0, Vector2(1, 0.15), -2.0, 0.0, 0, 0]
-point_count = 3
-
-[sub_resource type="CurveTexture" id="CurveTexture_jet_taper"]
-curve = SubResource("Curve_jet_taper")
-
-[sub_resource type="Gradient" id="Gradient_jet_fade"]
-offsets = PackedFloat32Array(0, 0.45, 1)
-colors = PackedColorArray(1, 1, 1, 0.5, 0.96, 0.98, 1, 0.4, 0.96, 0.98, 1, 0)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_jet_fade"]
-gradient = SubResource("Gradient_jet_fade")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bow_starboard"]
-emission_shape = 5
-emission_point_texture = ExtResource("5_sb_points")
-emission_normal_texture = ExtResource("6_sb_normals")
-emission_point_count = 64
-direction = Vector3(0, 0, 1)
-spread = 8.0
-initial_velocity_min = 3.5
-initial_velocity_max = 5.5
-inherit_velocity_ratio = 0.3
-gravity = Vector3(0, -9.8, 0)
-scale_min = 0.4
-scale_max = 1.3
-scale_curve = SubResource("CurveTexture_jet_taper")
-color_ramp = SubResource("GradientTexture1D_jet_fade")
-
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bow_port"]
 emission_shape = 5
 emission_point_texture = ExtResource("7_port_points")
 emission_normal_texture = ExtResource("8_port_normals")
 emission_point_count = 64
+inherit_velocity_ratio = 0.3
 direction = Vector3(0, 0, 1)
 spread = 8.0
 initial_velocity_min = 3.5
 initial_velocity_max = 5.5
-inherit_velocity_ratio = 0.3
-gravity = Vector3(0, -9.8, 0)
 scale_min = 0.4
 scale_max = 1.3
 scale_curve = SubResource("CurveTexture_jet_taper")
 color_ramp = SubResource("GradientTexture1D_jet_fade")
+collision_mode = 1
+collision_friction = 0.05
+collision_bounce = 0.08
+collision_use_scale = true
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_slam"]
 emission_shape = 3
 emission_box_extents = Vector3(0.55, 0.03, 0.7)
+inherit_velocity_ratio = 0.3
 direction = Vector3(0, 1, 0)
 spread = 70.0
 initial_velocity_min = 1.5
 initial_velocity_max = 3.5
-inherit_velocity_ratio = 0.3
-gravity = Vector3(0, -9.8, 0)
 damping_min = 0.5
 damping_max = 1.5
 scale_min = 0.4
@@ -139,14 +142,15 @@ angular_damping = Vector3(300, 500, 600)
 
 [node name="Wake" type="PhysXWaterWake3D" parent="." unique_id=12448688]
 size = 192.0
-cells = 768.0
+cells = 512
 
 [node name="BowSprayStarboard" type="GPUParticles3D" parent="." unique_id=581203377]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.15, 1.2)
 emitting = false
-amount = 1120
-lifetime = 0.4
+amount = 2100
+lifetime = 0.75
 fixed_fps = 60
+collision_base_size = 0.05
 visibility_aabb = AABB(-5, -3, -6, 10, 6, 12)
 process_material = SubResource("ParticleProcessMaterial_bow_starboard")
 draw_pass_1 = SubResource("QuadMesh_droplet")
@@ -154,9 +158,10 @@ draw_pass_1 = SubResource("QuadMesh_droplet")
 [node name="BowSprayPort" type="GPUParticles3D" parent="." unique_id=1876520991]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.15, 1.2)
 emitting = false
-amount = 1120
-lifetime = 0.4
+amount = 2100
+lifetime = 0.75
 fixed_fps = 60
+collision_base_size = 0.05
 visibility_aabb = AABB(-5, -3, -6, 10, 6, 12)
 process_material = SubResource("ParticleProcessMaterial_bow_port")
 draw_pass_1 = SubResource("QuadMesh_droplet")
@@ -174,8 +179,9 @@ process_material = SubResource("ParticleProcessMaterial_slam")
 draw_pass_1 = SubResource("QuadMesh_droplet")
 
 [node name="Spray" type="PhysXWaterSpray3D" parent="." unique_id=1693311840]
-bow_emitters = [NodePath("../BowSprayStarboard"), NodePath("../BowSprayPort")]
-slam_emitters = [NodePath("../SlamSplash")]
+bow_emitters = Array[NodePath]([NodePath("../BowSprayStarboard"), NodePath("../BowSprayPort")])
+slam_emitters = Array[NodePath]([NodePath("../SlamSplash")])
+water_collision = true
 
 [node name="ChaseCamera" type="Camera3D" parent="." unique_id=548532429]
 fov = 65.0
