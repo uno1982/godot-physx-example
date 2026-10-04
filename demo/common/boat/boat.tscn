@@ -76,10 +76,6 @@ scale_min = 0.4
 scale_max = 1.3
 scale_curve = SubResource("CurveTexture_jet_taper")
 color_ramp = SubResource("GradientTexture1D_jet_fade")
-collision_mode = 1
-collision_friction = 0.05
-collision_bounce = 0.08
-collision_use_scale = true
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bow_port"]
 emission_shape = 5
@@ -96,10 +92,6 @@ scale_min = 0.4
 scale_max = 1.3
 scale_curve = SubResource("CurveTexture_jet_taper")
 color_ramp = SubResource("GradientTexture1D_jet_fade")
-collision_mode = 1
-collision_friction = 0.05
-collision_bounce = 0.08
-collision_use_scale = true
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_slam"]
 emission_shape = 3
@@ -116,10 +108,6 @@ scale_min = 0.4
 scale_max = 1.3
 scale_curve = SubResource("CurveTexture_jet_taper")
 color_ramp = SubResource("GradientTexture1D_jet_fade")
-collision_mode = 1
-collision_friction = 0.05
-collision_bounce = 0.08
-collision_use_scale = true
 
 [node name="Boat" type="RigidBody3D" unique_id=1627293752]
 mass = 150.0
@@ -155,20 +143,20 @@ cells = 768.0
 
 [node name="BowSprayStarboard" type="GPUParticles3D" parent="." unique_id=581203377]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.15, 1.2)
-amount = 2100
-lifetime = 0.75
+emitting = false
+amount = 1120
+lifetime = 0.4
 fixed_fps = 60
-collision_base_size = 0.05
 visibility_aabb = AABB(-5, -3, -6, 10, 6, 12)
 process_material = SubResource("ParticleProcessMaterial_bow_starboard")
 draw_pass_1 = SubResource("QuadMesh_droplet")
 
 [node name="BowSprayPort" type="GPUParticles3D" parent="." unique_id=1876520991]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.15, 1.2)
-amount = 2100
-lifetime = 0.75
+emitting = false
+amount = 1120
+lifetime = 0.4
 fixed_fps = 60
-collision_base_size = 0.05
 visibility_aabb = AABB(-5, -3, -6, 10, 6, 12)
 process_material = SubResource("ParticleProcessMaterial_bow_port")
 draw_pass_1 = SubResource("QuadMesh_droplet")
@@ -177,11 +165,10 @@ draw_pass_1 = SubResource("QuadMesh_droplet")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 1.3)
 emitting = false
 amount = 400
-lifetime = 0.9
+lifetime = 0.6
 one_shot = true
 explosiveness = 0.85
 fixed_fps = 60
-collision_base_size = 0.05
 visibility_aabb = AABB(-5, -3, -5, 10, 7, 10)
 process_material = SubResource("ParticleProcessMaterial_slam")
 draw_pass_1 = SubResource("QuadMesh_droplet")
