@@ -18,8 +18,8 @@ extends VehicleBody3D
 #   Both     W / S throttle (it stays where you leave it), Space wheel
 #            brakes, R back to the runway (vehicle_swap.gd). On the ground
 #            only A / D steer (rudder and nose wheel); in arcade mode the
-#            camera is a free look there, and swings in behind the plane at
-#            lift-off.
+#            camera is a free look there -- once airborne, wherever it points
+#            is the aim.
 #
 # Take-off: throttle up, and past take-off speed aim (or pull) the nose up.
 # Landing: throttle down and fly it onto the runway; below take-off speed on
@@ -54,9 +54,6 @@ var camera_free_aim := true
 var camera_pitch := deg_to_rad(12.0)
 # Arcade A / D: how fast the camera's heading (the aim) swings, rad/s.
 var camera_yaw_rate := 0.0
-# Set for one frame at lift-off: the camera swings in behind the plane.
-var camera_recenter := false
-var _was_flying := false
 
 # Only the active vehicle reads input (vehicle_swap.gd).
 var active := false
@@ -163,12 +160,8 @@ func _physics_process(delta: float) -> void:
 				camera_yaw_rate = -yaw_rate
 	_asked = b.inverse() * want
 	# Manual: the camera follows the heading. Arcade: on the ground it's a
-	# free look, in the air the aim -- so at lift-off it swings in behind the
-	# plane, or the plane would turn toward wherever you were looking.
+	# free look, in the air the aim.
 	camera_follow_heading = control_mode == ControlMode.MANUAL
-	if flying and not _was_flying and not on_ground and control_mode == ControlMode.ARCADE:
-		camera_recenter = true
-	_was_flying = flying and not on_ground
 
 	if flying:
 		# The velocity swings onto the nose -- less so when slow, so it mushes
