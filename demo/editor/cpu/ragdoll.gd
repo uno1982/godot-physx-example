@@ -18,34 +18,71 @@ extends Node3D
 #      angle turns clockwise about Z.
 #   3. Give the bones realistic masses (the torso heaviest): a light bone
 #      carrying a heavy limb is what joint limits hold worst.
-#   4. Call physical_bones_start_simulation() to go limp.
+#   4. Bones whose capsules overlap at rest but aren't joined to each other
+#      (the stacked torso, the two thighs, the feet) need a collision
+#      exception: Godot only skips collisions between joined bones, and an
+#      overlapping pair pushes on itself forever -- the limp body crawls
+#      along the floor and strains its joints past their limits.
+#      mannequin_ragdoll.gd adds them from the capsules at start-up.
+#   5. Call physical_bones_start_simulation() to go limp.
 #
-#   L-click  shoot (knocks a mannequin over, or shoves a ragdoll)
-#   SPACE    drop a ragdoll down the steps
-#   WASD + hold RMB  fly     R  reset     ESC  quit
+#   L-click  shoot a mannequin over; on a limp ragdoll, hold to drag it by
+#            the point you grabbed (mouse wheel: nearer / further)
+#   F        drop a ragdoll down the steps
+#   WASD + SPACE/CTRL + hold RMB  fly     R  reset     ESC  quit
 
 const RAGDOLL := preload("res://demo/common/mannequin/mannequin_ragdoll.tscn")
 const SHOT_IMPULSE := 90.0 # N*s
 const SHOT_RANGE := 200.0
+# Dragging: a PinJoint3D holds the grabbed point to a kinematic anchor that
+# follows the cursor, no faster than DRAG_MAX_SPEED (m/s) -- the joint solver
+# carries the whole body hanging off it, which a push on the one bone didn't.
+const DRAG_MAX_SPEED := 14.0
 
 @onready var _camera: Camera3D = $Camera3D
 @onready var _hud: Label = $HUD/Label
 @onready var _dropped: Node3D = $Dropped
 var _fly: FlyCamera
+var _drag_bone: PhysicalBone3D # held, or null
+var _drag_local: Vector3 # grabbed point, in the bone's space
+var _drag_distance := 0.0 # from the camera, along the cursor's ray
+var _drag_anchor: AnimatableBody3D
+var _drag_joint: PinJoint3D
+var _drag_line: ImmediateMesh
 
 
 func _ready() -> void:
 	_fly = FlyCamera.new(_camera)
+	# A thin line from the grabbed point to where it's being pulled.
+	_drag_line = ImmediateMesh.new()
+	var line := MeshInstance3D.new()
+	line.mesh = _drag_line
+	line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = Color(1.0, 0.85, 0.2)
+	material.no_depth_test = true
+	line.material_override = material
+	add_child(line)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _fly.handle_input(event):
 		return
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_shoot(event.position)
+	if event is InputEventMouseButton:
+		match event.button_index:
+			MOUSE_BUTTON_LEFT:
+				if event.pressed:
+					_click(event.position if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED else _cursor())
+				else:
+					_release()
+			MOUSE_BUTTON_WHEEL_UP when _drag_bone:
+				_drag_distance = maxf(_drag_distance - 0.5, 1.0)
+			MOUSE_BUTTON_WHEEL_DOWN when _drag_bone:
+				_drag_distance = minf(_drag_distance + 0.5, 40.0)
 	elif event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
-			KEY_SPACE:
+			KEY_F:
 				_drop()
 			KEY_R:
 				get_tree().reload_current_scene()
@@ -60,14 +97,70 @@ func _process(delta: float) -> void:
 		limp += 1 if m.is_limp() else 0
 	_hud.text = "Ragdolls -- Godot's Create Physical Skeleton (PhysicalBoneSimulator3D + PhysicalBone3D)\n" \
 			+ "Cone joints: spine, shoulders, hips, ankles.  Hinges: knees, elbows (bend one way).\n" \
-			+ "L-click shoot   SPACE drop one   WASD + hold RMB fly   R reset   ESC\n" \
+			+ "L-click shoot (hold on a limp one to drag it, wheel nearer/further)   F drop one   WASD + hold RMB fly   R reset   ESC\n" \
 			+ "ragdolls: %d (%d limp)   physics %.1f ms   FPS %d" % [get_tree().get_nodes_in_group("ragdolls").size(), limp,
 			Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0, Engine.get_frames_per_second()]
 
 
-# A ray from the camera through the cursor: a mannequin's physical bone goes
-# limp with the shot's impulse where it was hit.
-func _shoot(screen: Vector2) -> void:
+func _physics_process(delta: float) -> void:
+	_drag_line.clear_surfaces()
+	if not _drag_bone:
+		return
+	if not is_instance_valid(_drag_bone):
+		_release()
+		return
+	var screen := _cursor()
+	var target := _camera.project_ray_origin(screen) + _camera.project_ray_normal(screen) * _drag_distance
+	_drag_anchor.global_position = _drag_anchor.global_position.move_toward(target, DRAG_MAX_SPEED * delta)
+	_drag_line.surface_begin(Mesh.PRIMITIVE_LINES)
+	_drag_line.surface_add_vertex(_drag_bone.global_transform * _drag_local)
+	_drag_line.surface_add_vertex(target)
+	_drag_line.surface_end()
+
+
+func _grab(bone: PhysicalBone3D, at: Vector3, distance: float) -> void:
+	_release()
+	_drag_bone = bone
+	_drag_local = bone.global_transform.affine_inverse() * at
+	_drag_distance = distance
+	# A shapeless kinematic body for the joint's other end.
+	_drag_anchor = AnimatableBody3D.new()
+	_drag_anchor.sync_to_physics = false
+	_drag_anchor.collision_layer = 0
+	_drag_anchor.collision_mask = 0
+	_drag_anchor.top_level = true
+	add_child(_drag_anchor)
+	_drag_anchor.global_position = at
+	_drag_joint = PinJoint3D.new()
+	_drag_joint.top_level = true
+	add_child(_drag_joint)
+	_drag_joint.global_position = at
+	_drag_joint.node_a = _drag_joint.get_path_to(_drag_anchor)
+	_drag_joint.node_b = _drag_joint.get_path_to(bone)
+
+
+func _release() -> void:
+	_drag_bone = null
+	if _drag_joint:
+		_drag_joint.queue_free()
+		_drag_joint = null
+	if _drag_anchor:
+		_drag_anchor.queue_free()
+		_drag_anchor = null
+
+
+# Where the cursor points: the mouse, or the middle of the view while the
+# fly camera has the mouse captured.
+func _cursor() -> Vector2:
+	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		return get_viewport().get_visible_rect().size * 0.5
+	return get_viewport().get_mouse_position()
+
+
+# A ray from the camera through the cursor. A standing mannequin's physical
+# bone goes limp with the shot's impulse where it was hit; a limp ragdoll's is
+# grabbed there, to drag.
+func _click(screen: Vector2) -> void:
 	var from := _camera.project_ray_origin(screen)
 	var dir := _camera.project_ray_normal(screen)
 	var query := PhysicsRayQueryParameters3D.create(from, from + dir * SHOT_RANGE)
@@ -78,7 +171,11 @@ func _shoot(screen: Vector2) -> void:
 	var mannequin := bone.get_parent()
 	while mannequin and not mannequin.has_method("go_limp"):
 		mannequin = mannequin.get_parent()
-	if mannequin:
+	if not mannequin:
+		return
+	if mannequin.is_limp():
+		_grab(bone, hit.position, from.distance_to(hit.position))
+	else:
 		mannequin.go_limp(dir * SHOT_IMPULSE, hit.position, bone)
 
 
