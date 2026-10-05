@@ -39,6 +39,9 @@ enum ControlMode { ARCADE, MANUAL }
 @export var turn_rate := 100.0 # deg/s the nose turns at, at most
 @export var roll_rate := 220.0 # deg/s
 @export var max_bank := 65.0 # deg the plane banks into a turn
+# Arcade: off, the plane points where the camera looks (mouse up = nose up);
+# on, up/down work like a flight stick (mouse down = camera down = nose up).
+@export var invert_pitch := false
 # Weight. 1: climbs bleed speed and dives build it, and below take-off speed
 # the wing carries less -- the plane sinks and its nose falls until it has
 # speed again (no stall, no spin). 0: floaty, gravity cancelled outright.
@@ -209,9 +212,12 @@ func _aim_turn(b: Basis, bank_into_turns: bool) -> Vector3:
 		var cam := get_viewport().get_camera_3d()
 		if not cam:
 			return Vector3.ZERO
-		# Where the camera looks, lifted by its resting look-down angle.
+		# Where the camera looks, lifted by its resting look-down angle --
+		# or, inverted, mirrored about it.
 		var look := -cam.global_basis.z
 		var elevation := asin(clampf(look.y, -1.0, 1.0)) + camera_pitch
+		if invert_pitch:
+			elevation = -elevation
 		var heading := atan2(look.x, look.z)
 		aim = Vector3(sin(heading) * cos(elevation), sin(elevation), cos(heading) * cos(elevation))
 	aim = aim.normalized()
