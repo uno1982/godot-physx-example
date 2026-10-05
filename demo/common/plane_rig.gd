@@ -7,8 +7,8 @@ extends VehicleBody3D
 # and Jolt.
 #
 # Two control modes, C to switch:
-#   Arcade   the plane flies toward wherever the camera points (mouse aim;
-#            pull the mouse back to aim up); Q / E roll; A / D yaw.
+#   Arcade   the plane flies toward wherever the camera points (mouse aim);
+#            Q / E roll; A / D yaw.
 #   Manual   Up / Down pitch (Down = nose up), Left / Right roll (Q / E too),
 #            A / D yaw; the camera is free.
 #   Both     W / S throttle (it stays where you leave it), Space wheel
@@ -24,7 +24,7 @@ enum ControlMode { ARCADE, MANUAL }
 	set(value):
 		control_mode = value
 		# Arcade: the camera is the aim -- it mustn't chase the heading, and
-		# the mouse aims like a flight stick over a wide range.
+		# it can look well up and down.
 		camera_follow_heading = value == ControlMode.MANUAL
 		camera_free_aim = value == ControlMode.ARCADE
 @export var max_speed := 70.0 # m/s at full throttle
@@ -138,6 +138,10 @@ func _physics_process(delta: float) -> void:
 		# yaw steers the nose wheel.
 		apply_central_force(forward * (_speed - forward_speed) / delta * mass * 0.5)
 		steering = clampf(_asked.y / deg_to_rad(turn_rate), -1.0, 1.0) * STEER
+		# Left/right on the ground is steering, not banking: ailerons stay
+		# neutral (the rudder and nose wheel turn; the elevator still shows a
+		# pull for take-off).
+		_asked.z = 0.0
 
 
 # Manual: the arrows ask for pitch and roll rates directly.

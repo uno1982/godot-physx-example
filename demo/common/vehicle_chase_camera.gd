@@ -66,10 +66,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# A target that aims with the camera (camera_free_aim: the plane in
 		# arcade mode) needs to look well up and down too.
 		var free_aim: bool = _target != null and _target.get("camera_free_aim") == true
-		# Aiming a plane, the mouse works like a flight stick: pull it toward
-		# you (down) to aim -- and pitch -- the nose up.
-		var dy: float = -event.relative.y if free_aim else event.relative.y
-		pitch = clampf(pitch + dy * mouse_sensitivity, -1.45 if free_aim else -0.6, 1.45 if free_aim else 1.2)
+		pitch = clampf(pitch + event.relative.y * mouse_sensitivity, -1.45 if free_aim else -0.6, 1.45 if free_aim else 1.2)
 		_since_mouse_look = 0.0
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
