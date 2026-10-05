@@ -8,7 +8,8 @@ extends VehicleBody3D
 #
 # Two control modes, C to switch:
 #   Arcade   the plane flies toward wherever the camera points (mouse aim);
-#            Q / E roll; A / D yaw.
+#            Q / E roll in place for as long as they're held (barrel rolls;
+#            it levels again on release); A / D yaw.
 #   Manual   Up / Down pitch (Down = nose up), Left / Right roll (Q / E too),
 #            A / D yaw; the camera is free.
 #   Both     W / S throttle (it stays where you leave it), Space wheel
@@ -38,6 +39,10 @@ enum ControlMode { ARCADE, MANUAL }
 var camera_distance := 16.0
 var camera_follow_heading := false
 var camera_free_aim := true
+# The camera sits above the plane looking down this much (rad); the aim is the
+# camera's direction lifted by the same angle, so at rest the plane flies
+# level and you still see it, and the runway, from above.
+var camera_pitch := deg_to_rad(12.0)
 
 # Only the active vehicle reads input (vehicle_swap.gd).
 var active := false
@@ -121,10 +126,12 @@ func _physics_process(delta: float) -> void:
 	if flying and not on_ground:
 		_speed = maxf(_speed, takeoff_speed)
 
-	# The rotation asked for, in world space.
-	var want := _manual_turn(b) if control_mode == ControlMode.MANUAL else _aim_turn(b)
+	# The rotation asked for, in world space. Q / E roll at the full rate,
+	# and while they're held the arcade aim doesn't bank (it would fight them).
+	var roll_keys := _axis(KEY_Q, KEY_E) if active else 0.0
+	var want := _manual_turn(b) if control_mode == ControlMode.MANUAL else _aim_turn(b, roll_keys == 0.0)
 	if active:
-		want += forward * _axis(KEY_Q, KEY_E) * deg_to_rad(roll_rate)
+		want += forward * roll_keys * deg_to_rad(roll_rate)
 		want -= b.y * _axis(KEY_A, KEY_D) * deg_to_rad(turn_rate) * 0.5
 	_asked = b.inverse() * want
 
@@ -157,7 +164,7 @@ func _manual_turn(b: Basis) -> Vector3:
 # toward its elevation, each at up to turn_rate, and bank into the turn (as a
 # real plane would to make it) -- wings level again once the nose is on the
 # aim. (Swinging the nose straight at an aim behind dipped through the turn.)
-func _aim_turn(b: Basis) -> Vector3:
+func _aim_turn(b: Basis, bank_into_turns: bool) -> Vector3:
 	if not active:
 		return Vector3.ZERO
 	var aim := aim_override
@@ -165,7 +172,7 @@ func _aim_turn(b: Basis) -> Vector3:
 		var cam := get_viewport().get_camera_3d()
 		if not cam:
 			return Vector3.ZERO
-		aim = -cam.global_basis.z
+		aim = (-cam.global_basis.z).rotated(cam.global_basis.x.normalized(), camera_pitch)
 	aim = aim.normalized()
 	var forward := b.z
 	var max_rate := deg_to_rad(turn_rate)
@@ -177,10 +184,13 @@ func _aim_turn(b: Basis) -> Vector3:
 	var turn := Vector3.UP * clampf(heading_error * 3.0, -max_rate, max_rate) + right * clampf(climb_error * 3.0, -max_rate, max_rate)
 	turn = turn.limit_length(max_rate)
 
-	# Bank by the heading still to turn; level when there's none.
+	if not bank_into_turns:
+		return turn
+	# Bank by the heading still to turn; level when there's none -- the short
+	# way round, from any roll (the full angle, so upside down reads as 180).
 	var want_bank := clampf(-heading_error * 2.0, -deg_to_rad(max_bank), deg_to_rad(max_bank))
-	var bank := asin(clampf(b.x.y, -1.0, 1.0)) # + = banked right
-	var roll := clampf((want_bank - bank) * 4.0, -deg_to_rad(roll_rate), deg_to_rad(roll_rate))
+	var bank := atan2(b.x.y, b.y.y) # + = banked right
+	var roll := clampf(wrapf(want_bank - bank, -PI, PI) * 4.0, -deg_to_rad(roll_rate), deg_to_rad(roll_rate))
 	return turn + forward * roll
 
 

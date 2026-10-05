@@ -52,12 +52,14 @@ func set_target(p_target: Node3D) -> void:
 	_target = p_target
 	var distance = p_target.get("camera_distance")
 	_spring_arm.spring_length = distance if distance != null else _default_spring_length
-	# A target that aims with the camera starts aimed straight ahead of it,
-	# level -- or it would turn toward wherever the camera last looked.
+	# A target that aims with the camera starts aimed straight ahead of it --
+	# or it would turn toward wherever the camera last looked -- looking down
+	# at it by its camera_pitch.
 	if p_target.get("camera_free_aim") == true:
 		var fwd := p_target.global_basis.z
 		yaw = atan2(fwd.x, fwd.z)
-		pitch = 0.0
+		var look_down = p_target.get("camera_pitch")
+		pitch = look_down if look_down != null else 0.0
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
