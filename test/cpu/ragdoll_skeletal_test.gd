@@ -1,7 +1,9 @@
 extends SceneTree
 
-# Real skinned-skeleton ragdoll: Skeleton3D + PhysicalBoneSimulator3D + ~15
-# PhysicalBone3D (the GDQuest mannequiny rig). Started simulating and shoved,
+# Real skinned-skeleton ragdoll: Skeleton3D + PhysicalBoneSimulator3D + 14
+# PhysicalBone3D (the demo's mannequin, its physical skeleton from Godot's
+# Create Physical Skeleton -- the same one character_cloth.tscn uses as cloth
+# colliders). Started simulating and shoved,
 # it must fall to the floor, keep its joints connected (bones stay near their
 # rest spacing, not flung apart), and never produce a NaN / explode.
 
@@ -23,7 +25,7 @@ func _initialize() -> void:
 	floor.position = Vector3(0, -0.5, 0)
 	root.add_child(floor)
 
-	var scene: PackedScene = load("res://demo/common/mannequiny/mannequiny_ragdoll.tscn")
+	var scene: PackedScene = load("res://demo/common/mannequin/mannequin_ragdoll.tscn")
 	var mann: Node3D = scene.instantiate()
 	mann.set("initial_velocity", Vector3(1.5, 3.0, 0.5))
 	mann.position = Vector3(0, 1.2, 0)

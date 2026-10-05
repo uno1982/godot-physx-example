@@ -9,3 +9,6 @@ CC0 1.0 Universal (public domain): https://creativecommons.org/publicdomain/zero
   pose: single layer with open hems, skinned rigidly to the hips and the upper
   chest (the cloth simulation does the rest). `mannequin_skin.tres` is the
   mannequin's own Skin, so the garments bind to its skeleton.
+- `mannequin_ragdoll.tscn` -- the mannequin with its physical skeleton (made
+  with Godot's Create Physical Skeleton, as in the character cloth demo) as a
+  ragdoll; `mannequin_ragdoll.gd` starts it simulating.
