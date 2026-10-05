@@ -68,14 +68,18 @@ func _physics_process(_delta: float) -> bool:
 	_tick += 1
 	if not _setup:
 		_setup = true
-		_door.apply_torque_impulse(Vector3(0, 8, 0))
+		# Into the limits' range: Godot's hinge angle turns clockwise about
+		# the hinge axis (+Y here), so [0, 90] deg opens the door clockwise.
+		_door.apply_torque_impulse(Vector3(0, -8, 0))
 	if _tick % 40 == 0:
 		var pd := _pendulum.global_position.distance_to(Vector3(0, 5, 0))
 		print("[joint] t%d  pendulum_dist=%.2f  door_yaw=%.1f deg" % [
 			_tick, pd, rad_to_deg(_door.global_rotation.y)])
 	if _tick >= 200:
 		var pd := _pendulum.global_position.distance_to(Vector3(0, 5, 0))
-		var yaw := absf(rad_to_deg(_door.global_rotation.y))
+		# Signed: swung open clockwise and stopped by the upper limit -- a
+		# mirrored hinge convention swings the other way, or not at all.
+		var yaw := -rad_to_deg(_door.global_rotation.y)
 		var ok := pd > 2.5 and pd < 3.6 and yaw > 10.0 and yaw < 96.0
 		print("[joint] pendulum_dist=%.2f  door_yaw=%.1f -> %s" % [pd, yaw, "PASS" if ok else "FAIL"])
 		quit(0 if ok else 1)
