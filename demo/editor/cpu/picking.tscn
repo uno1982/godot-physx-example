@@ -1,0 +1,216 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/editor/cpu/picking.gd" id="1_script"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_top_color = Color(0.35, 0.5, 0.72, 1)
+sky_horizon_color = Color(0.72, 0.77, 0.83, 1)
+ground_horizon_color = Color(0.72, 0.77, 0.83, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.56, 0.58, 0.62, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_zone_left"]
+transparency = 1
+albedo_color = Color(0.3, 0.85, 0.95, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_zone_mid"]
+transparency = 1
+albedo_color = Color(0.7, 0.45, 0.95, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_zone_right"]
+transparency = 1
+albedo_color = Color(0.95, 0.6, 0.25, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_glass"]
+transparency = 1
+albedo_color = Color(0.9, 0.95, 1, 0.25)
+roughness = 0.1
+
+[sub_resource type="StandardMaterial3D" id="Mat_crate"]
+albedo_color = Color(0.78, 0.6, 0.38, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Mat_laser"]
+shading_mode = 0
+albedo_color = Color(1, 0.15, 0.15, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_floor"]
+size = Vector3(30, 1, 30)
+
+[sub_resource type="BoxMesh" id="Mesh_floor"]
+material = SubResource("Mat_floor")
+size = Vector3(30, 1, 30)
+
+[sub_resource type="BoxShape3D" id="Shape_zone"]
+size = Vector3(1.6, 1.6, 1.6)
+
+[sub_resource type="BoxMesh" id="Mesh_zone_left"]
+material = SubResource("Mat_zone_left")
+size = Vector3(1.6, 1.6, 1.6)
+
+[sub_resource type="BoxMesh" id="Mesh_zone_mid"]
+material = SubResource("Mat_zone_mid")
+size = Vector3(1.6, 1.6, 1.6)
+
+[sub_resource type="BoxMesh" id="Mesh_zone_right"]
+material = SubResource("Mat_zone_right")
+size = Vector3(1.6, 1.6, 1.6)
+
+[sub_resource type="BoxShape3D" id="Shape_glass"]
+size = Vector3(2, 2.2, 0.08)
+
+[sub_resource type="BoxMesh" id="Mesh_glass"]
+material = SubResource("Mat_glass")
+size = Vector3(2, 2.2, 0.08)
+
+[sub_resource type="BoxShape3D" id="Shape_crate"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="BoxMesh" id="Mesh_crate"]
+material = SubResource("Mat_crate")
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="BoxMesh" id="Mesh_beam"]
+material = SubResource("Mat_laser")
+size = Vector3(0.03, 0.03, 1)
+
+[node name="Picking" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 8, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.964, 0.267, 0, -0.267, 0.964, 0, 3.6, 10)
+current = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+input_ray_pickable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("Shape_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("Mesh_floor")
+
+[node name="ZoneLeft" type="Area3D" parent="." groups=["pickable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneLeft"]
+shape = SubResource("Shape_zone")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZoneLeft"]
+mesh = SubResource("Mesh_zone_left")
+
+[node name="GlassNotPickable" type="StaticBody3D" parent="." groups=["pickable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 1.1, 1.3)
+input_ray_pickable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GlassNotPickable"]
+shape = SubResource("Shape_glass")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="GlassNotPickable"]
+mesh = SubResource("Mesh_glass")
+
+[node name="ZoneMiddle" type="Area3D" parent="." groups=["pickable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneMiddle"]
+shape = SubResource("Shape_zone")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZoneMiddle"]
+mesh = SubResource("Mesh_zone_mid")
+
+[node name="GlassPickable" type="StaticBody3D" parent="." groups=["pickable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 1.3)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GlassPickable"]
+shape = SubResource("Shape_glass")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="GlassPickable"]
+mesh = SubResource("Mesh_glass")
+
+[node name="ZoneRight" type="Area3D" parent="." groups=["pickable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneRight"]
+shape = SubResource("Shape_zone")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZoneRight"]
+mesh = SubResource("Mesh_zone_right")
+
+[node name="Crate" type="RigidBody3D" parent="." groups=["pickable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 0.4, 0.5)
+mass = 2.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Crate"]
+shape = SubResource("Shape_crate")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Crate"]
+mesh = SubResource("Mesh_crate")
+
+[node name="Laser" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -6)
+target_position = Vector3(0, 0, 30)
+collide_with_areas = true
+
+[node name="Beam" type="MeshInstance3D" parent="Laser"]
+mesh = SubResource("Mesh_beam")
+
+[node name="LeftLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 1.3)
+pixel_size = 0.008
+billboard = 1
+text = "glass: not pickable
+(click the zone behind)"
+font_size = 40
+outline_size = 10
+
+[node name="MiddleLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 1.3)
+pixel_size = 0.008
+billboard = 1
+text = "glass: pickable
+(blocks the zone behind)"
+font_size = 40
+outline_size = 10
+
+[node name="RightLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.3, 0)
+pixel_size = 0.008
+billboard = 1
+text = "Area3D zone"
+font_size = 40
+outline_size = 10
+
+[node name="CrateLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 1.4, 0.5)
+pixel_size = 0.008
+billboard = 1
+text = "crate: click to kick"
+font_size = 40
+outline_size = 10
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 900.0
+offset_bottom = 90.0
