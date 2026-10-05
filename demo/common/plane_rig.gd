@@ -7,7 +7,9 @@ extends VehicleBody3D
 # and Jolt.
 #
 # Two control modes, C to switch:
-#   Arcade   the plane flies toward wherever the camera points (mouse aim);
+#   Arcade   the plane turns toward where the camera looks, and the mouse's
+#            up/down works like a flight stick: move it down and the camera
+#            looks down while the plane pulls up (and the reverse);
 #            Q / E roll in place for as long as they're held (barrel rolls;
 #            it levels again on release); A / D yaw.
 #   Manual   Up / Down pitch (Down = nose up), Left / Right roll (Q / E too),
@@ -39,9 +41,8 @@ enum ControlMode { ARCADE, MANUAL }
 var camera_distance := 16.0
 var camera_follow_heading := false
 var camera_free_aim := true
-# The camera sits above the plane looking down this much (rad); the aim is the
-# camera's direction lifted by the same angle, so at rest the plane flies
-# level and you still see it, and the runway, from above.
+# The camera rests above the plane looking down this much (rad), where the
+# aim is level -- so you see the plane, and the runway, from above.
 var camera_pitch := deg_to_rad(12.0)
 
 # Only the active vehicle reads input (vehicle_swap.gd).
@@ -172,7 +173,12 @@ func _aim_turn(b: Basis, bank_into_turns: bool) -> Vector3:
 		var cam := get_viewport().get_camera_3d()
 		if not cam:
 			return Vector3.ZERO
-		aim = (-cam.global_basis.z).rotated(cam.global_basis.x.normalized(), camera_pitch)
+		# Heading from the camera; elevation mirrored about its resting angle,
+		# like a stick: the camera looking further down aims further up.
+		var look := -cam.global_basis.z
+		var elevation := -(asin(clampf(look.y, -1.0, 1.0)) + camera_pitch)
+		var heading := atan2(look.x, look.z)
+		aim = Vector3(sin(heading) * cos(elevation), sin(elevation), cos(heading) * cos(elevation))
 	aim = aim.normalized()
 	var forward := b.z
 	var max_rate := deg_to_rad(turn_rate)
