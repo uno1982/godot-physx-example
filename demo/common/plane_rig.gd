@@ -11,11 +11,14 @@ extends VehicleBody3D
 #            up/down works like a flight stick: move it down and the camera
 #            looks down while the plane pulls up (and the reverse);
 #            Q / E roll in place for as long as they're held (barrel rolls;
-#            it levels again on release); A / D yaw.
+#            it levels again on release); A / D turn left / right (they
+#            swing the aim, so the plane banks round after it).
 #   Manual   Up / Down pitch (Down = nose up), Left / Right roll (Q / E too),
 #            A / D yaw; the camera is free.
 #   Both     W / S throttle (it stays where you leave it), Space wheel
-#            brakes, R back to the runway (vehicle_swap.gd).
+#            brakes, R back to the runway (vehicle_swap.gd). On the ground
+#            only A / D steer (the nose wheel), and the camera follows the
+#            plane's heading.
 #
 # Take-off: throttle up, and past take-off speed aim (or pull) the nose up.
 # Landing: throttle down and fly it onto the runway; below take-off speed on
@@ -36,6 +39,10 @@ enum ControlMode { ARCADE, MANUAL }
 @export var turn_rate := 100.0 # deg/s the nose turns at, at most
 @export var roll_rate := 220.0 # deg/s
 @export var max_bank := 65.0 # deg the plane banks into a turn
+# Weight. 1: climbs bleed speed and dives build it, and below take-off speed
+# the wing carries less -- the plane sinks and its nose falls until it has
+# speed again (no stall, no spin). 0: floaty, gravity cancelled outright.
+@export_range(0.0, 1.0) var gravity_feel := 1.0
 
 # For the chase camera (vehicle_chase_camera.gd).
 var camera_distance := 16.0
@@ -44,6 +51,8 @@ var camera_free_aim := true
 # The camera rests above the plane looking down this much (rad), where the
 # aim is level -- so you see the plane, and the runway, from above.
 var camera_pitch := deg_to_rad(12.0)
+# Arcade A / D: how fast the camera's heading (the aim) swings, rad/s.
+var camera_yaw_rate := 0.0
 
 # Only the active vehicle reads input (vehicle_swap.gd).
 var active := false
@@ -53,7 +62,7 @@ var aim_override := Vector3.ZERO
 
 const RESPONSE := 8.0 # how quickly the rotation follows what's asked, 1/s
 const VELOCITY_GRIP := 5.0 # how quickly the velocity swings onto the nose, 1/s
-const CLIMB_COST := 15.0 # m/s slower pointing straight up (faster straight down)
+const MAX_DIVE_SPEED := 1.5 # x max_speed
 const BRAKE := 12.0
 const STEER := 0.5 # rad, nose wheel
 
@@ -117,38 +126,65 @@ func _physics_process(delta: float) -> void:
 	for w in _wheels:
 		on_ground = on_ground or w.is_in_contact()
 	var forward_speed := linear_velocity.dot(forward)
-	# (Off the ground but slow is a spawn or reset settling onto its wheels,
-	# not flight.)
-	var flying := forward_speed >= takeoff_speed or (not on_ground and forward_speed > takeoff_speed * 0.5)
+	# (Off the ground but nearly still is a spawn or reset settling onto its
+	# wheels, not flight.)
+	var flying := forward_speed >= takeoff_speed or (not on_ground and linear_velocity.length() > 3.0)
+	var g := get_gravity()
 
-	# Speed along the nose: toward the throttle's, a bit slower climbing and
-	# faster diving -- and in the air, never below take-off speed.
-	_speed = move_toward(forward_speed, throttle * max_speed - forward.y * CLIMB_COST, acceleration * delta)
-	if flying and not on_ground:
-		_speed = maxf(_speed, takeoff_speed)
+	# How much the wing carries: all of it from take-off speed up, less below.
+	var lift := clampf(forward_speed / takeoff_speed, 0.0, 1.0)
+	lift = lerpf(1.0, lift * lift, gravity_feel)
+	# Speed: the engine pulls it toward the throttle's, harder the further
+	# off it is, and gravity along the nose takes it away climbing and adds it
+	# diving (the part of gravity the wing doesn't carry acts on its own).
+	var speed := linear_velocity.length() if flying else forward_speed
+	var pull := (throttle * max_speed - speed) * acceleration / max_speed * 2.0
+	var slope := g.dot(forward) * gravity_feel * lift if flying else 0.0
+	_speed = clampf(speed + (pull + slope) * delta, 0.0, max_speed * MAX_DIVE_SPEED)
 
 	# The rotation asked for, in world space. Q / E roll at the full rate,
 	# and while they're held the arcade aim doesn't bank (it would fight them).
 	var roll_keys := _axis(KEY_Q, KEY_E) if active else 0.0
 	var want := _manual_turn(b) if control_mode == ControlMode.MANUAL else _aim_turn(b, roll_keys == 0.0)
+	camera_yaw_rate = 0.0
 	if active:
 		want += forward * roll_keys * deg_to_rad(roll_rate)
-		want -= b.y * _axis(KEY_A, KEY_D) * deg_to_rad(turn_rate) * 0.5
+		var turn_keys := _axis(KEY_A, KEY_D) # + = right
+		if not flying:
+			pass # steering, below
+		elif control_mode == ControlMode.ARCADE:
+			# Turn the aim; the plane follows it round.
+			camera_yaw_rate = -turn_keys * deg_to_rad(turn_rate) * 0.6
+		else:
+			want -= b.y * turn_keys * deg_to_rad(turn_rate) * 0.5
 	_asked = b.inverse() * want
+	# The camera follows the heading on the ground (and always in manual);
+	# in the air in arcade mode it's the aim, so it stays where it's put.
+	camera_follow_heading = control_mode == ControlMode.MANUAL or not flying
 
 	if flying:
-		# The velocity follows the nose, and the wing holds the plane up.
-		linear_velocity = linear_velocity.lerp(forward * _speed, clampf(VELOCITY_GRIP * delta, 0.0, 1.0))
-		apply_central_force(-get_gravity() * mass)
+		# The velocity swings onto the nose -- less so when slow, so it mushes
+		# -- at the new speed, and the wing holds up as much of the weight as
+		# it carries.
+		var heading := linear_velocity.normalized() if linear_velocity.length() > 0.5 else forward
+		heading = heading.slerp(forward, clampf(VELOCITY_GRIP * lift * delta, 0.0, 1.0)).normalized()
+		linear_velocity = heading * _speed
+		apply_central_force(-g * mass * lift)
+		# Slow, the nose falls toward where the plane is actually going.
+		var v := linear_velocity
+		if v.length() > 1.0 and lift < 1.0:
+			want += forward.cross(v.normalized()) * (1.0 - lift) * 3.0
 		angular_velocity = angular_velocity.lerp(want, clampf(RESPONSE * delta, 0.0, 1.0))
 	else:
 		# On the runway the wheels carry it: the prop pulls it along and the
 		# yaw steers the nose wheel.
-		apply_central_force(forward * (_speed - forward_speed) / delta * mass * 0.5)
-		steering = clampf(_asked.y / deg_to_rad(turn_rate), -1.0, 1.0) * STEER
-		# Left/right on the ground is steering, not banking: ailerons stay
-		# neutral (the rudder and nose wheel turn; the elevator still shows a
-		# pull for take-off).
+		apply_central_force(forward * (_speed - forward_speed) / delta * mass)
+		# Only A / D steer on the ground -- not the camera. The rudder turns
+		# with the nose wheel; the ailerons stay still; the elevator still
+		# shows a pull for take-off.
+		var steer_keys := _axis(KEY_A, KEY_D) if active else 0.0 # + = right
+		steering = -steer_keys * STEER
+		_asked.y = -steer_keys * deg_to_rad(turn_rate)
 		_asked.z = 0.0
 
 
