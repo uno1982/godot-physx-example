@@ -1,17 +1,20 @@
 extends Node3D
-# Root script for vehicle_demo.tscn: five vehicles -- stock VehicleBody3D car,
+# Root script for vehicle_demo.tscn: six vehicles -- stock VehicleBody3D car,
 # PhysXVehicle3D car, stock VehicleBody3D motorcycle, PhysXMotorcycle3D
-# motorcycle, PhysXTank3D -- all sit on the same track so they're directly
-# comparable, and one control set + camera cycles between them with a single
-# key.
+# motorcycle, PhysXTank3D, and a stock VehicleBody3D prop plane on its own
+# runway -- with one control set + camera cycling between them on a single
+# key. The plane has a ring course to fly through.
 #
-#   Tab   cycle control/camera focus between the five vehicles
+#   Tab   cycle control/camera focus between the vehicles
+#   R     (plane) back to the runway, rings reset
 
 @export var godot_car_path: NodePath
 @export var physx_car_path: NodePath
 @export var godot_motorcycle_path: NodePath
 @export var physx_motorcycle_path: NodePath
 @export var physx_tank_path: NodePath
+@export var plane_path: NodePath
+@export var plane_stats_path: NodePath
 @export var camera_path: NodePath
 @export var hud_label_path: NodePath
 @export var wall_path: NodePath
@@ -35,10 +38,20 @@ const HINT_PHYSX_CAR := "Driving: PhysX PhysXVehicle3D car  |  W/S throttle-brak
 const HINT_GODOT_MOTO := "Driving: Godot VehicleBody3D motorcycle (stock, script-side lean balance)  |  W/S throttle-reverse, A/D steer+lean, Space brake, Tab cycle vehicle"
 const HINT_PHYSX_MOTO := "Driving: PhysX PhysXMotorcycle3D  |  W/S throttle-brake, A/D steer+lean, Space brake, Tab cycle vehicle"
 const HINT_PHYSX_TANK := "Driving: PhysX PhysXTank3D  |  W/S drive, A/D pivot (skid-steer), Space brake, Left click fire, Tab cycle vehicle"
+const HINT_PLANE := "Flying: Godot VehicleBody3D prop plane (stock)  |  W/S throttle, Up/Down pitch (Down = nose up), Left/Right roll, A/D rudder + nose wheel, Space brake, R runway, Tab cycle vehicle"
+
+var _plane: Node3D
+var _plane_stats: Label
 
 func _ready() -> void:
 	_vehicles = [get_node(godot_car_path), get_node(physx_car_path), get_node(godot_motorcycle_path), get_node(physx_motorcycle_path), get_node(physx_tank_path)]
 	_hints = [HINT_GODOT_CAR, HINT_PHYSX_CAR, HINT_GODOT_MOTO, HINT_PHYSX_MOTO, HINT_PHYSX_TANK]
+	if not plane_path.is_empty():
+		_plane = get_node(plane_path)
+		_vehicles.append(_plane)
+		_hints.append(HINT_PLANE)
+	if not plane_stats_path.is_empty():
+		_plane_stats = get_node(plane_stats_path)
 	_camera = get_node(camera_path)
 	_hud_label = get_node(hud_label_path)
 	_apply_active()
@@ -70,6 +83,25 @@ func _unhandled_input(event: InputEvent) -> void:
 			_apply_active()
 		elif event.keycode == KEY_P:
 			_capture_impact_screenshot()
+		elif event.keycode == KEY_R and _plane and _vehicles[_active_index] == _plane:
+			_plane.reset_to_runway()
+			for ring in get_tree().get_nodes_in_group("flight_rings"):
+				ring.reset()
+
+
+func _process(_delta: float) -> void:
+	if not _plane_stats:
+		return
+	var flying := _plane and _vehicles[_active_index] == _plane
+	_plane_stats.visible = flying
+	if flying:
+		var rings := get_tree().get_nodes_in_group("flight_rings")
+		var passed := 0
+		for ring in rings:
+			passed += 1 if ring.is_passed else 0
+		_plane_stats.text = "airspeed %3.0f km/h   altitude %4.0f m   throttle %3.0f%%   rings %d / %d%s" % [
+			_plane.airspeed() * 3.6, _plane.global_position.y, _plane.throttle * 100.0, passed, rings.size(),
+			"   STALL" if _plane.is_stalling() else ""]
 
 func _apply_active() -> void:
 	for i in _vehicles.size():

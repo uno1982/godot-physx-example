@@ -11,6 +11,8 @@
 [ext_resource type="Script" uid="uid://day646v48a3u7" path="res://demo/common/physx_tank_rig.gd" id="7_physx_tank_rig"]
 [ext_resource type="ArrayMesh" uid="uid://b5newvi7ftphg" path="res://demo/common/meshes/tankbody_Cube_001.res" id="8_61xs6"]
 [ext_resource type="Script" uid="uid://b7jvhjbn005v5" path="res://demo/common/tank_turret_rig.gd" id="9_tank_turret_rig"]
+[ext_resource type="PackedScene" path="res://demo/common/plane.tscn" id="10_plane"]
+[ext_resource type="PackedScene" path="res://demo/common/flight_ring.tscn" id="11_ring"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -156,6 +158,33 @@ bottom_radius = 0.35
 height = 0.24
 radial_segments = 16
 
+[sub_resource type="StandardMaterial3D" id="Mat_runway"]
+albedo_color = Color(0.14, 0.14, 0.15, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="Mesh_runway"]
+material = SubResource("Mat_runway")
+size = Vector3(170, 0.04, 14)
+
+[sub_resource type="StandardMaterial3D" id="Mat_runway_line"]
+albedo_color = Color(0.9, 0.9, 0.85, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="Mesh_runway_line"]
+material = SubResource("Mat_runway_line")
+size = Vector3(6, 0.02, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_countryside"]
+albedo_color = Color(0.22, 0.3, 0.2, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="Mesh_countryside"]
+material = SubResource("Mat_countryside")
+size = Vector2(3000, 3000)
+
+[sub_resource type="BoxShape3D" id="Shape_countryside"]
+size = Vector3(3000, 1, 3000)
+
 [node name="VehicleDemo" type="Node3D" unique_id=767780711]
 script = ExtResource("4_swap")
 godot_car_path = NodePath("Car")
@@ -163,6 +192,8 @@ physx_car_path = NodePath("PhysXCar")
 godot_motorcycle_path = NodePath("Motorcycle")
 physx_motorcycle_path = NodePath("PhysXMotorcycle")
 physx_tank_path = NodePath("PhysXTank")
+plane_path = NodePath("Plane")
+plane_stats_path = NodePath("HUD/PlaneStats")
 camera_path = NodePath("ChaseCamera")
 hud_label_path = NodePath("HUD/Hint")
 wall_path = NodePath("Wall")
@@ -651,3 +682,107 @@ offset_top = 16.0
 offset_right = 500.0
 offset_bottom = 46.0
 text = "Driving: Godot VehicleBody3D (stock)  |  W/S throttle-reverse, A/D steer, Space brake, Tab swap car, Mouse look (Esc to release)"
+
+[node name="Airfield" type="Node3D" parent="."]
+
+[node name="Countryside" type="StaticBody3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.52, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Airfield/Countryside"]
+shape = SubResource("Shape_countryside")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Airfield/Countryside"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("Mesh_countryside")
+
+[node name="Runway" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -80)
+mesh = SubResource("Mesh_runway")
+
+[node name="Line1" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line2" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line3" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -51, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line4" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line5" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line6" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line7" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line8" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line9" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line10" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line11" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line12" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Line13" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69, 0.05, -80)
+mesh = SubResource("Mesh_runway_line")
+
+[node name="Plane" parent="." instance=ExtResource("10_plane")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -78, 0.2, -80)
+
+[node name="Rings" type="Node3D" parent="."]
+
+[node name="Ring1" parent="Rings" groups=["flight_rings"] instance=ExtResource("11_ring")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 150, 25, -100)
+
+[node name="Ring2" parent="Rings" groups=["flight_rings"] instance=ExtResource("11_ring")]
+transform = Transform3D(0.571064, 0, 0.820905, 0, 1, 0, -0.820905, 0, 0.571064, 312.635, 40, -53.1371)
+
+[node name="Ring3" parent="Rings" groups=["flight_rings"] instance=ExtResource("11_ring")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 380, 55, 60)
+
+[node name="Ring4" parent="Rings" groups=["flight_rings"] instance=ExtResource("11_ring")]
+transform = Transform3D(0.571064, 0, -0.820905, 0, 1, 0, 0.820905, 0, 0.571064, 312.635, 65, 173.137)
+
+[node name="Ring5" parent="Rings" groups=["flight_rings"] instance=ExtResource("11_ring")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 150, 60, 220)
+
+[node name="Ring6" parent="Rings" groups=["flight_rings"] instance=ExtResource("11_ring")]
+transform = Transform3D(-0.571064, 0, -0.820905, 0, 1, 0, 0.820905, 0, -0.571064, -12.6346, 50, 173.137)
+
+[node name="Ring7" parent="Rings" groups=["flight_rings"] instance=ExtResource("11_ring")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -80, 40, 60)
+
+[node name="Ring8" parent="Rings" groups=["flight_rings"] instance=ExtResource("11_ring")]
+transform = Transform3D(-0.571064, 0, 0.820905, 0, 1, 0, -0.820905, 0, -0.571064, -12.6346, 30, -53.1371)
+
+[node name="PlaneStats" type="Label" parent="HUD"]
+visible = false
+offset_left = 16.0
+offset_top = 46.0
+offset_right = 900.0
+offset_bottom = 76.0
