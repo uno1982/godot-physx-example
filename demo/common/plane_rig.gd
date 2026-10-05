@@ -7,9 +7,8 @@ extends VehicleBody3D
 # and Jolt.
 #
 # Two control modes, C to switch:
-#   Arcade   the plane turns toward where the camera looks, and the mouse's
-#            up/down works like a flight stick: move it down and the camera
-#            looks down while the plane pulls up (and the reverse);
+#   Arcade   the plane flies toward where the camera looks (the camera rests
+#            a little above it, looking down, where the plane flies level);
 #            Q / E roll in place for as long as they're held (barrel rolls;
 #            it levels again on release); A / D rudder (a flat yaw -- the
 #            aim swings with the nose).
@@ -210,10 +209,9 @@ func _aim_turn(b: Basis, bank_into_turns: bool) -> Vector3:
 		var cam := get_viewport().get_camera_3d()
 		if not cam:
 			return Vector3.ZERO
-		# Heading from the camera; elevation mirrored about its resting angle,
-		# like a stick: the camera looking further down aims further up.
+		# Where the camera looks, lifted by its resting look-down angle.
 		var look := -cam.global_basis.z
-		var elevation := -(asin(clampf(look.y, -1.0, 1.0)) + camera_pitch)
+		var elevation := asin(clampf(look.y, -1.0, 1.0)) + camera_pitch
 		var heading := atan2(look.x, look.z)
 		aim = Vector3(sin(heading) * cos(elevation), sin(elevation), cos(heading) * cos(elevation))
 	aim = aim.normalized()
