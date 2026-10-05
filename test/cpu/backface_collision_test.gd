@@ -16,6 +16,12 @@ var _drop: Array[RigidBody3D] = [] # dropped from above
 var _sunk: Array[RigidBody3D] = [] # starts just under the face, falls
 var _climb: Array[CharacterBody3D] = [] # moves up from below
 var _results := {}
+# Jumping up through a one-way (one-sided) platform at y = 3 over a ground at
+# y = 0: [weak jump -- center rises past the platform, feet don't; full jump].
+var _jumpers: Array[CharacterBody3D] = []
+var _jump_max: Array[float] = [-100.0, -100.0]
+const JUMP_SPEEDS := [8.5, 11.0]
+const JUMP_GRAVITY := 18.0
 var _face_index := -2
 
 # What a back face does on Jolt: it only counts with backface_collision on,
@@ -38,6 +44,9 @@ const EXPECTED := {
 	"rigid ball up from below stopped     [on]": true,
 	"rigid ball dropped on front stopped  [on]": true,
 	"character up from below stopped      [on]": true,
+	"weak jump through one-way falls back     ": true,
+	"full jump through one-way lands on top   ": true,
+	"full jump through one-way isn't snapped  ": true,
 }
 # PhysX overlap queries are two-sided: a shape just behind a one-sided mesh
 # still reports it there (Jolt doesn't). Printed, not checked.
@@ -79,6 +88,38 @@ func _initialize() -> void:
 		ch.position = Vector3(x, -1.5, 3)
 		root.add_child(ch)
 		_climb.append(ch)
+
+	# One-way platform over a ground, for the jumps.
+	var jx := 2 * SPACING
+	var ground := StaticBody3D.new()
+	var gcs := CollisionShape3D.new()
+	var gbox := BoxShape3D.new()
+	gbox.size = Vector3(10, 1, 10)
+	gcs.shape = gbox
+	ground.add_child(gcs)
+	ground.position = Vector3(jx, -0.5, 0)
+	root.add_child(ground)
+	var oneway := StaticBody3D.new()
+	var ocs := CollisionShape3D.new()
+	var oshape := ConcavePolygonShape3D.new()
+	var oplane := PlaneMesh.new()
+	oplane.size = Vector2(10, 10)
+	oshape.set_faces(oplane.get_faces())
+	ocs.shape = oshape
+	oneway.add_child(ocs)
+	oneway.position = Vector3(jx, 3, 0)
+	root.add_child(oneway)
+	for k in 2:
+		var j := CharacterBody3D.new()
+		var jcs := CollisionShape3D.new()
+		var jcap := CapsuleShape3D.new()
+		jcap.radius = 0.35
+		jcap.height = 1.8
+		jcs.shape = jcap
+		j.add_child(jcs)
+		j.position = Vector3(jx - 2 + k * 4, 0.95, 0)
+		root.add_child(j)
+		_jumpers.append(j)
 
 
 func _ball(root: Node, pos: Vector3, gravity: float) -> RigidBody3D:
@@ -134,6 +175,17 @@ func _physics_process(delta: float) -> bool:
 	for ch in _climb:
 		ch.velocity = Vector3(0, 4, 0)
 		ch.move_and_slide()
+	for k in 2:
+		var j := _jumpers[k]
+		if _tick == 10:
+			j.velocity.y = JUMP_SPEEDS[k]
+		elif j.is_on_floor():
+			j.velocity.y = -0.1
+		else:
+			j.velocity.y -= JUMP_GRAVITY * delta
+		j.move_and_slide()
+		if _tick > 10:
+			_jump_max[k] = maxf(_jump_max[k], j.position.y)
 
 	if _tick == 2:
 		for i in 2:
@@ -146,6 +198,13 @@ func _physics_process(delta: float) -> bool:
 			_results["rigid ball dropped on front stopped  [%s]" % tag] = _drop[i].position.y > 0.0
 			_results["ball starting under face held/pushed [%s]" % tag] = _sunk[i].position.y > -0.5
 			_results["character up from below stopped      [%s]" % tag] = _climb[i].position.y < 0.0
+		# Weak jump: the center pokes above the platform, the feet never do --
+		# back on the ground. Full jump: through the platform without being
+		# pushed onto it mid-jump (it rises past the standing height), then
+		# lands on top.
+		_results["weak jump through one-way falls back     "] = _jumpers[0].position.y < 1.5
+		_results["full jump through one-way lands on top   "] = absf(_jumpers[1].position.y - 3.9) < 0.1
+		_results["full jump through one-way isn't snapped  "] = _jump_max[1] > 4.1
 		for k in _results.keys():
 			var note := ""
 			if EXPECTED.has(k) and EXPECTED[k] != _results[k]:
