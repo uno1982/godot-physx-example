@@ -1,0 +1,152 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/editor/cpu/back_faces.gd" id="1_script"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_top_color = Color(0.35, 0.5, 0.72, 1)
+sky_horizon_color = Color(0.72, 0.77, 0.83, 1)
+ground_horizon_color = Color(0.72, 0.77, 0.83, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.56, 0.58, 0.62, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_oneway"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.35, 0.8, 0.9, 0.55)
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_solid"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.95, 0.55, 0.25, 0.7)
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_pad"]
+albedo_color = Color(0.3, 1, 0.5, 1)
+emission_enabled = true
+emission = Color(0.2, 0.9, 0.4, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="BoxShape3D" id="Shape_floor"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxMesh" id="Mesh_floor"]
+material = SubResource("Mat_floor")
+size = Vector3(40, 1, 40)
+
+[sub_resource type="CapsuleShape3D" id="Shape_player"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="ConcavePolygonShape3D" id="Shape_oneway"]
+data = PackedVector3Array(2, 0, 2, -2, 0, 2, 2, 0, -2, -2, 0, 2, -2, 0, -2, 2, 0, -2)
+
+[sub_resource type="ConcavePolygonShape3D" id="Shape_solid"]
+data = PackedVector3Array(2, 0, 2, -2, 0, 2, 2, 0, -2, -2, 0, 2, -2, 0, -2, 2, 0, -2)
+backface_collision = true
+
+[sub_resource type="PlaneMesh" id="Mesh_oneway"]
+material = SubResource("Mat_oneway")
+size = Vector2(4, 4)
+
+[sub_resource type="PlaneMesh" id="Mesh_solid"]
+material = SubResource("Mat_solid")
+size = Vector2(4, 4)
+
+[sub_resource type="CylinderMesh" id="Mesh_pad"]
+material = SubResource("Mat_pad")
+top_radius = 0.9
+bottom_radius = 0.9
+height = 0.1
+
+[node name="BackFaces" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 8, 0)
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("Shape_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("Mesh_floor")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("Shape_player")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+current = true
+
+[node name="OneWay" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="OneWay"]
+shape = SubResource("Shape_oneway")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="OneWay"]
+mesh = SubResource("Mesh_oneway")
+
+[node name="Pad" type="MeshInstance3D" parent="OneWay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.95, 0)
+mesh = SubResource("Mesh_pad")
+
+[node name="Label" type="Label3D" parent="OneWay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+pixel_size = 0.01
+billboard = 1
+text = "One-way
+backface_collision off"
+font_size = 48
+outline_size = 12
+
+[node name="Solid" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 3, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Solid"]
+shape = SubResource("Shape_solid")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Solid"]
+mesh = SubResource("Mesh_solid")
+
+[node name="Pad" type="MeshInstance3D" parent="Solid"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.95, 0)
+mesh = SubResource("Mesh_pad")
+
+[node name="Label" type="Label3D" parent="Solid"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+pixel_size = 0.01
+billboard = 1
+text = "Solid
+backface_collision on"
+font_size = 48
+outline_size = 12
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 900.0
+offset_bottom = 70.0

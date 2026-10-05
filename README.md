@@ -46,6 +46,7 @@ viewport gizmo and inspector, then press Play.
 | `cpu/heightmap.tscn` | Stock `HeightMapShape3D` terrain — a `@tool` script generates the collision and the matching visible mesh from noise, so selecting `Terrain/CollisionShape3D` shows the real height-field gizmo in the editor; the exported noise params rebuild it live. Play to walk the terrain (`WASD`, `SPACE` jump) and `B` rolls a row of balls down a slope. |
 | `cpu/shape_scale.tscn` | Walk a capsule character over collision shapes with non-uniform node scale baked into the geometry — stretched box platforms, a chamfered-box convex ramp, a trimesh hump, a scaled sphere dome and a scaled height-field mound. Select a piece and stretch its transform in the inspector, then press Play. |
 | `cpu/body_features.tscn` | Rigid-body settings you set in the Inspector, one station each: a carousel and an elevator built from `MovingPlatform` (an `AnimatableBody3D` with spin / travel / period, `demo/common/moving_platform.gd`) that the character and loose crates ride; crates that float on a **constant force** equal to their weight and a pinwheel turned by **constant torque**; two flywheels, one with 5x **inertia** (`F` kicks both); and two roly-poly toys, the green one with a low **custom center of mass** that rights itself (`G` knocks them over). Walk with `WASD`. Runs on PhysX and Jolt alike. |
+| `cpu/back_faces.tscn` | `ConcavePolygonShape3D.backface_collision`: two identical floating trimesh platforms, one one-sided (off) and one solid (on). Step on a glowing pad to be launched up -- you pass through the one-way platform and land on top, and bump your head on the solid one; `F` fires balls up from underneath both. Select a platform's `CollisionShape3D` to see the setting. |
 
 ### `demo/cpu/`
 
@@ -89,7 +90,8 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   connected and never NaN), `body_parity_test` (constant force/torque,
   custom inertia and center of mass, direct-state torque/force/mass queries,
   axis velocity, a character riding a spinning platform -- the same numbers
-  as on Jolt).
+  as on Jolt), `backface_collision_test` (a one-sided trimesh met from behind
+  by rays, shape casts, bodies and a character, back faces off and on).
   `physics_bench.gd` is a step-time benchmark across body counts (run once per
   engine, flipping `physics/3d/physics_engine`). `heightmap_runtime_probe.tscn`
   is a **windowed** run (not `--script`) — the GPU boundary crash only faults
