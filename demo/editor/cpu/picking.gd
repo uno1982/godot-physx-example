@@ -71,10 +71,14 @@ func _on_input_event(_camera: Node, event: InputEvent, pos: Vector3, _normal: Ve
 		if co is RigidBody3D:
 			co.apply_impulse(Vector3(0, KICK, -KICK * 0.5), pos - co.global_position)
 		else:
-			# Spin the clicked mesh a little so the click is visible.
+			# Flash it white. (Not a turn: turning only the mesh would leave the
+			# collision shape where it was, still taking the mouse.)
 			var mesh := _mesh_of(co)
 			if mesh:
-				create_tween().tween_property(mesh, "rotation:y", mesh.rotation.y + PI * 0.5, 0.25)
+				var mat := mesh.material_override as StandardMaterial3D
+				var color := mat.albedo_color
+				mat.albedo_color = Color(1, 1, 1, maxf(color.a, 0.8))
+				create_tween().tween_property(mat, "albedo_color", color, 0.4)
 
 
 func _physics_process(delta: float) -> void:
