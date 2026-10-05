@@ -144,12 +144,12 @@ func spawn_ragdoll(origin: Vector3, xf: Basis = Basis(), velocity: Vector3 = Vec
 	_cone(parts.torso, parts.head, at.call(Vector3(0, 1.95, 0)), 40, 30)
 	_cone(parts.pelvis, parts.l_thigh, at.call(Vector3(-0.16, 0.95, 0)), 50, 20)
 	_cone(parts.pelvis, parts.r_thigh, at.call(Vector3(0.16, 0.95, 0)), 50, 20)
-	_knee(parts.l_thigh, parts.l_shin, at.call(Vector3(-0.16, 0.45, 0)))
-	_knee(parts.r_thigh, parts.r_shin, at.call(Vector3(0.16, 0.45, 0)))
+	_hinge(parts.l_thigh, parts.l_shin, at.call(Vector3(-0.16, 0.45, 0)), xf, false)
+	_hinge(parts.r_thigh, parts.r_shin, at.call(Vector3(0.16, 0.45, 0)), xf, false)
 	_cone(parts.torso, parts.l_uarm, at.call(Vector3(-0.30, 1.84, 0)), 80, 40)
 	_cone(parts.torso, parts.r_uarm, at.call(Vector3(0.30, 1.84, 0)), 80, 40)
-	_knee(parts.l_uarm, parts.l_farm, at.call(Vector3(-0.34, 1.40, 0)))
-	_knee(parts.r_uarm, parts.r_farm, at.call(Vector3(0.34, 1.40, 0)))
+	_hinge(parts.l_uarm, parts.l_farm, at.call(Vector3(-0.34, 1.40, 0)), xf, true)
+	_hinge(parts.r_uarm, parts.r_farm, at.call(Vector3(0.34, 1.40, 0)), xf, true)
 	return parts.values()
 
 func _rd_box(pos: Vector3, size: Vector3, mass: float) -> RigidBody3D:
@@ -219,12 +219,17 @@ func _cone(a: RigidBody3D, b: RigidBody3D, at: Vector3, swing_deg: float, twist_
 	j.set_param(ConeTwistJoint3D.PARAM_SWING_SPAN, deg_to_rad(swing_deg))
 	j.set_param(ConeTwistJoint3D.PARAM_TWIST_SPAN, deg_to_rad(twist_deg))
 
-func _knee(a: RigidBody3D, b: RigidBody3D, at: Vector3) -> void:
+# A knee or an elbow: a hinge across the body (a HingeJoint3D turns about its
+# local Z, so it's turned to lie along the body's X), bending one way only --
+# a knee takes the foot back, an elbow the hand forward (the body faces -Z).
+# Godot's hinge angle runs clockwise about the axis, so back is positive.
+func _hinge(a: RigidBody3D, b: RigidBody3D, at: Vector3, xf: Basis, bend_forward: bool) -> void:
 	var j := HingeJoint3D.new()
 	j.position = at
+	j.basis = xf * Basis(Vector3.UP, PI / 2.0)
 	spawn_parent.add_child(j)
 	j.node_a = j.get_path_to(a)
 	j.node_b = j.get_path_to(b)
 	j.set_flag(HingeJoint3D.FLAG_USE_LIMIT, true)
-	j.set_param(HingeJoint3D.PARAM_LIMIT_LOWER, deg_to_rad(-120))
-	j.set_param(HingeJoint3D.PARAM_LIMIT_UPPER, deg_to_rad(0))
+	j.set_param(HingeJoint3D.PARAM_LIMIT_LOWER, deg_to_rad(-120.0 if bend_forward else 0.0))
+	j.set_param(HingeJoint3D.PARAM_LIMIT_UPPER, deg_to_rad(0.0 if bend_forward else 120.0))
