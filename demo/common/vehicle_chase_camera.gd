@@ -81,10 +81,17 @@ func _process(delta: float) -> void:
 	var target_pos := _target.global_position + Vector3(0, height, 0)
 	global_position = global_position.lerp(target_pos, clampf(follow_speed * delta, 0.0, 1.0))
 	_since_mouse_look += delta
-	# A target can turn the camera itself (the plane's arcade A / D).
+	# A target can turn the camera itself (the plane's arcade A / D), or ask
+	# it to swing in behind (the plane at lift-off).
 	var yaw_rate = _target.get("camera_yaw_rate")
 	if yaw_rate != null:
 		yaw += yaw_rate * delta
+	if _target.get("camera_recenter") == true:
+		_target.set("camera_recenter", false)
+		var fwd := _target.global_basis.z
+		yaw = atan2(fwd.x, fwd.z)
+		var look_down = _target.get("camera_pitch")
+		pitch = look_down if look_down != null else pitch
 	if _target.get("camera_follow_heading") and _since_mouse_look > heading_follow_delay:
 		# yaw 0 sits behind a target facing +Z (the arm extends to its rear).
 		var fwd := _target.global_basis.z

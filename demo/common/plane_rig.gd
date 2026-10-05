@@ -11,14 +11,15 @@ extends VehicleBody3D
 #            up/down works like a flight stick: move it down and the camera
 #            looks down while the plane pulls up (and the reverse);
 #            Q / E roll in place for as long as they're held (barrel rolls;
-#            it levels again on release); A / D turn left / right (they
-#            swing the aim, so the plane banks round after it).
+#            it levels again on release); A / D rudder (a flat yaw -- the
+#            aim swings with the nose).
 #   Manual   Up / Down pitch (Down = nose up), Left / Right roll (Q / E too),
 #            A / D yaw; the camera is free.
 #   Both     W / S throttle (it stays where you leave it), Space wheel
 #            brakes, R back to the runway (vehicle_swap.gd). On the ground
-#            only A / D steer (the nose wheel), and the camera follows the
-#            plane's heading.
+#            only A / D steer (rudder and nose wheel); in arcade mode the
+#            camera is a free look there, and swings in behind the plane at
+#            lift-off.
 #
 # Take-off: throttle up, and past take-off speed aim (or pull) the nose up.
 # Landing: throttle down and fly it onto the runway; below take-off speed on
@@ -53,6 +54,9 @@ var camera_free_aim := true
 var camera_pitch := deg_to_rad(12.0)
 # Arcade A / D: how fast the camera's heading (the aim) swings, rad/s.
 var camera_yaw_rate := 0.0
+# Set for one frame at lift-off: the camera swings in behind the plane.
+var camera_recenter := false
+var _was_flying := false
 
 # Only the active vehicle reads input (vehicle_swap.gd).
 var active := false
@@ -150,17 +154,21 @@ func _physics_process(delta: float) -> void:
 	if active:
 		want += forward * roll_keys * deg_to_rad(roll_rate)
 		var turn_keys := _axis(KEY_A, KEY_D) # + = right
-		if not flying:
-			pass # steering, below
-		elif control_mode == ControlMode.ARCADE:
-			# Turn the aim; the plane follows it round.
-			camera_yaw_rate = -turn_keys * deg_to_rad(turn_rate) * 0.6
-		else:
-			want -= b.y * turn_keys * deg_to_rad(turn_rate) * 0.5
+		if flying:
+			# Rudder: yaw the nose. In arcade the aim swings with it, so the
+			# aim doesn't pull it back.
+			var yaw_rate := turn_keys * deg_to_rad(turn_rate) * 0.6
+			want -= b.y * yaw_rate
+			if control_mode == ControlMode.ARCADE:
+				camera_yaw_rate = -yaw_rate
 	_asked = b.inverse() * want
-	# The camera follows the heading on the ground (and always in manual);
-	# in the air in arcade mode it's the aim, so it stays where it's put.
-	camera_follow_heading = control_mode == ControlMode.MANUAL or not flying
+	# Manual: the camera follows the heading. Arcade: on the ground it's a
+	# free look, in the air the aim -- so at lift-off it swings in behind the
+	# plane, or the plane would turn toward wherever you were looking.
+	camera_follow_heading = control_mode == ControlMode.MANUAL
+	if flying and not _was_flying and not on_ground and control_mode == ControlMode.ARCADE:
+		camera_recenter = true
+	_was_flying = flying and not on_ground
 
 	if flying:
 		# The velocity swings onto the nose -- less so when slow, so it mushes
