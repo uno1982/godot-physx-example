@@ -1,0 +1,128 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/editor/cpu/ragdoll.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://demo/common/mannequin/mannequin_ragdoll.tscn" id="2_ragdoll"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_top_color = Color(0.35, 0.5, 0.72, 1)
+sky_horizon_color = Color(0.72, 0.77, 0.83, 1)
+ground_horizon_color = Color(0.72, 0.77, 0.83, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.56, 0.58, 0.62, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_step"]
+albedo_color = Color(0.42, 0.46, 0.55, 1)
+roughness = 0.85
+
+[sub_resource type="BoxShape3D" id="Shape_floor"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxMesh" id="Mesh_floor"]
+material = SubResource("Mat_floor")
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxShape3D" id="Shape_top"]
+size = Vector3(5, 1.5, 1.5)
+
+[sub_resource type="BoxMesh" id="Mesh_top"]
+material = SubResource("Mat_step")
+size = Vector3(5, 1.5, 1.5)
+
+[sub_resource type="BoxShape3D" id="Shape_middle"]
+size = Vector3(5, 1.0, 1.5)
+
+[sub_resource type="BoxMesh" id="Mesh_middle"]
+material = SubResource("Mat_step")
+size = Vector3(5, 1.0, 1.5)
+
+[sub_resource type="BoxShape3D" id="Shape_bottom"]
+size = Vector3(5, 0.5, 1.5)
+
+[sub_resource type="BoxMesh" id="Mesh_bottom"]
+material = SubResource("Mat_step")
+size = Vector3(5, 0.5, 1.5)
+
+[node name="Ragdoll" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 8, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.94, 0.342, 0, -0.342, 0.94, 0, 2.6, 4.8)
+current = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("Shape_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("Mesh_floor")
+
+[node name="Steps" type="StaticBody3D" parent="."]
+
+[node name="Top" type="CollisionShape3D" parent="Steps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -7.25)
+shape = SubResource("Shape_top")
+
+[node name="TopMesh" type="MeshInstance3D" parent="Steps/Top"]
+mesh = SubResource("Mesh_top")
+
+[node name="Middle" type="CollisionShape3D" parent="Steps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -5.75)
+shape = SubResource("Shape_middle")
+
+[node name="MiddleMesh" type="MeshInstance3D" parent="Steps/Middle"]
+mesh = SubResource("Mesh_middle")
+
+[node name="Bottom" type="CollisionShape3D" parent="Steps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, -4.25)
+shape = SubResource("Shape_bottom")
+
+[node name="BottomMesh" type="MeshInstance3D" parent="Steps/Bottom"]
+mesh = SubResource("Mesh_bottom")
+
+[node name="Idle" parent="." groups=["ragdolls"] instance=ExtResource("2_ragdoll")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0, 0)
+start_limp = false
+animation = "Idle"
+
+[node name="Walking" parent="." groups=["ragdolls"] instance=ExtResource("2_ragdoll")]
+start_limp = false
+animation = "Walk"
+
+[node name="Dancing" parent="." groups=["ragdolls"] instance=ExtResource("2_ragdoll")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0, 0)
+start_limp = false
+animation = "Dance"
+
+[node name="Dropped" type="Node3D" parent="."]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 900.0
+offset_bottom = 110.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
