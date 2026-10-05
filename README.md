@@ -48,6 +48,7 @@ viewport gizmo and inspector, then press Play.
 | `cpu/body_features.tscn` | Rigid-body settings you set in the Inspector, one station each: a carousel and an elevator built from `MovingPlatform` (an `AnimatableBody3D` with spin / travel / period, `demo/common/moving_platform.gd`) that the character and loose crates ride; crates that float on a **constant force** equal to their weight and a pinwheel turned by **constant torque**; two flywheels, one with 5x **inertia** (`F` kicks both); and two roly-poly toys, the green one with a low **custom center of mass** that rights itself (`G` knocks them over). Walk with `WASD`. Runs on PhysX and Jolt alike. |
 | `cpu/back_faces.tscn` | `ConcavePolygonShape3D.backface_collision`: two identical floating trimesh platforms, one one-sided (off) and one solid (on). Step on a glowing pad to be launched up -- you pass through the one-way platform and land on top, and bump your head on the solid one; `F` fires balls up from underneath both. Select a platform's `CollisionShape3D` to see the setting. |
 | `cpu/picking.tscn` | Mouse picking and area queries, set in the Inspector: hover lights objects up and clicks react (`input_event`), Area3D zones included. A glass pane with `input_ray_pickable` off lets you click the zone behind it; one with it on blocks. Click the crate to kick it. A `RayCast3D` laser sweeps the zones -- `T` toggles its `collide_with_areas`. |
+| `cpu/stairs.tscn` | `SeparationRayShape3D`: two bots walk up identical 0.3 m stairs -- the one standing on a ray climbs, the capsule-only one stops at the first step. Walk them yourself on the same setup. A hover sled (a `RigidBody3D` on four corner rays) floats over bumps when you walk into it. Select a ray's `CollisionShape3D` to see it. |
 
 ### `demo/cpu/`
 
@@ -94,7 +95,9 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   as on Jolt), `backface_collision_test` (a one-sided trimesh met from behind
   by rays, shape casts, bodies and a character, back faces off and on),
   `query_filter_test` (`collide_with_bodies` / `collide_with_areas` across
-  rays, point/shape overlaps, casts, rest info and a `RayCast3D`).
+  rays, point/shape overlaps, casts, rest info and a `RayCast3D`),
+  `separation_ray_test` (a character standing on a ray: rest height, up and
+  down a step; a ray-only character; a rigid body on a ray).
   `physics_bench.gd` is a step-time benchmark across body counts (run once per
   engine, flipping `physics/3d/physics_engine`). `heightmap_runtime_probe.tscn`
   is a **windowed** run (not `--script`) — the GPU boundary crash only faults

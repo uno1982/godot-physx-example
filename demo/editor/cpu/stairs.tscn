@@ -1,0 +1,370 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/editor/cpu/stairs.gd" id="1_script"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_top_color = Color(0.35, 0.5, 0.72, 1)
+sky_horizon_color = Color(0.72, 0.77, 0.83, 1)
+ground_horizon_color = Color(0.72, 0.77, 0.83, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.56, 0.58, 0.62, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_stairs"]
+albedo_color = Color(0.42, 0.46, 0.55, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Mat_ray_bot"]
+albedo_color = Color(0.35, 0.75, 0.4, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_capsule_bot"]
+albedo_color = Color(0.85, 0.32, 0.3, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ray"]
+shading_mode = 0
+albedo_color = Color(1, 0.9, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_sled"]
+albedo_color = Color(0.3, 0.6, 0.95, 1)
+metallic = 0.4
+roughness = 0.4
+
+[sub_resource type="PhysicsMaterial" id="Mat_sled_physics"]
+friction = 0.05
+
+[sub_resource type="BoxShape3D" id="Shape_floor"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxMesh" id="Mesh_floor"]
+material = SubResource("Mat_floor")
+size = Vector3(40, 1, 40)
+
+[sub_resource type="CapsuleShape3D" id="Shape_player"]
+radius = 0.35
+height = 1.2
+
+[sub_resource type="SeparationRayShape3D" id="Ray_player"]
+length = 1.1
+
+[sub_resource type="CapsuleShape3D" id="Shape_bot_short"]
+radius = 0.3
+height = 1.0
+
+[sub_resource type="CapsuleMesh" id="Mesh_bot_short"]
+material = SubResource("Mat_ray_bot")
+radius = 0.3
+height = 1.0
+
+[sub_resource type="SeparationRayShape3D" id="Ray_bot"]
+length = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_leg"]
+material = SubResource("Mat_ray")
+top_radius = 0.03
+bottom_radius = 0.03
+height = 1.0
+
+[sub_resource type="CapsuleShape3D" id="Shape_bot_tall"]
+radius = 0.3
+height = 1.5
+
+[sub_resource type="CapsuleMesh" id="Mesh_bot_tall"]
+material = SubResource("Mat_capsule_bot")
+radius = 0.3
+height = 1.5
+
+[sub_resource type="BoxShape3D" id="Shape_sled"]
+size = Vector3(1.2, 0.3, 0.8)
+
+[sub_resource type="BoxMesh" id="Mesh_sled"]
+material = SubResource("Mat_sled")
+size = Vector3(1.2, 0.3, 0.8)
+
+[sub_resource type="SeparationRayShape3D" id="Ray_sled"]
+length = 0.6
+
+[sub_resource type="CylinderMesh" id="Mesh_sled_leg"]
+material = SubResource("Mat_ray")
+top_radius = 0.02
+bottom_radius = 0.02
+height = 0.6
+
+[sub_resource type="BoxShape3D" id="Shape_bump"]
+size = Vector3(3, 0.2, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_bump"]
+material = SubResource("Mat_stairs")
+size = Vector3(3, 0.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Step1"]
+size = Vector3(6, 0.3, 0.6)
+
+[sub_resource type="BoxMesh" id="Mesh_Step1"]
+material = SubResource("Mat_stairs")
+size = Vector3(6, 0.3, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_Step2"]
+size = Vector3(6, 0.6, 0.6)
+
+[sub_resource type="BoxMesh" id="Mesh_Step2"]
+material = SubResource("Mat_stairs")
+size = Vector3(6, 0.6, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_Step3"]
+size = Vector3(6, 0.9, 0.6)
+
+[sub_resource type="BoxMesh" id="Mesh_Step3"]
+material = SubResource("Mat_stairs")
+size = Vector3(6, 0.9, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_Step4"]
+size = Vector3(6, 1.2, 0.6)
+
+[sub_resource type="BoxMesh" id="Mesh_Step4"]
+material = SubResource("Mat_stairs")
+size = Vector3(6, 1.2, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_Step5"]
+size = Vector3(6, 1.5, 0.6)
+
+[sub_resource type="BoxMesh" id="Mesh_Step5"]
+material = SubResource("Mat_stairs")
+size = Vector3(6, 1.5, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_Landing"]
+size = Vector3(6, 1.5, 4)
+
+[sub_resource type="BoxMesh" id="Mesh_Landing"]
+material = SubResource("Mat_stairs")
+size = Vector3(6, 1.5, 4)
+
+[node name="Stairs" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 8, 0)
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("Shape_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("Mesh_floor")
+
+[node name="StairCase" type="StaticBody3D" parent="."]
+
+[node name="Step1" type="CollisionShape3D" parent="StairCase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.15, -1.3)
+shape = SubResource("Shape_Step1")
+
+[node name="Step1Mesh" type="MeshInstance3D" parent="StairCase/Step1"]
+mesh = SubResource("Mesh_Step1")
+
+[node name="Step2" type="CollisionShape3D" parent="StairCase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.3, -1.9)
+shape = SubResource("Shape_Step2")
+
+[node name="Step2Mesh" type="MeshInstance3D" parent="StairCase/Step2"]
+mesh = SubResource("Mesh_Step2")
+
+[node name="Step3" type="CollisionShape3D" parent="StairCase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.45, -2.5)
+shape = SubResource("Shape_Step3")
+
+[node name="Step3Mesh" type="MeshInstance3D" parent="StairCase/Step3"]
+mesh = SubResource("Mesh_Step3")
+
+[node name="Step4" type="CollisionShape3D" parent="StairCase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.6, -3.1)
+shape = SubResource("Shape_Step4")
+
+[node name="Step4Mesh" type="MeshInstance3D" parent="StairCase/Step4"]
+mesh = SubResource("Mesh_Step4")
+
+[node name="Step5" type="CollisionShape3D" parent="StairCase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.75, -3.7)
+shape = SubResource("Shape_Step5")
+
+[node name="Step5Mesh" type="MeshInstance3D" parent="StairCase/Step5"]
+mesh = SubResource("Mesh_Step5")
+
+[node name="Landing" type="CollisionShape3D" parent="StairCase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.75, -6)
+shape = SubResource("Shape_Landing")
+
+[node name="LandingMesh" type="MeshInstance3D" parent="StairCase/Landing"]
+mesh = SubResource("Mesh_Landing")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.05, 4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("Shape_player")
+
+[node name="Ray" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.1, 0)
+shape = SubResource("Ray_player")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+current = true
+
+[node name="RayBot" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0.05, 2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RayBot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("Shape_bot_short")
+
+[node name="Body" type="MeshInstance3D" parent="RayBot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("Mesh_bot_short")
+
+[node name="Ray" type="CollisionShape3D" parent="RayBot"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1, 0)
+shape = SubResource("Ray_bot")
+
+[node name="Leg" type="MeshInstance3D" parent="RayBot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("Mesh_leg")
+
+[node name="Label" type="Label3D" parent="RayBot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+pixel_size = 0.008
+billboard = 1
+text = "stands on a ray"
+font_size = 40
+outline_size = 10
+
+[node name="CapsuleBot" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.05, 2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CapsuleBot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("Shape_bot_tall")
+
+[node name="Body" type="MeshInstance3D" parent="CapsuleBot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+mesh = SubResource("Mesh_bot_tall")
+
+[node name="Label" type="Label3D" parent="CapsuleBot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+pixel_size = 0.008
+billboard = 1
+text = "capsule only"
+font_size = 40
+outline_size = 10
+
+[node name="StairsLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 2.3, -1.5)
+pixel_size = 0.008
+billboard = 1
+text = "0.3 m steps"
+font_size = 40
+outline_size = 10
+
+[node name="HoverSled" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.6, -2)
+mass = 10.0
+physics_material_override = SubResource("Mat_sled_physics")
+linear_damp = 0.5
+angular_damp = 3.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HoverSled"]
+shape = SubResource("Shape_sled")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="HoverSled"]
+mesh = SubResource("Mesh_sled")
+
+[node name="Ray1" type="CollisionShape3D" parent="HoverSled"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -0.5, 0, -0.3)
+shape = SubResource("Ray_sled")
+
+[node name="Leg1" type="MeshInstance3D" parent="HoverSled"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, -0.3, -0.3)
+mesh = SubResource("Mesh_sled_leg")
+
+[node name="Ray2" type="CollisionShape3D" parent="HoverSled"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0.5, 0, -0.3)
+shape = SubResource("Ray_sled")
+
+[node name="Leg2" type="MeshInstance3D" parent="HoverSled"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.3, -0.3)
+mesh = SubResource("Mesh_sled_leg")
+
+[node name="Ray3" type="CollisionShape3D" parent="HoverSled"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -0.5, 0, 0.3)
+shape = SubResource("Ray_sled")
+
+[node name="Leg3" type="MeshInstance3D" parent="HoverSled"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, -0.3, 0.3)
+mesh = SubResource("Mesh_sled_leg")
+
+[node name="Ray4" type="CollisionShape3D" parent="HoverSled"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0.5, 0, 0.3)
+shape = SubResource("Ray_sled")
+
+[node name="Leg4" type="MeshInstance3D" parent="HoverSled"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.3, 0.3)
+mesh = SubResource("Mesh_sled_leg")
+
+[node name="SledLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2, -2)
+pixel_size = 0.008
+billboard = 1
+text = "hover sled: a RigidBody3D on 4 rays
+walk into it"
+font_size = 40
+outline_size = 10
+
+[node name="Bump1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, -4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bump1"]
+shape = SubResource("Shape_bump")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Bump1"]
+mesh = SubResource("Mesh_bump")
+
+[node name="Bump2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, -5.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bump2"]
+shape = SubResource("Shape_bump")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Bump2"]
+mesh = SubResource("Mesh_bump")
+
+[node name="Bump3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, -7)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bump3"]
+shape = SubResource("Shape_bump")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Bump3"]
+mesh = SubResource("Mesh_bump")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 900.0
+offset_bottom = 70.0
