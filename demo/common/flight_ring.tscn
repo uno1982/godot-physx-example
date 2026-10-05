@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/common/flight_ring.gd" id="1_ring"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_ring"]
+albedo_color = Color(1, 0.75, 0.15, 1)
+emission_enabled = true
+emission = Color(1, 0.75, 0.15, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="TorusMesh" id="Mesh_ring"]
+material = SubResource("Mat_ring")
+inner_radius = 6.0
+outer_radius = 6.8
+rings = 48
+ring_segments = 12
+
+[sub_resource type="CylinderShape3D" id="Shape_hole"]
+height = 1.0
+radius = 6.0
+
+[node name="FlightRing" type="Area3D"]
+monitorable = false
+script = ExtResource("1_ring")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+mesh = SubResource("Mesh_ring")
+
+[node name="Hole" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+shape = SubResource("Shape_hole")
