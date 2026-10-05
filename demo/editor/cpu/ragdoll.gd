@@ -34,10 +34,14 @@ extends Node3D
 const RAGDOLL := preload("res://demo/common/mannequin/mannequin_ragdoll.tscn")
 const SHOT_IMPULSE := 90.0 # N*s
 const SHOT_RANGE := 200.0
-# Dragging: a PinJoint3D holds the grabbed point to a kinematic anchor that
-# follows the cursor, no faster than DRAG_MAX_SPEED (m/s) -- the joint solver
-# carries the whole body hanging off it, which a push on the one bone didn't.
+# Dragging: the grabbed point is steered toward the cursor at DRAG_RATE (1/s),
+# no faster than DRAG_MAX_SPEED (m/s), by an impulse each tick that matches its
+# velocity -- scaled by the grabbed bone's mass, so the rest of the body hangs
+# off it with its weight and lags behind like it. Raise DRAG_RATE / DRAG_GAIN
+# to hold it firmer.
+const DRAG_RATE := 10.0
 const DRAG_MAX_SPEED := 14.0
+const DRAG_GAIN := 0.6
 
 @onready var _camera: Camera3D = $Camera3D
 @onready var _hud: Label = $HUD/Label
@@ -46,8 +50,6 @@ var _fly: FlyCamera
 var _drag_bone: PhysicalBone3D # held, or null
 var _drag_local: Vector3 # grabbed point, in the bone's space
 var _drag_distance := 0.0 # from the camera, along the cursor's ray
-var _drag_anchor: AnimatableBody3D
-var _drag_joint: PinJoint3D
 var _drag_line: ImmediateMesh
 
 
@@ -102,7 +104,7 @@ func _process(delta: float) -> void:
 			Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0, Engine.get_frames_per_second()]
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	_drag_line.clear_surfaces()
 	if not _drag_bone:
 		return
@@ -111,9 +113,13 @@ func _physics_process(delta: float) -> void:
 		return
 	var screen := _cursor()
 	var target := _camera.project_ray_origin(screen) + _camera.project_ray_normal(screen) * _drag_distance
-	_drag_anchor.global_position = _drag_anchor.global_position.move_toward(target, DRAG_MAX_SPEED * delta)
+	var point := _drag_bone.global_transform * _drag_local
+	var offset := point - _drag_bone.global_position
+	var velocity := _drag_bone.linear_velocity + _drag_bone.angular_velocity.cross(offset)
+	var wanted := ((target - point) * DRAG_RATE).limit_length(DRAG_MAX_SPEED)
+	_drag_bone.apply_impulse((wanted - velocity) * _drag_bone.mass * DRAG_GAIN, offset)
 	_drag_line.surface_begin(Mesh.PRIMITIVE_LINES)
-	_drag_line.surface_add_vertex(_drag_bone.global_transform * _drag_local)
+	_drag_line.surface_add_vertex(point)
 	_drag_line.surface_add_vertex(target)
 	_drag_line.surface_end()
 
@@ -123,30 +129,10 @@ func _grab(bone: PhysicalBone3D, at: Vector3, distance: float) -> void:
 	_drag_bone = bone
 	_drag_local = bone.global_transform.affine_inverse() * at
 	_drag_distance = distance
-	# A shapeless kinematic body for the joint's other end.
-	_drag_anchor = AnimatableBody3D.new()
-	_drag_anchor.sync_to_physics = false
-	_drag_anchor.collision_layer = 0
-	_drag_anchor.collision_mask = 0
-	_drag_anchor.top_level = true
-	add_child(_drag_anchor)
-	_drag_anchor.global_position = at
-	_drag_joint = PinJoint3D.new()
-	_drag_joint.top_level = true
-	add_child(_drag_joint)
-	_drag_joint.global_position = at
-	_drag_joint.node_a = _drag_joint.get_path_to(_drag_anchor)
-	_drag_joint.node_b = _drag_joint.get_path_to(bone)
 
 
 func _release() -> void:
 	_drag_bone = null
-	if _drag_joint:
-		_drag_joint.queue_free()
-		_drag_joint = null
-	if _drag_anchor:
-		_drag_anchor.queue_free()
-		_drag_anchor = null
 
 
 # Where the cursor points: the mouse, or the middle of the view while the
