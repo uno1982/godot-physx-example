@@ -1,0 +1,466 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/editor/cpu/body_features.gd" id="1_script"]
+[ext_resource type="Script" path="res://demo/common/moving_platform.gd" id="2_platform"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_top_color = Color(0.35, 0.5, 0.72, 1)
+sky_horizon_color = Color(0.72, 0.77, 0.83, 1)
+ground_horizon_color = Color(0.72, 0.77, 0.83, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.56, 0.58, 0.62, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_platform"]
+albedo_color = Color(0.36, 0.42, 0.55, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_crate"]
+albedo_color = Color(0.78, 0.6, 0.38, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Mat_float"]
+albedo_color = Color(0.45, 0.72, 0.9, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_wheel"]
+albedo_color = Color(0.62, 0.64, 0.68, 1)
+metallic = 0.6
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.9, 0.7, 0.25, 1)
+metallic = 0.8
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_green"]
+albedo_color = Color(0.35, 0.75, 0.4, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_red"]
+albedo_color = Color(0.85, 0.32, 0.3, 1)
+roughness = 0.5
+
+[sub_resource type="BoxShape3D" id="Shape_floor"]
+size = Vector3(60, 1, 60)
+
+[sub_resource type="BoxMesh" id="Mesh_floor"]
+material = SubResource("Mat_floor")
+size = Vector3(60, 1, 60)
+
+[sub_resource type="CapsuleShape3D" id="Shape_player"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CylinderShape3D" id="Shape_carousel"]
+height = 0.2
+radius = 5.0
+
+[sub_resource type="CylinderMesh" id="Mesh_carousel"]
+material = SubResource("Mat_platform")
+top_radius = 5.0
+bottom_radius = 5.0
+height = 0.2
+
+[sub_resource type="BoxShape3D" id="Shape_lift"]
+size = Vector3(3, 0.3, 3)
+
+[sub_resource type="BoxMesh" id="Mesh_lift"]
+material = SubResource("Mat_platform")
+size = Vector3(3, 0.3, 3)
+
+[sub_resource type="BoxShape3D" id="Shape_ledge"]
+size = Vector3(6, 0.3, 4)
+
+[sub_resource type="BoxMesh" id="Mesh_ledge"]
+material = SubResource("Mat_platform")
+size = Vector3(6, 0.3, 4)
+
+[sub_resource type="BoxShape3D" id="Shape_crate"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[sub_resource type="BoxMesh" id="Mesh_crate"]
+material = SubResource("Mat_crate")
+size = Vector3(0.6, 0.6, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_float"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_float"]
+material = SubResource("Mat_float")
+size = Vector3(1, 1, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_blade_h"]
+size = Vector3(3, 0.3, 0.1)
+
+[sub_resource type="BoxMesh" id="Mesh_blade_h"]
+material = SubResource("Mat_float")
+size = Vector3(3, 0.3, 0.1)
+
+[sub_resource type="BoxShape3D" id="Shape_blade_v"]
+size = Vector3(0.3, 3, 0.1)
+
+[sub_resource type="BoxMesh" id="Mesh_blade_v"]
+material = SubResource("Mat_float")
+size = Vector3(0.3, 3, 0.1)
+
+[sub_resource type="CylinderShape3D" id="Shape_wheel"]
+height = 0.2
+radius = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_wheel"]
+material = SubResource("Mat_wheel")
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.2
+
+[sub_resource type="CylinderMesh" id="Mesh_wheel_gold"]
+material = SubResource("Mat_gold")
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.2
+
+[sub_resource type="BoxMesh" id="Mesh_spoke"]
+material = SubResource("Mat_platform")
+size = Vector3(1.9, 0.22, 0.15)
+
+[sub_resource type="CylinderMesh" id="Mesh_post"]
+material = SubResource("Mat_platform")
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.9
+
+[sub_resource type="SphereShape3D" id="Shape_toy_base"]
+radius = 0.5
+
+[sub_resource type="CapsuleShape3D" id="Shape_toy_head"]
+radius = 0.3
+height = 1.0
+
+[sub_resource type="SphereMesh" id="Mesh_toy_base_green"]
+material = SubResource("Mat_green")
+radius = 0.5
+height = 1.0
+
+[sub_resource type="CapsuleMesh" id="Mesh_toy_head_green"]
+material = SubResource("Mat_green")
+radius = 0.3
+height = 1.0
+
+[sub_resource type="SphereMesh" id="Mesh_toy_base_red"]
+material = SubResource("Mat_red")
+radius = 0.5
+height = 1.0
+
+[sub_resource type="CapsuleMesh" id="Mesh_toy_head_red"]
+material = SubResource("Mat_red")
+radius = 0.3
+height = 1.0
+
+[node name="BodyFeatures" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 8, 0)
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("Shape_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("Mesh_floor")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 10)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("Shape_player")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+current = true
+
+[node name="Carousel" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.1, -4)
+script = ExtResource("2_platform")
+spin = Vector3(0, 25, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Carousel"]
+shape = SubResource("Shape_carousel")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Carousel"]
+mesh = SubResource("Mesh_carousel")
+
+[node name="Stripe" type="MeshInstance3D" parent="Carousel"]
+transform = Transform3D(2.5, 0, 0, 0, 0.2, 0, 0, 0, 1, 2.5, 0.11, 0)
+mesh = SubResource("Mesh_crate")
+
+[node name="Crate1" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.55, -4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Crate1"]
+shape = SubResource("Shape_crate")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Crate1"]
+mesh = SubResource("Mesh_crate")
+
+[node name="Crate2" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.55, -7)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Crate2"]
+shape = SubResource("Shape_crate")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Crate2"]
+mesh = SubResource("Mesh_crate")
+
+[node name="Crate3" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.55, -4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Crate3"]
+shape = SubResource("Shape_crate")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Crate3"]
+mesh = SubResource("Mesh_crate")
+
+[node name="CarouselLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3, -4)
+pixel_size = 0.01
+billboard = 1
+text = "Carousel
+MovingPlatform, spin 25 deg/s"
+font_size = 48
+outline_size = 12
+
+[node name="Elevator" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.15, 8)
+script = ExtResource("2_platform")
+travel = Vector3(0, 4, 0)
+period = 8.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Elevator"]
+shape = SubResource("Shape_lift")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Elevator"]
+mesh = SubResource("Mesh_lift")
+
+[node name="Ledge" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.15, 11.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ledge"]
+shape = SubResource("Shape_ledge")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ledge"]
+mesh = SubResource("Mesh_ledge")
+
+[node name="ElevatorLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.5, 6)
+pixel_size = 0.01
+billboard = 1
+text = "Elevator
+MovingPlatform, travel 4 m up"
+font_size = 48
+outline_size = 12
+
+[node name="ConstantForce" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -4)
+
+[node name="Float1" type="RigidBody3D" parent="ConstantForce"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1.5, 0)
+mass = 4.0
+constant_force = Vector3(0, 39.2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ConstantForce/Float1"]
+shape = SubResource("Shape_float")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ConstantForce/Float1"]
+mesh = SubResource("Mesh_float")
+
+[node name="Float2" type="RigidBody3D" parent="ConstantForce"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+mass = 4.0
+constant_force = Vector3(0, 39.2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ConstantForce/Float2"]
+shape = SubResource("Shape_float")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ConstantForce/Float2"]
+mesh = SubResource("Mesh_float")
+
+[node name="Float3" type="RigidBody3D" parent="ConstantForce"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.2, 0)
+mass = 4.0
+constant_force = Vector3(0, 39.2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ConstantForce/Float3"]
+shape = SubResource("Shape_float")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ConstantForce/Float3"]
+mesh = SubResource("Mesh_float")
+
+[node name="Pinwheel" type="RigidBody3D" parent="ConstantForce"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -3)
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+mass = 2.0
+can_sleep = false
+constant_torque = Vector3(0, 0, 8)
+angular_damp_mode = 1
+angular_damp = 1.0
+
+[node name="Horizontal" type="CollisionShape3D" parent="ConstantForce/Pinwheel"]
+shape = SubResource("Shape_blade_h")
+
+[node name="HorizontalMesh" type="MeshInstance3D" parent="ConstantForce/Pinwheel/Horizontal"]
+mesh = SubResource("Mesh_blade_h")
+
+[node name="Vertical" type="CollisionShape3D" parent="ConstantForce/Pinwheel"]
+shape = SubResource("Shape_blade_v")
+
+[node name="VerticalMesh" type="MeshInstance3D" parent="ConstantForce/Pinwheel/Vertical"]
+mesh = SubResource("Mesh_blade_v")
+
+[node name="Label" type="Label3D" parent="ConstantForce"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.2, -3)
+pixel_size = 0.01
+billboard = 1
+text = "Constant force / torque
+crates: force = their weight, they float
+pinwheel: constant torque"
+font_size = 48
+outline_size = 12
+
+[node name="Inertia" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 8)
+
+[node name="Flywheel" type="RigidBody3D" parent="Inertia"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 0)
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+mass = 10.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Inertia/Flywheel"]
+shape = SubResource("Shape_wheel")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Inertia/Flywheel"]
+mesh = SubResource("Mesh_wheel")
+
+[node name="Spoke" type="MeshInstance3D" parent="Inertia/Flywheel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("Mesh_spoke")
+
+[node name="HeavyFlywheel" type="RigidBody3D" parent="Inertia"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 0)
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+mass = 10.0
+inertia = Vector3(0, 25, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Inertia/HeavyFlywheel"]
+shape = SubResource("Shape_wheel")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Inertia/HeavyFlywheel"]
+mesh = SubResource("Mesh_wheel_gold")
+
+[node name="Spoke" type="MeshInstance3D" parent="Inertia/HeavyFlywheel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("Mesh_spoke")
+
+[node name="Post1" type="MeshInstance3D" parent="Inertia"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.45, 0)
+mesh = SubResource("Mesh_post")
+
+[node name="Post2" type="MeshInstance3D" parent="Inertia"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.45, 0)
+mesh = SubResource("Mesh_post")
+
+[node name="Label" type="Label3D" parent="Inertia"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 0)
+pixel_size = 0.01
+billboard = 1
+text = "Inertia  (F: kick both)
+same disc; gold: inertia Y 25 (shape: 5)"
+font_size = 48
+outline_size = 12
+
+[node name="CenterOfMass" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12)
+
+[node name="LowCenter" type="RigidBody3D" parent="CenterOfMass"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, 0)
+mass = 2.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.3, 0)
+angular_damp = 0.5
+
+[node name="Base" type="CollisionShape3D" parent="CenterOfMass/LowCenter"]
+shape = SubResource("Shape_toy_base")
+
+[node name="BaseMesh" type="MeshInstance3D" parent="CenterOfMass/LowCenter/Base"]
+mesh = SubResource("Mesh_toy_base_green")
+
+[node name="Head" type="CollisionShape3D" parent="CenterOfMass/LowCenter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("Shape_toy_head")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="CenterOfMass/LowCenter/Head"]
+mesh = SubResource("Mesh_toy_head_green")
+
+[node name="AutoCenter" type="RigidBody3D" parent="CenterOfMass"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.5, 0)
+mass = 2.0
+angular_damp = 0.5
+
+[node name="Base" type="CollisionShape3D" parent="CenterOfMass/AutoCenter"]
+shape = SubResource("Shape_toy_base")
+
+[node name="BaseMesh" type="MeshInstance3D" parent="CenterOfMass/AutoCenter/Base"]
+mesh = SubResource("Mesh_toy_base_red")
+
+[node name="Head" type="CollisionShape3D" parent="CenterOfMass/AutoCenter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("Shape_toy_head")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="CenterOfMass/AutoCenter/Head"]
+mesh = SubResource("Mesh_toy_head_red")
+
+[node name="Label" type="Label3D" parent="CenterOfMass"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+pixel_size = 0.01
+billboard = 1
+text = "Center of mass  (G: knock over)
+green: custom, low in the base  |  red: auto"
+font_size = 48
+outline_size = 12
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 900.0
+offset_bottom = 90.0

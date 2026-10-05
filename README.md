@@ -45,6 +45,7 @@ viewport gizmo and inspector, then press Play.
 | `cpu/soft_body.tscn` | Stock `SoftBody3D` blobs (sphere, subdivided box) on the PhysX backend — select one to paint pinned vertices with its gizmo and tune `pressure_coefficient` / `linear_stiffness` / `total_mass` in the inspector. Press Play, `SPACE` drops a heavy ball on them. |
 | `cpu/heightmap.tscn` | Stock `HeightMapShape3D` terrain — a `@tool` script generates the collision and the matching visible mesh from noise, so selecting `Terrain/CollisionShape3D` shows the real height-field gizmo in the editor; the exported noise params rebuild it live. Play to walk the terrain (`WASD`, `SPACE` jump) and `B` rolls a row of balls down a slope. |
 | `cpu/shape_scale.tscn` | Walk a capsule character over collision shapes with non-uniform node scale baked into the geometry — stretched box platforms, a chamfered-box convex ramp, a trimesh hump, a scaled sphere dome and a scaled height-field mound. Select a piece and stretch its transform in the inspector, then press Play. |
+| `cpu/body_features.tscn` | Rigid-body settings you set in the Inspector, one station each: a carousel and an elevator built from `MovingPlatform` (an `AnimatableBody3D` with spin / travel / period, `demo/common/moving_platform.gd`) that the character and loose crates ride; crates that float on a **constant force** equal to their weight and a pinwheel turned by **constant torque**; two flywheels, one with 5x **inertia** (`F` kicks both); and two roly-poly toys, the green one with a low **custom center of mass** that rights itself (`G` knocks them over). Walk with `WASD`. Runs on PhysX and Jolt alike. |
 
 ### `demo/cpu/`
 
@@ -85,7 +86,10 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   `soft_body_spawn_test`, `soft_body_cascade_test`, `determinism_test`,
   `ragdoll_skeletal_test` (a rigged humanoid `Skeleton3D` +
   `PhysicalBoneSimulator3D` ragdoll: shove it, it must fall, keep its joints
-  connected and never NaN).
+  connected and never NaN), `body_parity_test` (constant force/torque,
+  custom inertia and center of mass, direct-state torque/force/mass queries,
+  axis velocity, a character riding a spinning platform -- the same numbers
+  as on Jolt).
   `physics_bench.gd` is a step-time benchmark across body counts (run once per
   engine, flipping `physics/3d/physics_engine`). `heightmap_runtime_probe.tscn`
   is a **windowed** run (not `--script`) — the GPU boundary crash only faults
