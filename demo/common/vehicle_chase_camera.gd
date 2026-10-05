@@ -52,12 +52,24 @@ func set_target(p_target: Node3D) -> void:
 	_target = p_target
 	var distance = p_target.get("camera_distance")
 	_spring_arm.spring_length = distance if distance != null else _default_spring_length
+	# A target that aims with the camera starts aimed straight ahead of it,
+	# level -- or it would turn toward wherever the camera last looked.
+	if p_target.get("camera_free_aim") == true:
+		var fwd := p_target.global_basis.z
+		yaw = atan2(fwd.x, fwd.z)
+		pitch = 0.0
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		yaw -= event.relative.x * mouse_sensitivity
 		# + here, not the more usual - (see the pitch-inversion note above).
-		pitch = clampf(pitch + event.relative.y * mouse_sensitivity, -0.6, 1.2)
+		# A target that aims with the camera (camera_free_aim: the plane in
+		# arcade mode) needs to look well up and down too.
+		var free_aim: bool = _target != null and _target.get("camera_free_aim") == true
+		# Aiming a plane, the mouse works like a flight stick: pull it toward
+		# you (down) to aim -- and pitch -- the nose up.
+		var dy: float = -event.relative.y if free_aim else event.relative.y
+		pitch = clampf(pitch + dy * mouse_sensitivity, -1.45 if free_aim else -0.6, 1.45 if free_aim else 1.2)
 		_since_mouse_look = 0.0
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

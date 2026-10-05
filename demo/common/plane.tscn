@@ -31,10 +31,10 @@ radius = 0.62
 height = 7.3
 
 [sub_resource type="BoxShape3D" id="Shape_wing"]
-size = Vector3(10, 0.15, 1.6)
+size = Vector3(10.2, 0.15, 1.46)
 
 [sub_resource type="BoxShape3D" id="Shape_tail"]
-size = Vector3(3.4, 0.1, 1.0)
+size = Vector3(3.0, 0.1, 0.65)
 
 [sub_resource type="BoxShape3D" id="Shape_fin"]
 size = Vector3(0.1, 1.4, 1.0)
@@ -56,7 +56,7 @@ size = Vector3(1.16, 0.55, 1.6)
 
 [sub_resource type="BoxMesh" id="Mesh_wing_half"]
 material = SubResource("Mat_body")
-size = Vector3(5, 0.15, 1.6)
+size = Vector3(5.1, 0.15, 1.46)
 
 [sub_resource type="BoxMesh" id="Mesh_aileron"]
 material = SubResource("Mat_trim")
@@ -64,11 +64,11 @@ size = Vector3(2, 0.08, 0.4)
 
 [sub_resource type="BoxMesh" id="Mesh_tailplane"]
 material = SubResource("Mat_body")
-size = Vector3(3.4, 0.1, 0.6)
+size = Vector3(3.0, 0.1, 0.4)
 
 [sub_resource type="BoxMesh" id="Mesh_elevator"]
 material = SubResource("Mat_trim")
-size = Vector3(3.4, 0.08, 0.4)
+size = Vector3(3.0, 0.08, 0.25)
 
 [sub_resource type="BoxMesh" id="Mesh_fin"]
 material = SubResource("Mat_body")
@@ -123,7 +123,7 @@ transform = Transform3D(1, 0, 0, 0, -0.0871557, -0.996195, 0, 0.996195, -0.08715
 shape = SubResource("Shape_fuselage")
 
 [node name="Wing" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0.67)
 shape = SubResource("Shape_wing")
 
 [node name="Tailplane" type="CollisionShape3D" parent="."]
@@ -147,11 +147,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 1.2)
 mesh = SubResource("Mesh_cabin")
 
 [node name="WingLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.99863, -0.052336, 0, 0.052336, 0.99863, 0, 0, 0, 1, 2.5, 2.065, 0.6)
+transform = Transform3D(0.99863, -0.052336, 0, 0.052336, 0.99863, 0, 0, 0, 1, 2.55, 2.065, 0.67)
 mesh = SubResource("Mesh_wing_half")
 
 [node name="WingRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.99863, 0.052336, 0, -0.052336, 0.99863, 0, 0, 0, 1, -2.5, 2.065, 0.6)
+transform = Transform3D(0.99863, 0.052336, 0, -0.052336, 0.99863, 0, 0, 0, 1, -2.55, 2.065, 0.67)
 mesh = SubResource("Mesh_wing_half")
 
 [node name="StrutLeft" type="MeshInstance3D" parent="."]
@@ -177,14 +177,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2)
 mesh = SubResource("Mesh_aileron")
 
 [node name="TailplaneMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, -3.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, -3.35)
 mesh = SubResource("Mesh_tailplane")
 
 [node name="Elevator" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, -3.55)
 
 [node name="Mesh" type="MeshInstance3D" parent="Elevator"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.125)
 mesh = SubResource("Mesh_elevator")
 
 [node name="FinMesh" type="MeshInstance3D" parent="."]

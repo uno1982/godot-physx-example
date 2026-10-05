@@ -38,7 +38,7 @@ const HINT_PHYSX_CAR := "Driving: PhysX PhysXVehicle3D car  |  W/S throttle-brak
 const HINT_GODOT_MOTO := "Driving: Godot VehicleBody3D motorcycle (stock, script-side lean balance)  |  W/S throttle-reverse, A/D steer+lean, Space brake, Tab cycle vehicle"
 const HINT_PHYSX_MOTO := "Driving: PhysX PhysXMotorcycle3D  |  W/S throttle-brake, A/D steer+lean, Space brake, Tab cycle vehicle"
 const HINT_PHYSX_TANK := "Driving: PhysX PhysXTank3D  |  W/S drive, A/D pivot (skid-steer), Space brake, Left click fire, Tab cycle vehicle"
-const HINT_PLANE := "Flying: Godot VehicleBody3D prop plane (stock)  |  W/S throttle, Up/Down pitch (Down = nose up), Left/Right roll, A/D rudder + nose wheel, Space brake, R runway, Tab cycle vehicle"
+const HINT_PLANE := "Flying: Godot VehicleBody3D stunt plane (stock)  |  W/S throttle, Mouse aim (arcade) or arrows (manual), Q/E roll, A/D yaw, C switch mode, Space brake, R runway, Tab cycle vehicle"
 
 var _plane: Node3D
 var _plane_stats: Label
@@ -85,6 +85,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_capture_impact_screenshot()
 		elif event.keycode == KEY_R and _plane and _vehicles[_active_index] == _plane:
 			_plane.reset_to_runway()
+			_camera.set_target(_plane) # aim straight down the runway again
 			for ring in get_tree().get_nodes_in_group("flight_rings"):
 				ring.reset()
 
@@ -99,9 +100,9 @@ func _process(_delta: float) -> void:
 		var passed := 0
 		for ring in rings:
 			passed += 1 if ring.is_passed else 0
-		_plane_stats.text = "airspeed %3.0f km/h   altitude %4.0f m   throttle %3.0f%%   rings %d / %d%s" % [
-			_plane.airspeed() * 3.6, _plane.global_position.y, _plane.throttle * 100.0, passed, rings.size(),
-			"   STALL" if _plane.is_stalling() else ""]
+		_plane_stats.text = "%s   airspeed %3.0f km/h   altitude %4.0f m   throttle %3.0f%%   rings %d / %d" % [
+			"ARCADE (C: manual)" if _plane.control_mode == _plane.ControlMode.ARCADE else "MANUAL (C: arcade)",
+			_plane.airspeed() * 3.6, _plane.global_position.y, _plane.throttle * 100.0, passed, rings.size()]
 
 func _apply_active() -> void:
 	for i in _vehicles.size():
