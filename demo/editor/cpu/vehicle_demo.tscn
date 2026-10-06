@@ -759,6 +759,8 @@ mesh = SubResource("Mesh_runway_line")
 
 [node name="Plane" parent="." unique_id=118945708 instance=ExtResource("10_plane")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -78, 0.2, -80)
+takeoff_speed = 20.0
+max_bank = 75.0
 
 [node name="Rings" type="Node3D" parent="." unique_id=99635726]
 
