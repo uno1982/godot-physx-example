@@ -41,7 +41,7 @@ const HINT_PHYSX_MOTO := "Driving: PhysX PhysXMotorcycle3D  |  W/S throttle-brak
 const HINT_PHYSX_TANK := "Driving: PhysX PhysXTank3D  |  W/S drive, A/D pivot (skid-steer), Space brake, Left click fire, Tab cycle vehicle"
 const HINT_PLANE := "Flying: Godot VehicleBody3D stunt plane (stock)  |  W/S throttle, Mouse aim (arcade) or arrows (manual), Q/E roll, A/D yaw, C switch mode, Space brake, R runway, Tab cycle vehicle"
 
-const HINT_HELI := "Flying: Godot RigidBody3D helicopter (stock)  |  Mouse aim (look down to fly forward), W/S climb/descend, A/D yaw, Q/E strafe, R pad, Tab cycle vehicle"
+const HINT_HELI := "Flying: Godot RigidBody3D helicopter (stock)  |  Mouse aim, W/S forward/back, Space/Ctrl climb/descend, A/D yaw, Q/E strafe, R pad, Tab cycle vehicle"
 
 var _plane: Node3D
 var _heli: Node3D

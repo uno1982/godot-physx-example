@@ -3,15 +3,15 @@ extends RigidBody3D
 # game-style flight controller -- it holds a hover when you let go. Nothing
 # engine-specific: it flies the same on PhysX and Jolt.
 #
-#   Mouse    the flight assistant: the helicopter turns toward where the
-#            camera looks, and tilts to fly that way -- look down past the
-#            resting view to go forward (further = faster), up to back off.
-#   W / S    collective: climb / descend (let go and it holds its height)
-#   A / D    tail rotor: yaw in place (the aim turns with the nose)
-#   Q / E    tilt sideways: strafe left / right
-#   R        back to the pad (vehicle_swap.gd)
+#   Mouse          the flight assistant: the helicopter turns toward where
+#                  the camera looks
+#   W / S          forward / back (it tilts to fly that way)
+#   Space / Ctrl   collective: climb / descend (let go and it holds its height)
+#   A / D          tail rotor: yaw in place (the aim turns with the nose)
+#   Q / E          tilt sideways: strafe left / right
+#   R              back to the pad (vehicle_swap.gd)
 
-@export var max_speed := 40.0 # m/s forward
+@export var max_speed := 40.0 # m/s forward (backward: 40% of it)
 @export var climb_rate := 8.0 # m/s up or down
 @export var turn_rate := 90.0 # deg/s the nose turns at, at most
 @export var max_tilt := 25.0 # deg the body tilts toward where it's going
@@ -31,7 +31,6 @@ var aim_override := Vector3.ZERO
 
 const ACCELERATION := 12.0 # m/s^2 toward the speed asked for
 const RESPONSE := 5.0 # how quickly the attitude follows, 1/s
-const FULL_SPEED_LOOK := 25.0 # deg below the resting view for full speed
 const SPINUP := 1.5 # s for the rotor to reach full speed
 
 var _rotor := 0.0 # 0 stopped .. 1 flying speed
@@ -97,9 +96,10 @@ func _physics_process(delta: float) -> void:
 	# What's asked for.
 	var aim := _aim()
 	var heading_error := wrapf(atan2(aim.x, aim.z) - atan2(forward.x, forward.z), -PI, PI)
-	var look := asin(clampf(aim.y, -1.0, 1.0)) # 0 = resting view
-	var fly := clampf(-look / deg_to_rad(FULL_SPEED_LOOK), -0.3, 1.0) if active else 0.0
-	var climb := _axis(KEY_S, KEY_W) if active else 0.0
+	var fly := _axis(KEY_S, KEY_W) if active else 0.0
+	if fly < 0.0:
+		fly *= 0.4 # backing up is slower
+	var climb := _axis(KEY_CTRL, KEY_SPACE) if active else 0.0
 	var strafe := _axis(KEY_Q, KEY_E) if active else 0.0 # + = right
 	var yaw_keys := _axis(KEY_A, KEY_D) if active else 0.0 # + = right
 	if on_ground and climb <= 0.0:
