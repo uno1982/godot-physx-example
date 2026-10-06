@@ -127,7 +127,11 @@ func _physics_process(delta: float) -> void:
 	var local_v := Vector3(linear_velocity.dot(flat_right), 0.0, linear_velocity.dot(flat_forward))
 	var tilt := deg_to_rad(max_tilt)
 	var pitch_down := clampf(local_v.z / max_speed, -0.5, 1.0) * tilt
-	var bank := clampf(local_v.x / (max_speed * 0.5), -1.0, 1.0) * tilt * 0.7 + clampf(-yaw_rate / max_rate, -1.0, 1.0) * tilt * 0.3
+	# Bank from what's asked, not the sideways drift (mid-turn the momentum
+	# still carries it outward, which would lean it out of the turn): into
+	# strafes, and into turns, more the faster it flies.
+	var speed_frac := clampf(local_v.z / max_speed, 0.0, 1.0)
+	var bank := clampf(strafe * 0.7 + clampf(-yaw_rate / max_rate, -1.0, 1.0) * (0.3 + 0.7 * speed_frac), -1.0, 1.0) * tilt
 	var want_basis := Basis(Vector3.UP, atan2(flat_forward.x, flat_forward.z)) * Basis(Vector3.RIGHT, pitch_down) * Basis(Vector3.BACK, bank)
 	var err := (want_basis * b.inverse()).get_rotation_quaternion()
 	var spin := Vector3.ZERO
