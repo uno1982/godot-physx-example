@@ -1,0 +1,193 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/common/heli_rig.gd" id="1_rig"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_body"]
+albedo_color = Color(0.75, 0.15, 0.1, 1)
+metallic = 0.3
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_glass"]
+albedo_color = Color(0.12, 0.16, 0.22, 1)
+metallic = 0.6
+roughness = 0.1
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.12, 0.12, 0.13, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_trim"]
+albedo_color = Color(0.93, 0.93, 0.9, 1)
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="Mat_disc"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.7, 0.7, 0.72, 0)
+cull_mode = 2
+
+[sub_resource type="BoxShape3D" id="Shape_cabin"]
+size = Vector3(1.7, 1.6, 3.0)
+
+[sub_resource type="BoxShape3D" id="Shape_boom"]
+size = Vector3(0.35, 0.35, 4.6)
+
+[sub_resource type="BoxShape3D" id="Shape_skid"]
+size = Vector3(0.14, 0.12, 3.0)
+
+[sub_resource type="SphereMesh" id="Mesh_cabin"]
+material = SubResource("Mat_body")
+radius = 1.0
+height = 2.0
+
+[sub_resource type="SphereMesh" id="Mesh_canopy"]
+material = SubResource("Mat_glass")
+radius = 0.82
+height = 1.64
+
+[sub_resource type="CylinderMesh" id="Mesh_boom"]
+material = SubResource("Mat_body")
+top_radius = 0.12
+bottom_radius = 0.22
+height = 4.6
+
+[sub_resource type="BoxMesh" id="Mesh_fin"]
+material = SubResource("Mat_body")
+size = Vector3(0.08, 1.0, 0.6)
+
+[sub_resource type="BoxMesh" id="Mesh_stab"]
+material = SubResource("Mat_trim")
+size = Vector3(1.2, 0.06, 0.4)
+
+[sub_resource type="CylinderMesh" id="Mesh_mast"]
+material = SubResource("Mat_dark")
+top_radius = 0.08
+bottom_radius = 0.12
+height = 0.5
+
+[sub_resource type="BoxMesh" id="Mesh_blade"]
+material = SubResource("Mat_dark")
+size = Vector3(0.28, 0.05, 9.4)
+
+[sub_resource type="CylinderMesh" id="Mesh_disc"]
+material = SubResource("Mat_disc")
+top_radius = 4.7
+bottom_radius = 4.7
+height = 0.01
+
+[sub_resource type="BoxMesh" id="Mesh_tail_blade"]
+material = SubResource("Mat_trim")
+size = Vector3(0.04, 1.3, 0.12)
+
+[sub_resource type="BoxMesh" id="Mesh_skid"]
+material = SubResource("Mat_dark")
+size = Vector3(0.1, 0.1, 3.0)
+
+[sub_resource type="CylinderMesh" id="Mesh_strut"]
+material = SubResource("Mat_dark")
+top_radius = 0.04
+bottom_radius = 0.04
+height = 0.7
+
+[node name="Helicopter" type="RigidBody3D" groups=["aircraft"]]
+mass = 1200.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 1.1, 0)
+linear_damp_mode = 1
+angular_damp_mode = 1
+script = ExtResource("1_rig")
+
+[node name="Cabin" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0.3)
+shape = SubResource("Shape_cabin")
+
+[node name="Boom" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -3.2)
+shape = SubResource("Shape_boom")
+
+[node name="SkidLeft" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.06, 0.2)
+shape = SubResource("Shape_skid")
+
+[node name="SkidRight" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.06, 0.2)
+shape = SubResource("Shape_skid")
+
+[node name="GroundRay" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0.2)
+target_position = Vector3(0, -0.45, 0)
+
+[node name="CabinMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9, 0, 0, 0, 0.8, 0, 0, 0, 1.55, 0, 1.3, 0.2)
+mesh = SubResource("Mesh_cabin")
+
+[node name="Canopy" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.95, 0, 0, 0, 0.85, 0, 0, 0, 1.05, 0, 1.45, 0.95)
+mesh = SubResource("Mesh_canopy")
+
+[node name="BoomMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 1.5, -3.2)
+mesh = SubResource("Mesh_boom")
+
+[node name="Fin" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95, -5.2)
+mesh = SubResource("Mesh_fin")
+
+[node name="Stabilizer" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -4.6)
+mesh = SubResource("Mesh_stab")
+
+[node name="Mast" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0.1)
+mesh = SubResource("Mesh_mast")
+
+[node name="MainRotor" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.55, 0.1)
+
+[node name="Blade1" type="MeshInstance3D" parent="MainRotor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("Mesh_blade")
+
+[node name="Blade2" type="MeshInstance3D" parent="MainRotor"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+mesh = SubResource("Mesh_blade")
+
+[node name="Disc" type="MeshInstance3D" parent="MainRotor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("Mesh_disc")
+cast_shadow = 0
+
+[node name="TailRotor" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12, 1.95, -5.25)
+
+[node name="Blade1" type="MeshInstance3D" parent="TailRotor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("Mesh_tail_blade")
+
+[node name="Blade2" type="MeshInstance3D" parent="TailRotor"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+mesh = SubResource("Mesh_tail_blade")
+
+[node name="SkidLeftMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.06, 0.2)
+mesh = SubResource("Mesh_skid")
+
+[node name="StrutLeftFront" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.861849, -0.507165, 0, 0.507165, 0.861849, 0, 0, 0, 1, 0.65875, 0.385, 0.9)
+mesh = SubResource("Mesh_strut")
+
+[node name="StrutLeftBack" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.861849, -0.507165, 0, 0.507165, 0.861849, 0, 0, 0, 1, 0.65875, 0.385, -0.5)
+mesh = SubResource("Mesh_strut")
+
+[node name="SkidRightMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.06, 0.2)
+mesh = SubResource("Mesh_skid")
+
+[node name="StrutRightFront" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.861849, 0.507165, 0, -0.507165, 0.861849, 0, 0, 0, 1, -0.65875, 0.385, 0.9)
+mesh = SubResource("Mesh_strut")
+
+[node name="StrutRightBack" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.861849, 0.507165, 0, -0.507165, 0.861849, 0, 0, 0, 1, -0.65875, 0.385, -0.5)
+mesh = SubResource("Mesh_strut")
