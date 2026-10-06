@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://b7jvhjbn005v5" path="res://demo/common/tank_turret_rig.gd" id="9_tank_turret_rig"]
 [ext_resource type="PackedScene" path="res://demo/common/plane.tscn" id="10_plane"]
 [ext_resource type="PackedScene" path="res://demo/common/flight_ring.tscn" id="11_ring"]
+[ext_resource type="PackedScene" path="res://demo/common/heli.tscn" id="12_heli"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -184,6 +185,24 @@ roughness = 0.8
 material = SubResource("Mat_runway_line")
 size = Vector3(6, 0.02, 0.4)
 
+[sub_resource type="StandardMaterial3D" id="Mat_helipad"]
+albedo_color = Color(0.16, 0.17, 0.18, 1)
+roughness = 0.9
+
+[sub_resource type="CylinderMesh" id="Mesh_helipad"]
+material = SubResource("Mat_helipad")
+top_radius = 6.0
+bottom_radius = 6.0
+height = 0.04
+
+[sub_resource type="BoxMesh" id="Mesh_helipad_bar"]
+material = SubResource("Mat_runway_line")
+size = Vector3(0.6, 0.02, 4.0)
+
+[sub_resource type="BoxMesh" id="Mesh_helipad_cross"]
+material = SubResource("Mat_runway_line")
+size = Vector3(2.4, 0.02, 0.6)
+
 [node name="VehicleDemo" type="Node3D" unique_id=767780711]
 script = ExtResource("4_swap")
 godot_car_path = NodePath("Car")
@@ -192,6 +211,7 @@ godot_motorcycle_path = NodePath("Motorcycle")
 physx_motorcycle_path = NodePath("PhysXMotorcycle")
 physx_tank_path = NodePath("PhysXTank")
 plane_path = NodePath("Plane")
+heli_path = NodePath("Helicopter")
 plane_stats_path = NodePath("HUD/PlaneStats")
 camera_path = NodePath("ChaseCamera")
 hud_label_path = NodePath("HUD/Hint")
@@ -787,3 +807,22 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -80, 40, 60)
 
 [node name="Ring8" parent="Rings" unique_id=392963863 groups=["flight_rings"] instance=ExtResource("11_ring")]
 transform = Transform3D(-0.571064, 0, 0.820905, 0, 1, 0, -0.820905, 0, -0.571064, -12.6346, 30, -53.1371)
+
+[node name="Helipad" type="MeshInstance3D" parent="Airfield"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0.02, -55)
+mesh = SubResource("Mesh_helipad")
+
+[node name="HLeft" type="MeshInstance3D" parent="Airfield/Helipad"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.03, 0)
+mesh = SubResource("Mesh_helipad_bar")
+
+[node name="HRight" type="MeshInstance3D" parent="Airfield/Helipad"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.03, 0)
+mesh = SubResource("Mesh_helipad_bar")
+
+[node name="HCross" type="MeshInstance3D" parent="Airfield/Helipad"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = SubResource("Mesh_helipad_cross")
+
+[node name="Helicopter" parent="." instance=ExtResource("12_heli")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -40, 0.1, -55)

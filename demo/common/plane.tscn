@@ -109,7 +109,7 @@ top_radius = 0.04
 bottom_radius = 0.04
 height = 1.0
 
-[node name="Plane" type="VehicleBody3D" groups=["plane"]]
+[node name="Plane" type="VehicleBody3D" groups=["plane", "aircraft"]]
 mass = 700.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 1.4, 0.9)

@@ -1,12 +1,12 @@
 extends Node3D
-# Root script for vehicle_demo.tscn: six vehicles -- stock VehicleBody3D car,
+# Root script for vehicle_demo.tscn: seven vehicles -- stock VehicleBody3D car,
 # PhysXVehicle3D car, stock VehicleBody3D motorcycle, PhysXMotorcycle3D
-# motorcycle, PhysXTank3D, and a stock VehicleBody3D prop plane on its own
-# runway -- with one control set + camera cycling between them on a single
-# key. The plane has a ring course to fly through.
+# motorcycle, PhysXTank3D, a stock VehicleBody3D prop plane on its own runway,
+# and a stock RigidBody3D helicopter on a pad -- with one control set + camera
+# cycling between them on a single key. Both aircraft can fly the ring course.
 #
 #   Tab   cycle control/camera focus between the vehicles
-#   R     (plane) back to the runway, rings reset
+#   R     (plane / helicopter) back to the runway or pad, rings reset
 
 @export var godot_car_path: NodePath
 @export var physx_car_path: NodePath
@@ -14,6 +14,7 @@ extends Node3D
 @export var physx_motorcycle_path: NodePath
 @export var physx_tank_path: NodePath
 @export var plane_path: NodePath
+@export var heli_path: NodePath
 @export var plane_stats_path: NodePath
 @export var camera_path: NodePath
 @export var hud_label_path: NodePath
@@ -40,7 +41,10 @@ const HINT_PHYSX_MOTO := "Driving: PhysX PhysXMotorcycle3D  |  W/S throttle-brak
 const HINT_PHYSX_TANK := "Driving: PhysX PhysXTank3D  |  W/S drive, A/D pivot (skid-steer), Space brake, Left click fire, Tab cycle vehicle"
 const HINT_PLANE := "Flying: Godot VehicleBody3D stunt plane (stock)  |  W/S throttle, Mouse aim (arcade) or arrows (manual), Q/E roll, A/D yaw, C switch mode, Space brake, R runway, Tab cycle vehicle"
 
+const HINT_HELI := "Flying: Godot RigidBody3D helicopter (stock)  |  Mouse aim (look down to fly forward), W/S climb/descend, A/D yaw, Q/E strafe, R pad, Tab cycle vehicle"
+
 var _plane: Node3D
+var _heli: Node3D
 var _plane_stats: Label
 
 func _ready() -> void:
@@ -50,6 +54,10 @@ func _ready() -> void:
 		_plane = get_node(plane_path)
 		_vehicles.append(_plane)
 		_hints.append(HINT_PLANE)
+	if not heli_path.is_empty():
+		_heli = get_node(heli_path)
+		_vehicles.append(_heli)
+		_hints.append(HINT_HELI)
 	if not plane_stats_path.is_empty():
 		_plane_stats = get_node(plane_stats_path)
 	_camera = get_node(camera_path)
@@ -88,18 +96,28 @@ func _unhandled_input(event: InputEvent) -> void:
 			_camera.set_target(_plane) # aim straight down the runway again
 			for ring in get_tree().get_nodes_in_group("flight_rings"):
 				ring.reset()
+		elif event.keycode == KEY_R and _heli and _vehicles[_active_index] == _heli:
+			_heli.reset_to_pad()
+			_camera.set_target(_heli)
+			for ring in get_tree().get_nodes_in_group("flight_rings"):
+				ring.reset()
 
 
 func _process(_delta: float) -> void:
 	if not _plane_stats:
 		return
-	var flying := _plane and _vehicles[_active_index] == _plane
+	var active_vehicle: Node3D = _vehicles[_active_index]
+	var flying := (_plane and active_vehicle == _plane) or (_heli and active_vehicle == _heli)
 	_plane_stats.visible = flying
-	if flying:
-		var rings := get_tree().get_nodes_in_group("flight_rings")
-		var passed := 0
-		for ring in rings:
-			passed += 1 if ring.is_passed else 0
+	if not flying:
+		return
+	var rings := get_tree().get_nodes_in_group("flight_rings")
+	var passed := 0
+	for ring in rings:
+		passed += 1 if ring.is_passed else 0
+	if active_vehicle == _heli:
+		_plane_stats.text = "HELICOPTER   speed %3.0f km/h   altitude %4.0f m   rings %d / %d" % [_heli.airspeed() * 3.6, _heli.global_position.y, passed, rings.size()]
+	else:
 		_plane_stats.text = "%s   airspeed %3.0f km/h   altitude %4.0f m   throttle %3.0f%%   rings %d / %d" % [
 			"ARCADE (C: manual)" if _plane.control_mode == _plane.ControlMode.ARCADE else "MANUAL (C: arcade)",
 			_plane.airspeed() * 3.6, _plane.global_position.y, _plane.throttle * 100.0, passed, rings.size()]

@@ -1,7 +1,8 @@
 extends Area3D
 # A ring to fly through: an Area3D whose disc-shaped collision fills the hole.
-# The first time something in the "plane" group passes through, it turns
-# green and emits `passed`. reset() makes it count again.
+# The first time something in the "aircraft" group (the plane, the
+# helicopter) passes through, it turns green and emits `passed`. reset() makes
+# it count again.
 
 signal passed
 
@@ -21,7 +22,7 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node3D) -> void:
-	if is_passed or not body.is_in_group("plane"):
+	if is_passed or not body.is_in_group("aircraft"):
 		return
 	is_passed = true
 	_paint()
