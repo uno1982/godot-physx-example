@@ -73,6 +73,9 @@ steam, dust, signal smoke) to instance or copy.
 | `presets.tscn` | The five presets side by side -- five independent flows at once. |
 | `dust_trail.tscn` | A cart circling on a `MovingPlatform` hub kicks dust up from its rear wheels; the emitters ride along inside the cart, the flow sits at the scene root. |
 | `moving_collider.tscn` | A slab sweeping back and forth through a fire plume, pushing the smoke aside as it passes. |
+| `flame_thrower.tscn` | A burning fuel jet fired at a wall, rolling into fire across it. Nozzle-like emitters need a high `couple_rate` (Flow's default 2 only nudges the gas) and low `buoyancy` so the burning jet holds its line. |
+| `jet_flame.tscn` | A jet engine's exhaust at night: a sharp white-hot core cone (`demo/flow/jet_core_solid.gdshader`) with the Flow plume carrying on past it. The core is an opaque glowing mesh, so Flow -- drawn after transparent geometry as usual -- composites around it; `divergence` below zero on the nozzle keeps the plume a tight stream. |
+| `torch.tscn` | A blowtorch drawn entirely by `demo/flow/jet_cone.gdshader`: a crisp, additive blue cone with a white-hot inner cone. A fluid grid can't resolve a flame front that thin, so the sharp part is a mesh. |
 
 ### `demo/cpu/`
 
