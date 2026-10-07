@@ -1,7 +1,7 @@
 extends SceneTree
 
 # PhysXFlow3D's GPU render: a hot emitter for 3 s in front of a camera. Every
-# Flow pipeline must compile through RenderingDevice.
+# Flow pipeline it runs must compile through RenderingDevice.
 # Flow's own ray marcher draws it into Godot's frame every frame, straight
 # from the GPU (nothing read back). Needs a window (headless has no
 # RenderingDevice):
@@ -53,7 +53,9 @@ func _physics_process(_delta: float) -> bool:
 		_step.append(s.step_ms)
 	if _tick == 180:
 		_check("Flow running", s.running, str(s.error))
-		_check("every Flow pipeline compiled", s.get("pipelines", 0) > 50 and s.get("pipeline_failures", -1) == 0, "%s ok, %s failed, start %.0f ms" % [s.get("pipelines"), s.get("pipeline_failures"), s.start_ms])
+		# Pipelines are built on first use: the ~30 a smoke grid runs, not all
+		# ~120 Flow registers.
+		_check("every Flow pipeline it ran compiled", s.get("pipelines", 0) >= 20 and s.get("pipeline_failures", -1) == 0, "%s ok, %s failed, start %.0f ms" % [s.get("pipelines"), s.get("pipeline_failures"), s.start_ms])
 		_check("compute passes ran last frame", s.get("passes", 0) > 0, "%s passes, frame %s done %s" % [s.get("passes"), s.get("frame"), s.get("frame_completed")])
 		_check("drawn by Flow's ray marcher every frame", s.render_calls > 0 and s.render_outputs == s.render_calls, "%d frames" % s.render_calls)
 		_check("nothing read back to the CPU", s.readback_bytes == 0, "%d bytes" % s.readback_bytes)
