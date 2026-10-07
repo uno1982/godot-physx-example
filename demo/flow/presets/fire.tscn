@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[sub_resource type="Gradient" id="SmokeRamp"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.6, 0.6, 0.6, 1, 0.1, 0.1, 0.1, 1)
+
+[node name="Fire" type="PhysXFlow3D"]
+smoke_fade = 0.4
+smoke_density = 4.0
+smoke_color = Color(0.4, 0.4, 0.4, 1)
+emission_strength = 8.0
+smoke_ramp = SubResource("SmokeRamp")
+
+[node name="Emitter" type="PhysXFlowEmitter3D" parent="."]
+flow = NodePath("..")
+radius = 0.4
+velocity = Vector3(0, 3, 0)
+temperature = 2.0
+fuel = 1.5
+smoke = 0.3

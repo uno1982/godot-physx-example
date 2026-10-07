@@ -1,0 +1,106 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/common/fly_camera_node.gd" id="1_cam"]
+[ext_resource type="PackedScene" path="res://demo/flow/presets/fire.tscn" id="p0"]
+[ext_resource type="PackedScene" path="res://demo/flow/presets/black_smoke.tscn" id="p1"]
+[ext_resource type="PackedScene" path="res://demo/flow/presets/steam.tscn" id="p2"]
+[ext_resource type="PackedScene" path="res://demo/flow/presets/dust.tscn" id="p3"]
+[ext_resource type="PackedScene" path="res://demo/flow/presets/signal_smoke.tscn" id="p4"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_horizon_color = Color(0.66, 0.69, 0.74, 1)
+ground_horizon_color = Color(0.66, 0.69, 0.74, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+ambient_light_color = Color(0.55, 0.6, 0.7, 1)
+ambient_light_energy = 0.6
+tonemap_mode = 4
+
+[sub_resource type="BoxShape3D" id="Shape_ground"]
+size = Vector3(60, 1, 60)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.42, 0.4, 0.37, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_ground"]
+material = SubResource("Mat_ground")
+size = Vector3(60, 1, 60)
+
+[node name="FlowPresets" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 10, 0)
+light_energy = 2.0
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("Shape_ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("Mesh_ground")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, -0.173648, 0, 0.173648, 0.984808, 0, 4, 17)
+script = ExtResource("1_cam")
+
+[node name="Fire" parent="." instance=ExtResource("p0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 0)
+
+[node name="Label" type="Label3D" parent="Fire"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.8)
+pixel_size = 0.01
+text = "Fire"
+font_size = 48
+outline_size = 12
+
+[node name="BlackSmoke" parent="." instance=ExtResource("p1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 0)
+
+[node name="Label" type="Label3D" parent="BlackSmoke"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.8)
+pixel_size = 0.01
+text = "Black smoke"
+font_size = 48
+outline_size = 12
+
+[node name="Steam" parent="." instance=ExtResource("p2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="Label" type="Label3D" parent="Steam"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.8)
+pixel_size = 0.01
+text = "Steam"
+font_size = 48
+outline_size = 12
+
+[node name="Dust" parent="." instance=ExtResource("p3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.5, 0)
+
+[node name="Label" type="Label3D" parent="Dust"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.8)
+pixel_size = 0.01
+text = "Dust"
+font_size = 48
+outline_size = 12
+
+[node name="SignalSmoke" parent="." instance=ExtResource("p4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.5, 0)
+
+[node name="Label" type="Label3D" parent="SignalSmoke"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.8)
+pixel_size = 0.01
+text = "Signal smoke"
+font_size = 48
+outline_size = 12

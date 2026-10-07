@@ -20,6 +20,13 @@ Scenes and tests are grouped by what they need:
   `godot_physx` build.
 - **`gpu/`** — GPU particle fluids (`PhysXParticleFluid3D`). Needs an engine
   built with `physx_gpu=yes` and a CUDA device; inert otherwise.
+- **`flow/`** — NVIDIA Flow smoke, fire and dust (`PhysXFlow3D`). Needs an
+  engine built with `flow_sdk=<path to the Flow SDK>` (the `flow` folder of the
+  PhysX repo, built with its `build.bat`), `nvflow.dll` and `nvflowext.dll`
+  next to the editor binary (the build copies them), and the Forward+ or
+  Mobile renderer. Any GPU works -- Flow runs on Godot's own Vulkan or
+  Direct3D 12 device, not CUDA. Without Flow in the build its scenes still
+  open, with the Flow nodes as placeholders.
 
 `PhysXCloth3D` runs on the GPU (a PhysX deformable surface) when CUDA is present
 and falls back to a built-in CPU solver otherwise, like GPU rigid dynamics — so
@@ -50,6 +57,22 @@ viewport gizmo and inspector, then press Play.
 | `cpu/picking.tscn` | Mouse picking and area queries, set in the Inspector: hover lights objects up and clicks react (`input_event`), Area3D zones included. A glass pane with `input_ray_pickable` off lets you click the zone behind it; one with it on blocks. Click the crate to kick it. A `RayCast3D` laser sweeps the zones -- `T` toggles its `collide_with_areas`. |
 | `cpu/stairs.tscn` | `SeparationRayShape3D`: two bots walk up identical 0.3 m stairs -- the one standing on a ray climbs, the capsule-only one stops at the first step. Walk them yourself on the same setup. A hover sled (a `RigidBody3D` on four corner rays) floats over bumps when you walk into it. Select a ray's `CollisionShape3D` to see it. |
 | `cpu/vehicle_demo.tscn` | Seven vehicles on one track, `Tab` to switch: a stock `VehicleBody3D` car and motorcycle and their `PhysXVehicle3D` / `PhysXMotorcycle3D` counterparts, a `PhysXTank3D` (left click fires), and a stock `VehicleBody3D` arcade stunt plane on its own runway with eight rings to fly through (`demo/common/plane.tscn`: tricycle gear for the runway; in the air it flies where its nose points and turns toward the mouse aim, banking into turns -- `C` switches to manual stick controls; moving control surfaces and prop), and a stock `RigidBody3D` helicopter on a pad (`demo/common/heli.tscn`: hovers when you let go; it turns toward the mouse aim, W/S forward/back, Space/Ctrl climb/descend, A/D yaw, Q/E strafe; spinning main and tail rotors) that can fly the same rings. Red vehicles are stock nodes and run on any engine; blue ones are PhysX nodes. |
+
+### `demo/editor/flow/` — NVIDIA Flow
+
+Each flow is a `PhysXFlow3D` (the simulation, how it looks) fed by
+`PhysXFlowEmitter3D` nodes (where gas comes from); an emitter's `flow` path
+picks which flow it feeds, or with it empty, the scene's only one -- so an
+emitter can live inside a vehicle scene. Physics bodies near the gas are solids
+it flows around. `demo/flow/presets/` holds ready-made looks (fire, black smoke,
+steam, dust, signal smoke) to instance or copy.
+
+| Scene | What it shows |
+| --- | --- |
+| `smoke_plume.tscn` | A fire plume rolling over a tilted box: select the flow or the emitter to tune them while it runs in the editor. |
+| `presets.tscn` | The five presets side by side -- five independent flows at once. |
+| `dust_trail.tscn` | A cart circling on a `MovingPlatform` hub kicks dust up from its rear wheels; the emitters ride along inside the cart, the flow sits at the scene root. |
+| `moving_collider.tscn` | A slab sweeping back and forth through a fire plume, pushing the smoke aside as it passes. |
 
 ### `demo/cpu/`
 
@@ -106,6 +129,12 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
 - **`test/gpu/`** — `particle_fluid_test`, `particle_emit_test`,
   `particle_foam_test`, `soft_body_gpu_test` (`PxDeformableVolume` — fall,
   collide, deform, impulse, pin). These `SKIP` (exit 0) without a CUDA device.
+- **`test/flow/`** — `flow_smoke_test` (gas rises, `sample_smoke`),
+  `flow_targets_test` (emitters feed the flow their `flow` path names),
+  `flow_render_test` (the render effect draws), `flow_compositor_test` (user
+  compositors are left as they were, no compositors left behind). Flow needs a
+  RenderingDevice, so these run **windowed** (drop `--headless`); they `SKIP`
+  in a build without Flow.
 
 Both `physx_showcase` and `physx_rid_showcase` also take a headless benchmark
 mode — no window, no rendering — that prints physics step time and rate:

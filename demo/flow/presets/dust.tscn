@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[node name="Dust" type="PhysXFlow3D"]
+smoke_fade = 0.35
+smoke_density = 6.0
+smoke_color = Color(0.62, 0.52, 0.4, 1)
+emission_strength = 0.0
+buoyancy = 0.3
+
+[node name="Emitter" type="PhysXFlowEmitter3D" parent="."]
+flow = NodePath("..")
+radius = 0.6
+velocity = Vector3(0, 0.6, 0)
+temperature = 0.05
+smoke = 2.0
