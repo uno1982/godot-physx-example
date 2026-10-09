@@ -14,6 +14,10 @@ editor binary. `project.godot` already selects the PhysX backend:
 3d/physics_engine="PhysX"
 ```
 
+The engine module itself lives in
+[uno1982/godot](https://github.com/uno1982/godot), `modules/godot_physx`, on
+the `feature/physx5-module` branch.
+
 Scenes and tests are grouped by what they need:
 
 - **`cpu/`** — rigid bodies, joints, characters, areas, queries. Works with any
