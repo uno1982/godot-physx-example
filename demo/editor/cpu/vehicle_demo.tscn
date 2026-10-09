@@ -671,14 +671,34 @@ transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_tank_wheel")
 
 [node name="Wall" type="PhysXDestructible3D" parent="." unique_id=111584850]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.831232, 5.7871094, 35.047466)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.831232, 5.7871094, 28.941772)
 blast_asset = ExtResource("4_d5aud")
+shatter_speed = 11.1
 auto_mass = false
-mass = 1.317
+mass = 20.0
 dynamic = true
+impact_strength = 2.0
+impact_damage_scale = 3.04
+impact_radius = 10.0
 
 [node name="screenshotcam" type="Camera3D" parent="Wall" unique_id=1332322632]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 17.965233)
+
+[node name="Label3D" type="Label3D" parent="Wall" unique_id=2074014586]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0.8032446, 4.5909605, -1.8917542)
+text = "DYNAMIC"
+font_size = 120
+
+[node name="WallStatic" type="PhysXDestructible3D" parent="." unique_id=100000100]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.87973, 5.5870733, 28.850052)
+blast_asset = ExtResource("4_d5aud")
+auto_mass = false
+mass = 1.317
+
+[node name="Label3D" type="Label3D" parent="WallStatic" unique_id=483171377]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 1.2484436, 4.5909605, -1.8917542)
+text = "STATIC"
+font_size = 120
 
 [node name="ChaseCamera" type="Node3D" parent="." unique_id=598304933]
 physics_interpolation_mode = 2
@@ -700,7 +720,7 @@ offset_left = 16.0
 offset_top = 16.0
 offset_right = 500.0
 offset_bottom = 46.0
-text = "Driving: Godot VehicleBody3D (stock)  |  W/S throttle-reverse, A/D steer, Space brake, Tab swap car, Mouse look (Esc to release)"
+text = "Driving: Godot VehicleBody3D (stock)  |  W/S throttle-reverse, A/D steer, Space brake, Tab swap car, Mouse look (Esc to release)  |  L-click cannon (shatters the falling wall), hold R-click machine gun (chips pieces off the standing wall)"
 
 [node name="PlaneStats" type="Label" parent="HUD" unique_id=818277926]
 visible = false
