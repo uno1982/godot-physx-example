@@ -71,7 +71,8 @@ func _apply_lean_control(_steer: float) -> void:
 	# Correct around the HEADING-projected forward (flattened to the
 	# horizontal plane) -- see motorcycle_probe_test.gd's identical fix for
 	# why (rotating around a pitched forward axis leaks into world-frame yaw).
-	var raw_forward := _bike.get_forward()
+	# (-get_forward(): this controller was tuned when get_forward() returned the local -Z; negated it is that same axis.)
+	var raw_forward := -_bike.get_forward()
 	var flat_forward := Vector3(raw_forward.x, 0.0, raw_forward.z)
 	if flat_forward.length() < 0.001:
 		return

@@ -141,8 +141,9 @@ func _physics_process(delta: float) -> void:
 	if Input.is_key_pressed(KEY_D):
 		turn -= 1.0
 
-	var target_left := clampf(base + turn, -1.0, 1.0)
-	var target_right := clampf(base - turn, -1.0, 1.0)
+	# A (turn > 0) turns left: the left track slows, the right speeds up.
+	var target_left := clampf(base - turn, -1.0, 1.0)
+	var target_right := clampf(base + turn, -1.0, 1.0)
 	left_ratio = move_toward(left_ratio, target_left, ratio_speed * delta)
 	right_ratio = move_toward(right_ratio, target_right, ratio_speed * delta)
 	brake = 1.0 if Input.is_key_pressed(KEY_SPACE) else 0.0

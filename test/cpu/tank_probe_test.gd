@@ -84,7 +84,7 @@ func _tick() -> void:
 	_probe.step(1.0 / 60.0, left_ratio, right_ratio, 0.0)
 
 	if _t == 150:
-		_start_yaw = _probe.get_forward().signed_angle_to(Vector3(0, 0, -1), Vector3.UP)
+		_start_yaw = _probe.get_forward().signed_angle_to(Vector3(0, 0, 1), Vector3.UP)
 
 	if _t % 30 == 0:
 		var dist := pos.distance_to(_start_pos)
@@ -94,7 +94,7 @@ func _tick() -> void:
 	if _t >= 320:
 		var final_pos := _probe.get_position()
 		var straight_dist := Vector3(_start_pos.x, 0, _start_pos.z).distance_to(Vector3(final_pos.x, 0, final_pos.z))
-		var end_yaw := _probe.get_forward().signed_angle_to(Vector3(0, 0, -1), Vector3.UP)
+		var end_yaw := _probe.get_forward().signed_angle_to(Vector3(0, 0, 1), Vector3.UP)
 		var yaw_change_during_pivot := absf(angle_difference(_start_yaw, end_yaw))
 		print("[tank-probe] done. final_pos=%s straight_dist=%.2f yaw_change_during_pivot=%.2f rad" % [
 			final_pos, straight_dist, yaw_change_during_pivot])

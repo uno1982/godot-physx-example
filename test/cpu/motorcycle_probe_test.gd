@@ -57,7 +57,7 @@ func _tick() -> void:
 	# real balance logic to survive the run -- see this file's own doc
 	# comment for why no such logic lives here anymore.
 	var roll := _probe.get_roll_angle()
-	_probe.set_angular_velocity(_probe.get_angular_velocity() - _probe.get_forward() * roll * 4.0)
+	_probe.set_angular_velocity(_probe.get_angular_velocity() + _probe.get_forward() * roll * 4.0)
 
 	var throttle := 1.0
 	var steer := 0.0

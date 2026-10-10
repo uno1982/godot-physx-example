@@ -191,7 +191,8 @@ func _apply_lean_control() -> void:
 	# "forward" points) doesn't carry the same risk as the terms above: it's
 	# only used as the axis to nudge angular velocity along, and roll_rate/
 	# new_roll_rate are already correctly signed relative to roll itself.
-	var raw_forward := get_forward()
+	# (-get_forward(): this controller was tuned when get_forward() returned the local -Z; negated it is that same axis.)
+	var raw_forward := -get_forward()
 	var flat_forward := Vector3(raw_forward.x, 0.0, raw_forward.z)
 	if flat_forward.length() < 0.001:
 		return
@@ -202,7 +203,8 @@ func _apply_lean_control() -> void:
 		set_angular_velocity(corrected_angular_velocity)
 
 func _apply_pitch_stabilization() -> void:
-	var forward := get_forward()
+	# (-get_forward(): this controller was tuned when get_forward() returned the local -Z; negated it is that same axis.)
+	var forward := -get_forward()
 	var right_now := global_transform.basis.x
 	var angular_velocity := get_angular_velocity()
 
