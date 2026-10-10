@@ -28,8 +28,10 @@ var _node
 var _tick := 0
 var _total := 0
 var _max_live := 0
-var _settle_sum_y := NAN
-var _post_sum_y := NAN
+var _settle_sum_y := 0.0
+var _post_sum_y := 0.0
+var _settle_measured := false
+var _post_measured := false
 
 func _initialize() -> void:
 	print("[u24d] engine = ", ProjectSettings.get_setting("physics/3d/physics_engine", "?"))
@@ -96,6 +98,7 @@ func _physics_process(_delta: float) -> bool:
 		# floor the only motion is gravity, so live piece bodies MUST have
 		# dropped measurably below the frozen node origin by now.
 		_settle_sum_y = _sum_piece_y()
+		_settle_measured = true
 		print("[u24d] settle: mean piece y=", _settle_sum_y / live,
 				" vs node y=", NODE_ORIGIN.y, " (drift window)")
 
@@ -121,6 +124,7 @@ func _physics_process(_delta: float) -> bool:
 
 	if _tick == 50:
 		_post_sum_y = _sum_piece_y()
+		_post_measured = true
 		print("[u24d] post-split: mean piece y=", _post_sum_y / _node.get_piece_count(),
 				" (was ", _settle_sum_y / LEAF_COUNT, " at settle)")
 
@@ -148,7 +152,7 @@ func _physics_process(_delta: float) -> bool:
 		# would sit right at NODE_ORIGIN; post-fix every piece inherited
 		# its predecessor's falling pose and kept falling (~1.5 s of
 		# gravity by now -> several meters below).
-		var min_dist := INF
+		var min_dist := 1e20
 		var closest_chunk := -1
 		for i in n:
 			var xf: Transform3D = _node.get_piece_transform(i)

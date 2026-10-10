@@ -144,14 +144,14 @@ bottom_radius = 0.3
 height = 0.15
 radial_segments = 16
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_7yygr"]
+size = Vector3(2.188623, 0.6036377, 4.035895)
+
 [sub_resource type="BoxMesh" id="BoxMesh_wh2v7"]
 size = Vector3(1, 0.45214844, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_s2fja"]
 size = Vector3(0.25, 0.25, 2.5)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_7yygr"]
-size = Vector3(1.4525146, 0.6741028, 1.9719543)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_tank_wheel"]
 top_radius = 0.35
@@ -522,6 +522,10 @@ mesh = SubResource("CylinderMesh_physx_moto_wheel")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.24120498, -24.651382)
 script = ExtResource("7_physx_tank_rig")
 
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PhysXTank" unique_id=2090634730]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.053894043, 0.6636689, 0.0116996765)
+shape = SubResource("BoxShape3D_7yygr")
+
 [node name="Turret" type="Node3D" parent="PhysXTank" unique_id=1172400001]
 script = ExtResource("9_tank_turret_rig")
 
@@ -537,10 +541,6 @@ mesh = SubResource("BoxMesh_s2fja")
 transform = Transform3D(1.5251405, 0, 0, 0, 1, 0, 0, 0, 2.0072768, 0, 0.19291997, 0)
 material_override = ExtResource("6_42fnc")
 mesh = ExtResource("8_61xs6")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PhysXTank" unique_id=2090634730]
-transform = Transform3D(1.5251405, 0, 0, 0, 1, 0, 0, 0, 2.0072768, 0.019640923, 0.61185, -0.017242432)
-shape = SubResource("BoxShape3D_7yygr")
 
 [node name="WheelL0" type="PhysXVehicleWheel3D" parent="PhysXTank" unique_id=100000043]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.1, 1.5)
