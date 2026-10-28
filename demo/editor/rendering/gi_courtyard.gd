@@ -5,7 +5,8 @@ extends Node3D
 # material, the probe or the GI node's settings directly. GI runs in the editor viewport too.
 #
 #   G        GI: PXTGI / Godot's SDFGI (decent settings) / none
-#   R        our reflections: traced / screen space / Godot's own
+#   R        our reflections: traced + probes / traced / screen space / Godot's own (traced + probes: PXTGI draws
+#            the probes whose intensity is 0 itself, tracing below the roughness cutoff)
 #   F        Godot's screen-space reflections (SSR) on / off
 #   P        reflection probe on / off (inside its box the probe's cubemap replaces the traced reflections, as it
 #            does SDFGI's: compare the mirror sphere)
@@ -58,8 +59,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_G:
 			_set_gi((_gi_mode + 1) % 3)
 		KEY_R:
-			# Traced -> screen space -> Godot's own.
-			_gi.set("reflection_mode", (int(_gi.get("reflection_mode")) + 2) % 3)
+			# Traced + probes -> traced -> screen space -> Godot's own.
+			_gi.set("reflection_mode", (int(_gi.get("reflection_mode")) + 3) % 4)
 		KEY_F:
 			_env.ssr_enabled = not _env.ssr_enabled
 		KEY_P:
@@ -88,7 +89,7 @@ func _process(delta: float) -> void:
 		_sun.transform = Transform3D(Basis.looking_at(-at), at)
 
 	var gi_names: Array[String] = ["PXTGI", "Godot SDFGI (decent)", "none"]
-	var refl_names: Array[String] = ["Godot's own", "screen space", "traced"]
+	var refl_names: Array[String] = ["Godot's own", "screen space", "traced", "traced + probes"]
 	var debug_names := {0: "off", 3: "world only", 4: "world hits", 5: "world position"}
 	var refl: String = refl_names[int(_gi.get("reflection_mode"))] if _gi_mode == 0 else "-"
 	var dbg: String = debug_names.get(int(_gi.get("debug")), "?") if _gi_mode == 0 else "-"
