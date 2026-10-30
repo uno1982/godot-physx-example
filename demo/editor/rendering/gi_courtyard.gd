@@ -6,7 +6,8 @@ extends Node3D
 #
 #   G        GI: PXTGI / Godot's SDFGI (decent settings) / none
 #   R        our reflections: traced + probes / traced / screen space / Godot's own (traced + probes: PXTGI draws
-#            the probes whose intensity is 0 itself, tracing below the roughness cutoff)
+#            the probes whose intensity is 0 itself, tracing below the roughness cutoff; the demo sets the probe so
+#            then, intensity 0 with its shadows, and back to the scene's own settings in the other modes)
 #   F        Godot's screen-space reflections (SSR) on / off
 #   P        reflection probe on / off (inside its box the probe's cubemap replaces the traced reflections, as it
 #            does SDFGI's: compare the mirror sphere)
@@ -23,6 +24,8 @@ extends Node3D
 @onready var _label: Label = $HUD/Label
 
 var _gi_mode := 0 # 0 PXTGI, 1 SDFGI, 2 none
+var _probe_intensity := 1.0 # the probe's own settings, given back when leaving traced + probes
+var _probe_shadows := false
 var _sun_distance := 0.0
 var _sun_yaw := 0.0
 var _sun_pitch := 0.0
@@ -34,6 +37,17 @@ func _ready() -> void:
 	_sun_yaw = atan2(at.x, at.z)
 	_sun_pitch = asin(at.y / _sun_distance)
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+	_probe_intensity = _probe.intensity
+	_probe_shadows = _probe.enable_shadows
+	_sync_probe()
+
+
+# Traced + probes draws the probe itself only when Godot doesn't (intensity 0), and needs the probe's capture to have
+# shadows; the other modes show the probe as the scene sets it.
+func _sync_probe() -> void:
+	var drawn_by_pxtgi := int(_gi.get("reflection_mode")) == 3
+	_probe.intensity = 0.0 if drawn_by_pxtgi else _probe_intensity
+	_probe.enable_shadows = true if drawn_by_pxtgi else _probe_shadows
 
 
 func _set_gi(mode: int) -> void:
@@ -61,6 +75,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_R:
 			# Traced + probes -> traced -> screen space -> Godot's own.
 			_gi.set("reflection_mode", (int(_gi.get("reflection_mode")) + 3) % 4)
+			_sync_probe()
 		KEY_F:
 			_env.ssr_enabled = not _env.ssr_enabled
 		KEY_P:
