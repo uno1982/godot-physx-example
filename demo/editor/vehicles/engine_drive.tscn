@@ -1,0 +1,494 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/common/engine_drive_demo.gd" id="1_mq3hc"]
+[ext_resource type="Script" path="res://demo/common/physx_vehicle_rig.gd" id="2_5xkt3"]
+[ext_resource type="Script" path="res://demo/common/vehicle_chase_camera.gd" id="3_rrhh6"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+ambient_light_source = 2
+ambient_light_color = Color(0.26, 0.26, 0.26, 1)
+ambient_light_energy = 2.2
+tonemap_mode = 3
+ssr_enabled = true
+ssil_enabled = true
+sdfgi_enabled = true
+glow_enabled = true
+glow_bloom = 0.08
+fog_sun_scatter = 0.6
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.004
+
+[sub_resource type="Gradient" id="Gradient_e3wys"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.8)
+colors = PackedColorArray(0.2, 0.22, 0.2, 1, 0.5, 0.52, 0.5, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dsn52"]
+gradient = SubResource("Gradient_e3wys")
+width = 8
+fill_to = Vector2(0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tlv3w"]
+albedo_texture = SubResource("GradientTexture2D_dsn52")
+uv1_scale = Vector3(1, 200, 1)
+texture_filter = 5
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_huhus"]
+size = Vector2(60, 2000)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wwe10"]
+size = Vector3(60, 0.5, 2000)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sfo33"]
+albedo_color = Color(0.9, 0.75, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1arna"]
+size = Vector3(0.3, 2, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7vq3i"]
+size = Vector3(1.2970581, 0.60046387, 1.1694336)
+
+[sub_resource type="StandardMaterial3D" id="Mat_physx_chassis"]
+albedo_color = Color(0.1, 0.35, 0.8, 1)
+metallic = 0.3
+roughness = 0.35
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_physx_chassis"]
+size = Vector3(1.4, 0.8, 3.7)
+
+[sub_resource type="BoxMesh" id="BoxMesh_physx_chassis"]
+size = Vector3(1.4, 0.8, 3.7)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_physx_wheel"]
+top_radius = 0.4
+bottom_radius = 0.4
+height = 0.3
+radial_segments = 16
+
+[node name="EngineDriveDemo" type="Node3D" unique_id=134137860]
+script = ExtResource("1_mq3hc")
+car_path = NodePath("PhysXCar")
+gauge_path = NodePath("HUD/Gauge")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=416939571]
+transform = Transform3D(1, 0, 0, 0, 0.6, 0.8, 0, -0.8, 0.6, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=252051841]
+environment = SubResource("Environment_1")
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=1750381789]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 950)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=1676688150]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+material_override = SubResource("StandardMaterial3D_tlv3w")
+mesh = SubResource("PlaneMesh_huhus")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1554396684]
+shape = SubResource("BoxShape3D_wwe10")
+
+[node name="Post100L" type="MeshInstance3D" parent="." unique_id=1931091974]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 100)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post100L" unique_id=967943399]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "100 m"
+font_size = 96
+
+[node name="Post100R" type="MeshInstance3D" parent="." unique_id=1884173083]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 100)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post200L" type="MeshInstance3D" parent="." unique_id=897524920]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 200)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post200L" unique_id=951556806]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "200 m"
+font_size = 96
+
+[node name="Post200R" type="MeshInstance3D" parent="." unique_id=31803028]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 200)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post300L" type="MeshInstance3D" parent="." unique_id=805625536]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 300)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post300L" unique_id=80016087]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "300 m"
+font_size = 96
+
+[node name="Post300R" type="MeshInstance3D" parent="." unique_id=1560991962]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 300)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post400L" type="MeshInstance3D" parent="." unique_id=1296849349]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 400)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post400L" unique_id=563729845]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "400 m"
+font_size = 96
+
+[node name="Post400R" type="MeshInstance3D" parent="." unique_id=924998488]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 400)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post500L" type="MeshInstance3D" parent="." unique_id=1037684106]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 500)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post500L" unique_id=204446048]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "500 m"
+font_size = 96
+
+[node name="Post500R" type="MeshInstance3D" parent="." unique_id=1056606611]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 500)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post600L" type="MeshInstance3D" parent="." unique_id=517606031]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 600)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post600L" unique_id=1857074347]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "600 m"
+font_size = 96
+
+[node name="Post600R" type="MeshInstance3D" parent="." unique_id=1965023012]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 600)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post700L" type="MeshInstance3D" parent="." unique_id=839373524]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 700)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post700L" unique_id=1513738285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "700 m"
+font_size = 96
+
+[node name="Post700R" type="MeshInstance3D" parent="." unique_id=1309282788]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 700)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post800L" type="MeshInstance3D" parent="." unique_id=193279157]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 800)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post800L" unique_id=321028866]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "800 m"
+font_size = 96
+
+[node name="Post800R" type="MeshInstance3D" parent="." unique_id=288889651]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 800)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post900L" type="MeshInstance3D" parent="." unique_id=1185929291]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 900)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post900L" unique_id=1061079018]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "900 m"
+font_size = 96
+
+[node name="Post900R" type="MeshInstance3D" parent="." unique_id=1318493125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 900)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1000L" type="MeshInstance3D" parent="." unique_id=474587597]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1000)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1000L" unique_id=722119782]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1000 m"
+font_size = 96
+
+[node name="Post1000R" type="MeshInstance3D" parent="." unique_id=962519810]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1000)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1100L" type="MeshInstance3D" parent="." unique_id=1922108153]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1100)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1100L" unique_id=21549976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1100 m"
+font_size = 96
+
+[node name="Post1100R" type="MeshInstance3D" parent="." unique_id=74128123]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1100)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1200L" type="MeshInstance3D" parent="." unique_id=145642204]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1200)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1200L" unique_id=1924309421]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1200 m"
+font_size = 96
+
+[node name="Post1200R" type="MeshInstance3D" parent="." unique_id=322952480]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1200)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1300L" type="MeshInstance3D" parent="." unique_id=196646559]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1300)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1300L" unique_id=1689595776]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1300 m"
+font_size = 96
+
+[node name="Post1300R" type="MeshInstance3D" parent="." unique_id=254337118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1300)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1400L" type="MeshInstance3D" parent="." unique_id=1737423431]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1400)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1400L" unique_id=289294279]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1400 m"
+font_size = 96
+
+[node name="Post1400R" type="MeshInstance3D" parent="." unique_id=1099318197]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1400)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1500L" type="MeshInstance3D" parent="." unique_id=707432703]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1500)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1500L" unique_id=301073815]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1500 m"
+font_size = 96
+
+[node name="Post1500R" type="MeshInstance3D" parent="." unique_id=1241681411]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1500)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1600L" type="MeshInstance3D" parent="." unique_id=1125964988]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1600)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1600L" unique_id=1471656737]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1600 m"
+font_size = 96
+
+[node name="Post1600R" type="MeshInstance3D" parent="." unique_id=310281222]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1600)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1700L" type="MeshInstance3D" parent="." unique_id=56055371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1700)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1700L" unique_id=1237033208]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1700 m"
+font_size = 96
+
+[node name="Post1700R" type="MeshInstance3D" parent="." unique_id=2119635361]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1700)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1800L" type="MeshInstance3D" parent="." unique_id=555868538]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1800)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1800L" unique_id=733797669]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1800 m"
+font_size = 96
+
+[node name="Post1800R" type="MeshInstance3D" parent="." unique_id=917903225]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1800)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Post1900L" type="MeshInstance3D" parent="." unique_id=537840810]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1900)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="Label" type="Label3D" parent="Post1900L" unique_id=1382187485]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+text = "1900 m"
+font_size = 96
+
+[node name="Post1900R" type="MeshInstance3D" parent="." unique_id=553085169]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1, 1900)
+material_override = SubResource("StandardMaterial3D_sfo33")
+mesh = SubResource("BoxMesh_1arna")
+
+[node name="PhysXCar" type="PhysXVehicle3D" parent="." unique_id=653767649]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+moment_of_inertia = Vector3(2000, 2000, 1000)
+drivetrain = 1
+script = ExtResource("2_5xkt3")
+steer_speed = 5.0
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="PhysXCar" unique_id=989535629]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.001739502, 1.3449407, 1.2301985)
+mesh = SubResource("BoxMesh_7vq3i")
+surface_material_override/0 = SubResource("Mat_physx_chassis")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PhysXCar" unique_id=2055838423]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6497346, 0)
+shape = SubResource("BoxShape3D_physx_chassis")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar" unique_id=1628302009]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6497346, 0)
+mesh = SubResource("BoxMesh_physx_chassis")
+surface_material_override/0 = SubResource("Mat_physx_chassis")
+
+[node name="WheelFL" type="PhysXVehicleWheel3D" parent="PhysXCar" unique_id=1554043958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0, 1.35)
+radius = 0.4
+suspension_travel = 0.55
+suspension_stiffness = 37400.0
+tire_lateral_stiffness = 68800.0
+tire_friction = 1.87
+use_as_steering = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar/WheelFL" unique_id=1765288305]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_physx_wheel")
+
+[node name="WheelFR" type="PhysXVehicleWheel3D" parent="PhysXCar" unique_id=1633602044]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 1.35)
+radius = 0.4
+suspension_travel = 0.55
+suspension_stiffness = 37400.0
+tire_lateral_stiffness = 68800.0
+tire_friction = 1.87
+use_as_steering = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar/WheelFR" unique_id=836666998]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_physx_wheel")
+
+[node name="WheelRL" type="PhysXVehicleWheel3D" parent="PhysXCar" unique_id=351490156]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0, -1.35)
+radius = 0.4
+suspension_travel = 0.55
+suspension_stiffness = 37400.0
+tire_lateral_stiffness = 68800.0
+tire_friction = 1.87
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar/WheelRL" unique_id=337385812]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_physx_wheel")
+
+[node name="WheelRR" type="PhysXVehicleWheel3D" parent="PhysXCar" unique_id=587781083]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, -1.35)
+radius = 0.4
+suspension_travel = 0.55
+suspension_stiffness = 37400.0
+tire_lateral_stiffness = 68800.0
+tire_friction = 1.87
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PhysXCar/WheelRR" unique_id=7358099]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_physx_wheel")
+
+[node name="ChaseCamera" type="Node3D" parent="." unique_id=1987824722]
+physics_interpolation_mode = 2
+script = ExtResource("3_rrhh6")
+target_path = NodePath("../PhysXCar")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="ChaseCamera" unique_id=789536758]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+collision_mask = 0
+spring_length = 7.0
+
+[node name="Camera3D" type="Camera3D" parent="ChaseCamera/SpringArm3D" unique_id=2032454791]
+current = true
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1030671494]
+
+[node name="Hint" type="Label" parent="HUD" unique_id=2047322731]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 16.0
+offset_bottom = 12.0
+text = "PhysXVehicle3D, drivetrain = Engine  |  W/S throttle-brake-reverse, A/D steer, Space brake, E/Q shift up/down (manual), M automatic, Shift clutch, R reset"
+
+[node name="Gauge" type="Label" parent="HUD" unique_id=462853635]
+offset_left = 16.0
+offset_top = 44.0
+offset_right = 16.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 28
