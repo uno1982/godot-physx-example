@@ -6,10 +6,7 @@ extends PhysXVehicle3D
 # so the two cars feel directly comparable side by side.
 #
 # With drivetrain = Engine there is a gearbox too:
-#   E / Q  shift up / down (switches to manual)
-#   M      cycle manual / manual without clutch assist (a shift needs
-#          Shift held) / automatic
-#   Shift  hold the clutch
+#   E / Q  shift up / down, M gearbox mode, Shift clutch (gearbox_keys.gd)
 
 @export var steer_speed := 2.0 # normalized steering input/sec toward the target
 
@@ -17,7 +14,7 @@ extends PhysXVehicle3D
 # on why the inactive one must relax to neutral instead of coasting.
 var active := false
 
-var _shift_keys := {} # key -> held last tick, so a shift happens once per press
+var _gearbox := preload("res://demo/common/gearbox_keys.gd").new()
 
 func _physics_process(delta: float) -> void:
 	if not active:
@@ -52,7 +49,7 @@ func _physics_process(delta: float) -> void:
 		throttle = 0.0
 
 	if drivetrain == DRIVETRAIN_ENGINE:
-		_gearbox_input()
+		_gearbox.update(self)
 
 	var s := 0.0
 	if Input.is_key_pressed(KEY_A):
@@ -61,36 +58,3 @@ func _physics_process(delta: float) -> void:
 		s -= 1.0
 	steer = move_toward(steer, s, steer_speed * delta)
 
-
-func _pressed(key: Key) -> bool:
-	var down := Input.is_key_pressed(key)
-	var pressed: bool = down and not _shift_keys.get(key, false)
-	_shift_keys[key] = down
-	return pressed
-
-
-func _gearbox_input() -> void:
-	clutch = 1.0 if Input.is_key_pressed(KEY_SHIFT) else 0.0
-	# Clutch assist only means anything in manual, so M cycles three modes:
-	# manual -> manual without clutch assist -> automatic -> manual.
-	if _pressed(KEY_M):
-		if automatic_transmission:
-			_take_over()
-		elif clutch_assist:
-			clutch_assist = false
-		else:
-			automatic_transmission = true
-	var up := _pressed(KEY_E)
-	var down := _pressed(KEY_Q)
-	# Without the assist the gearbox won't move unless the clutch is down, so don't queue a gear it won't take.
-	if (up or down) and (clutch_assist or clutch >= 0.5):
-		if automatic_transmission:
-			_take_over()
-		gear = clampi(gear + (1 if up else -1), 0, gear_ratios.size())
-
-
-# Manual from here on, starting in the gear the autobox is in (or shifting to).
-func _take_over() -> void:
-	automatic_transmission = false
-	clutch_assist = true
-	gear = maxi(get_target_gear(), 1)

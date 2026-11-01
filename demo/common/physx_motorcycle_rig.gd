@@ -7,6 +7,9 @@ extends PhysXMotorcycle3D
 # GodotPhysXMotorcycleProbe/test/cpu/motorcycle_probe_test.gd (a direct
 # torque-impulse PD controller was tried there first and found to diverge --
 # see that test's own comments for the numbers that showed it).
+#
+# With drivetrain = Engine there is a gearbox too:
+#   E / Q  shift up / down, M gearbox mode, Shift clutch (gearbox_keys.gd)
 
 @export var steer_speed := 2.0 # normalized steering input/sec toward the target
 @export var lean_velocity_correction_enabled := true
@@ -14,6 +17,7 @@ extends PhysXMotorcycle3D
 @export_range(0.0, 1.0, 0.05) var rear_braking_step_out_strength := 0.25
 
 var _held_target_lean := 0.0
+var _gearbox := preload("res://demo/common/gearbox_keys.gd").new()
 
 # Lean controller gains -- same values/meaning as motorcycle_probe_test.gd's
 # own constants, tuned against this node's default ~220kg/wheelbase-1.4m
@@ -69,6 +73,9 @@ func _physics_process(delta: float) -> void:
 	if Input.is_key_pressed(KEY_SPACE):
 		brake = 1.0
 		throttle = 0.0
+
+	if drivetrain == DRIVETRAIN_ENGINE:
+		_gearbox.update(self)
 
 	var s := 0.0
 	if Input.is_key_pressed(KEY_A):
