@@ -31,6 +31,8 @@ const MAX_LEAN_ANGLE := 0.35
 # held at (mid-slide) to the fresh banking-formula value, yanking the bike
 # upright in one tick instead of settling out of the lean smoothly.
 const LEAN_RELEASE_RATE := 1.5
+# How much steering allows the full measured lean (see _apply_lean_control()).
+const STEER_FOR_FULL_LEAN := 0.3
 # Pitch stabilization -- same PD/velocity-blend pattern as the roll
 # correction, but correcting pitch (nose-up wheelies / nose-down endos)
 # back toward level instead of correcting lean. Needed because a steep
@@ -183,6 +185,17 @@ func _apply_lean_control() -> void:
 	# move_toward's the held value at a bounded rate, so it settles out of
 	# the lean smoothly over LEAN_RELEASE_RATE's own timescale.
 	var raw_target_lean := clampf(atan2(-lateral_accel, 9.81), -MAX_LEAN_ANGLE, MAX_LEAN_ANGLE)
+	# At speed the measured acceleration feeds back on itself: lateral_accel
+	# scales with speed, so the small yaw of the bike straightening up after a
+	# turn reads as a hard turn the other way, the bike leans into it, and
+	# that lean yaws it back -- a weave from full lean to full lean with the
+	# steering centred (at 200 km/h, from a quarter-second tap). So the
+	# steering gates the lean: never away from the turn asked for (positive
+	# steer leans to negative roll), and only as far as the steering is in,
+	# back to upright when it's released.
+	if raw_target_lean * steer > 0.0:
+		raw_target_lean = 0.0
+	raw_target_lean *= clampf(absf(steer) / STEER_FOR_FULL_LEAN, 0.0, 1.0)
 	if brake > 0.0:
 		pass # frozen -- see comment above.
 	else:
