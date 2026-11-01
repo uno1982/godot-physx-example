@@ -7,7 +7,7 @@ extends PhysXVehicle3D
 #
 # With drivetrain = Engine there is a gearbox too:
 #   E / Q  shift up / down (switches to manual)
-#   M      back to automatic
+#   M      toggle automatic / manual
 #   Shift  hold the clutch
 
 @export var steer_speed := 2.0 # normalized steering input/sec toward the target
@@ -71,12 +71,19 @@ func _pressed(key: Key) -> bool:
 func _gearbox_input() -> void:
 	clutch = 1.0 if Input.is_key_pressed(KEY_SHIFT) else 0.0
 	if _pressed(KEY_M):
-		automatic_transmission = true
+		if automatic_transmission:
+			_take_over()
+		else:
+			automatic_transmission = true
 	var up := _pressed(KEY_E)
 	var down := _pressed(KEY_Q)
 	if up or down:
 		if automatic_transmission:
-			# Take over from the gear the autobox is in.
-			automatic_transmission = false
-			gear = maxi(get_target_gear(), 1)
+			_take_over()
 		gear = clampi(gear + (1 if up else -1), 0, gear_ratios.size())
+
+
+# Manual from here on, starting in the gear the autobox is in (or shifting to).
+func _take_over() -> void:
+	automatic_transmission = false
+	gear = maxi(get_target_gear(), 1)

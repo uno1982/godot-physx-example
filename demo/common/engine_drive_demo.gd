@@ -4,7 +4,7 @@ extends Node3D
 # on a long straight with a marker every 100 m.
 #
 #   W/S    throttle / brake, then reverse     A/D  steer     Space  brake
-#   E / Q  shift up / down (manual)           M    automatic
+#   E / Q  shift up / down (manual)           M    automatic / manual
 #   Shift  clutch                             R    back to the start
 
 @export var car_path: NodePath

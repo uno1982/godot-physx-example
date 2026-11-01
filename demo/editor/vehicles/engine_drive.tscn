@@ -484,7 +484,7 @@ offset_left = 16.0
 offset_top = 12.0
 offset_right = 16.0
 offset_bottom = 12.0
-text = "PhysXVehicle3D, drivetrain = Engine  |  W/S throttle-brake-reverse, A/D steer, Space brake, E/Q shift up/down (manual), M automatic, Shift clutch, R reset"
+text = "PhysXVehicle3D, drivetrain = Engine  |  W/S throttle-brake-reverse, A/D steer, Space brake, E/Q shift up/down (manual), M automatic/manual, Shift clutch, R reset"
 
 [node name="Gauge" type="Label" parent="HUD" unique_id=462853635]
 offset_left = 16.0
