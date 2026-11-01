@@ -6,7 +6,8 @@ extends SceneTree
 # gears 4 / 2 / 1.5 / 1.1 / 1.0, final drive 4):
 #   automatic: shifts up through the gears and keeps accelerating
 #   manual, 1st gear: stays in 1st, held at the 6000 RPM limit
-#   clutch pressed / neutral: the engine revs, the car stays put
+#   clutch pressed / neutral: the engine revs, the car stays put (and the
+#     automatic, revving against the clutch, holds 1st instead of shifting up)
 #   reverse: drives backwards in the reverse gear
 #   limited slip, rear-wheel drive: drives
 #   split grip (rear-wheel drive in 1st, the left rear tyre on almost no grip):
@@ -14,6 +15,10 @@ extends SceneTree
 #     (measured after 3 s; then both lift off -- the uneven drive yaws the car)
 #   no clutch assist, manual: asked for 2nd without the clutch it stays in
 #     1st; with the clutch pressed it shifts, and stays there once released
+#   clutch dump (rear-wheel drive, 1500 N m, grippy rear tyres, high rear-set
+#     center of mass, revved in 1st with the clutch down, then released): with
+#     tire_force_point 1 (forces at the contact patch) the nose lifts; at 0 (the
+#     suspension mount) it barely pitches
 #   direct drive next to them: unchanged (no engine, gear 1)
 #   bad gear ratios (ascending): an error, and the car never builds
 # Then: a teleport brings the engine back to idle, the automatic car switched to
@@ -29,6 +34,7 @@ var _ok := true
 var _max_gear := {}
 var _speed_before_switch := 0.0
 var _split := {}
+var _pitch := {}
 
 
 func _check(cond: bool, msg: String) -> void:
@@ -86,6 +92,27 @@ func _initialize() -> void:
 					if not w.use_as_steering and w.position.x < 0.0:
 						w.tire_friction = 0.1)
 	_cars["no clutch assist"] = _car(160, func(c): c.automatic_transmission = false; c.gear = 1; c.clutch_assist = false)
+	for tfp in [0, 1]:
+		var key := "dump tfp %d" % tfp
+		_cars[key] = _car(200 + tfp * 20, func(c):
+			c.automatic_transmission = false
+			c.gear = 1
+			c.clutch = 1.0
+			c.engine_peak_torque = 1500.0
+			c.tire_force_point = float(tfp)
+			c.center_of_mass_mode = PhysXVehicle3D.CENTER_OF_MASS_MODE_CUSTOM
+			c.center_of_mass = Vector3(0, 0.2, -0.35)
+			c.moment_of_inertia = Vector3(2000, 2000, 1000) # the engine_drive demo car's, wheels too
+			for w in c.get_children():
+				if w is PhysXVehicleWheel3D:
+					w.radius = 0.36
+					w.suspension_travel = 0.3
+					w.suspension_stiffness = 60000.0
+					w.suspension_damping = 5000.0
+					w.tire_lateral_stiffness = 68800.0
+					w.use_as_traction = not w.use_as_steering
+					w.tire_friction = 1.0 if w.use_as_steering else 3.0)
+		_pitch[key] = 0.0
 	_cars["direct"] = _car(60, func(c): c.drivetrain = PhysXVehicle3D.DRIVETRAIN_DIRECT)
 	print("[engine drive] (an error about gear ratios is expected next)")
 	_cars["bad ratios"] = _car(80, func(c): c.gear_ratios = PackedFloat32Array([1.0, 2.0]))
@@ -111,6 +138,16 @@ func _step() -> void:
 	if _t == 60 + 180:
 		_check(na.get_target_gear() == 2, "no clutch assist: clutch pressed, shifting to gear %d" % na.get_target_gear())
 		na.clutch = 0.0
+	if _t == 60 + 120:
+		for k in _pitch:
+			_cars[k].clutch = 0.0 # pop the clutch
+	if _t > 60 + 120 and _t <= 60 + 300:
+		for k in _pitch:
+			_pitch[k] = maxf(_pitch[k], rad_to_deg(asin(clampf(_cars[k].global_basis.z.normalized().y, -1.0, 1.0))))
+	if _t == 60 + 300:
+		_check(_pitch["dump tfp 1"] > 6.0 and _pitch["dump tfp 0"] < 3.0,
+				"clutch dump: nose up %.1f deg with tire_force_point 1, %.1f deg at 0" % [_pitch["dump tfp 1"], _pitch["dump tfp 0"]])
+		_check(_cars["dump tfp 1"].global_basis.y.y > 0.95, "clutch dump: back on its wheels 3 s later")
 	if _t < 60 + RUN:
 		for k in _cars:
 			if k != "at rest" and not (k.begins_with("split") and _t >= 60 + 180):
@@ -128,6 +165,7 @@ func _step() -> void:
 				"manual 1st: gear %d (max %d), held at %.0f RPM, %.1f m/s" % [m.get_current_gear(), _max_gear["manual 1st"], m.get_engine_rpm(), m.get_forward_speed()])
 		var cl: PhysXVehicle3D = _cars["clutch pressed"]
 		_check(absf(cl.get_forward_speed()) < 0.2 and cl.get_engine_rpm() > 3000.0, "clutch pressed: %.2f m/s at %.0f RPM" % [cl.get_forward_speed(), cl.get_engine_rpm()])
+		_check(_max_gear["clutch pressed"] == 1, "clutch pressed, automatic: held 1st while revving (highest gear %d)" % _max_gear["clutch pressed"])
 		var n: PhysXVehicle3D = _cars["neutral"]
 		_check(absf(n.get_forward_speed()) < 0.2 and n.get_current_gear() == 0 and n.get_engine_rpm() > 3000.0, "neutral: %.2f m/s, gear %d, %.0f RPM" % [n.get_forward_speed(), n.get_current_gear(), n.get_engine_rpm()])
 		var r: PhysXVehicle3D = _cars["reverse"]

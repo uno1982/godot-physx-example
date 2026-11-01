@@ -4,9 +4,10 @@ extends Node3D
 # on a long straight with a marker every 100 m.
 #
 #   W/S    throttle / brake, then reverse     A/D  steer     Space  brake
-#   E / Q  shift up / down (manual)           M    automatic / manual
-#   Shift  clutch                             R    back to the start
-#   C      clutch assist on / off (off: hold Shift to change gear in manual)
+#   E / Q  shift up / down (manual)           Shift  clutch
+#   M      manual / manual without clutch assist (hold Shift to change gear)
+#          / automatic                        R    back to the start
+# The car starts in manual, first gear.
 
 @export var car_path: NodePath
 @export var gauge_path: NodePath
@@ -28,11 +29,11 @@ func _process(_delta: float) -> void:
 	if _car.get_current_gear() != _car.get_target_gear():
 		gear_text = "%s > %s" % [_gear_name(_car.get_current_gear()), gear_text] # shifting
 	_gauge.text = "%s   gear %s   %4.0f RPM   %3.0f km/h%s" % [
-		"Automatic" if _car.automatic_transmission else "Manual",
+		"Automatic" if _car.automatic_transmission else ("Manual" if _car.clutch_assist else "Manual, no clutch assist"),
 		gear_text,
 		_car.get_engine_rpm(),
 		absf(_car.get_forward_speed()) * 3.6,
-		("   clutch" if _car.clutch > 0.0 else "") + ("" if _car.clutch_assist else "   (no clutch assist)")]
+		"   clutch" if _car.clutch > 0.0 else ""]
 
 
 func _gear_name(g: int) -> String:
