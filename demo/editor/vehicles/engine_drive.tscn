@@ -563,7 +563,7 @@ material_override = SubResource("StandardMaterial3D_t6o3m")
 mesh = SubResource("BoxMesh_4a6pd")
 
 [node name="StartLine" type="MeshInstance3D" parent="." unique_id=1925679892]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.01, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.01, 1.1805054)
 material_override = SubResource("StandardMaterial3D_aiclg")
 mesh = SubResource("BoxMesh_v0igs")
 
@@ -608,7 +608,7 @@ text = "1/8 MILE"
 font_size = 96
 
 [node name="Tree" type="Node3D" parent="." unique_id=848017493]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.052016735, 0, 5)
 
 [node name="Pole" type="MeshInstance3D" parent="Tree" unique_id=290837020]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
@@ -646,7 +646,7 @@ material_override = SubResource("StandardMaterial3D_cpgx0")
 mesh = SubResource("SphereMesh_n4q6o")
 
 [node name="PhysXCar" type="PhysXVehicle3D" parent="." unique_id=1762079183]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5654879, 0.4, -0.74495137)
 moment_of_inertia = Vector3(2000, 2000, 1000)
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, -0.35)
