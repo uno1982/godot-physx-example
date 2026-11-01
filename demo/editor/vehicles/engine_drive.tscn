@@ -1,8 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://mu20f5w0y2hx"]
 
-[ext_resource type="Script" path="res://demo/common/engine_drive_demo.gd" id="1_mq3hc"]
-[ext_resource type="Script" path="res://demo/common/physx_vehicle_rig.gd" id="2_5xkt3"]
-[ext_resource type="Script" path="res://demo/common/vehicle_chase_camera.gd" id="3_rrhh6"]
+[ext_resource type="Script" uid="uid://d11d8cjxgrxow" path="res://demo/common/engine_drive_demo.gd" id="1_mq3hc"]
+[ext_resource type="Script" uid="uid://do613d8qiqent" path="res://demo/common/physx_vehicle_rig.gd" id="2_5xkt3"]
+[ext_resource type="Script" uid="uid://bm7xdpv63vo8c" path="res://demo/common/vehicle_chase_camera.gd" id="3_rrhh6"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -484,7 +484,7 @@ offset_left = 16.0
 offset_top = 12.0
 offset_right = 16.0
 offset_bottom = 12.0
-text = "PhysXVehicle3D, drivetrain = Engine  |  W/S throttle-brake-reverse, A/D steer, Space brake, E/Q shift up/down (manual), M automatic/manual, Shift clutch, R reset"
+text = "PhysXVehicle3D, drivetrain = Engine  |  W/S throttle-brake-reverse, A/D steer, Space brake, E/Q shift up/down (manual), M automatic/manual, Shift clutch, C clutch assist, R reset"
 
 [node name="Gauge" type="Label" parent="HUD" unique_id=462853635]
 offset_left = 16.0

@@ -6,6 +6,7 @@ extends Node3D
 #   W/S    throttle / brake, then reverse     A/D  steer     Space  brake
 #   E / Q  shift up / down (manual)           M    automatic / manual
 #   Shift  clutch                             R    back to the start
+#   C      clutch assist on / off (off: hold Shift to change gear in manual)
 
 @export var car_path: NodePath
 @export var gauge_path: NodePath
@@ -31,7 +32,7 @@ func _process(_delta: float) -> void:
 		gear_text,
 		_car.get_engine_rpm(),
 		absf(_car.get_forward_speed()) * 3.6,
-		"   clutch" if _car.clutch > 0.0 else ""]
+		("   clutch" if _car.clutch > 0.0 else "") + ("" if _car.clutch_assist else "   (no clutch assist)")]
 
 
 func _gear_name(g: int) -> String:

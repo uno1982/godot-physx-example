@@ -12,6 +12,8 @@ extends SceneTree
 #   split grip (rear-wheel drive in 1st, the left rear tyre on almost no grip):
 #     the open differential spins that wheel and crawls, limited slip pulls away
 #     (measured after 3 s; then both lift off -- the uneven drive yaws the car)
+#   no clutch assist, manual: asked for 2nd without the clutch it stays in
+#     1st; with the clutch pressed it shifts, and stays there once released
 #   direct drive next to them: unchanged (no engine, gear 1)
 #   bad gear ratios (ascending): an error, and the car never builds
 # Then: a teleport brings the engine back to idle, the automatic car switched to
@@ -83,6 +85,7 @@ func _initialize() -> void:
 					w.use_as_traction = not w.use_as_steering
 					if not w.use_as_steering and w.position.x < 0.0:
 						w.tire_friction = 0.1)
+	_cars["no clutch assist"] = _car(160, func(c): c.automatic_transmission = false; c.gear = 1; c.clutch_assist = false)
 	_cars["direct"] = _car(60, func(c): c.drivetrain = PhysXVehicle3D.DRIVETRAIN_DIRECT)
 	print("[engine drive] (an error about gear ratios is expected next)")
 	_cars["bad ratios"] = _car(80, func(c): c.gear_ratios = PackedFloat32Array([1.0, 2.0]))
@@ -99,6 +102,15 @@ func _step() -> void:
 	if _t == 60 + 180:
 		for k in ["split open", "split limited slip"]:
 			_split[k] = _cars[k].get_forward_speed()
+	var na: PhysXVehicle3D = _cars["no clutch assist"]
+	if _t == 60 + 60:
+		na.gear = 2 # no clutch
+	if _t == 60 + 120:
+		_check(na.get_current_gear() == 1 and na.get_target_gear() == 1, "no clutch assist: asked for 2nd without the clutch, still in gear %d (target %d)" % [na.get_current_gear(), na.get_target_gear()])
+		na.clutch = 1.0
+	if _t == 60 + 180:
+		_check(na.get_target_gear() == 2, "no clutch assist: clutch pressed, shifting to gear %d" % na.get_target_gear())
+		na.clutch = 0.0
 	if _t < 60 + RUN:
 		for k in _cars:
 			if k != "at rest" and not (k.begins_with("split") and _t >= 60 + 180):
@@ -125,6 +137,7 @@ func _step() -> void:
 		var so: float = _split["split open"]
 		var sl: float = _split["split limited slip"]
 		_check(sl > 2.0 and sl > so * 3.0, "split grip: limited slip %.2f m/s, open %.2f m/s" % [sl, so])
+		_check(na.get_current_gear() == 2 and na.get_forward_speed() > 15.0, "no clutch assist: clutch released, drives on in gear %d at %.1f m/s" % [na.get_current_gear(), na.get_forward_speed()])
 		var d: PhysXVehicle3D = _cars["direct"]
 		_check(d.get_forward_speed() > 50.0 and d.get_engine_rpm() == 0.0 and d.get_current_gear() == 1, "direct drive: %.1f m/s, no engine, gear %d" % [d.get_forward_speed(), d.get_current_gear()])
 		var b: PhysXVehicle3D = _cars["bad ratios"]

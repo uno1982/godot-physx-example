@@ -9,6 +9,7 @@ extends PhysXVehicle3D
 #   E / Q  shift up / down (switches to manual)
 #   M      toggle automatic / manual
 #   Shift  hold the clutch
+#   C      toggle clutch assist (off: a manual shift needs Shift held)
 
 @export var steer_speed := 2.0 # normalized steering input/sec toward the target
 
@@ -70,6 +71,8 @@ func _pressed(key: Key) -> bool:
 
 func _gearbox_input() -> void:
 	clutch = 1.0 if Input.is_key_pressed(KEY_SHIFT) else 0.0
+	if _pressed(KEY_C):
+		clutch_assist = not clutch_assist
 	if _pressed(KEY_M):
 		if automatic_transmission:
 			_take_over()
@@ -77,7 +80,8 @@ func _gearbox_input() -> void:
 			automatic_transmission = true
 	var up := _pressed(KEY_E)
 	var down := _pressed(KEY_Q)
-	if up or down:
+	# Without the assist the gearbox won't move unless the clutch is down, so don't queue a gear it won't take.
+	if (up or down) and (clutch_assist or clutch >= 0.5):
 		if automatic_transmission:
 			_take_over()
 		gear = clampi(gear + (1 if up else -1), 0, gear_ratios.size())
