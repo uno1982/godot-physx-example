@@ -12,8 +12,9 @@ extends Node3D
 #      but keep the ones between two kept bones (the clavicles): a bone between
 #      physical bones without one of its own stays in the animation's pose
 #      while the limb past it hangs from the rest pose, and the mesh tears open
-#      there. (This mannequin's skeleton lacked them; mannequin_ragdoll.gd adds
-#      them at start-up.)
+#      there. If the rest pose is far from how the animations hold such a bone
+#      (a retargeted T-pose's clavicles), give it a 6DOF joint with per-axis
+#      limits around the animated pose, as the mannequin's clavicles have.
 #   2. On each PhysicalBone3D, under Joint, pick a type and its limits:
 #      Cone at the spine (25 deg swing here), shoulders (95), hips (60) and
 #      ankles (30); Hinge at the knees and elbows, limited so they bend one
