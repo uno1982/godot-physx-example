@@ -8,7 +8,12 @@ extends Node3D
 # To make your own (see demo/common/mannequin/mannequin_ragdoll.tscn):
 #   1. Select the character's Skeleton3D and use Skeleton3D > Create Physical
 #      Skeleton: one PhysicalBone3D per bone, with a capsule each, under a
-#      PhysicalBoneSimulator3D. Delete the bones you don't need (fingers, toes).
+#      PhysicalBoneSimulator3D. Delete the bones you don't need (fingers, toes),
+#      but keep the ones between two kept bones (the clavicles): a bone between
+#      physical bones without one of its own stays in the animation's pose
+#      while the limb past it hangs from the rest pose, and the mesh tears open
+#      there. (This mannequin's skeleton lacked them; mannequin_ragdoll.gd adds
+#      them at start-up.)
 #   2. On each PhysicalBone3D, under Joint, pick a type and its limits:
 #      Cone at the spine (25 deg swing here), shoulders (95), hips (60) and
 #      ankles (30); Hinge at the knees and elbows, limited so they bend one

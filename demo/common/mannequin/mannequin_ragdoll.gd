@@ -22,6 +22,7 @@ var _limp := false
 func _ready() -> void:
 	_simulator = find_child("PhysicalBoneSimulator3D", true, false)
 	_animation_player = find_child("AnimationPlayer", true, false)
+	_add_clavicles()
 	_except_overlapping_bones()
 	if start_limp:
 		go_limp()
@@ -47,6 +48,51 @@ func go_limp(impulse := Vector3(), at := Vector3(), bone: PhysicalBone3D = null)
 
 func is_limp() -> bool:
 	return _limp
+
+
+# The clavicles (Shoulder bones) get physical bones of their own, between the
+# upper chest and the upper arms. Without them, a clavicle stays in whatever
+# pose the animation left it in while the arm hangs from the shoulder socket
+# of the rest pose the joints were made in -- this retargeted skeleton's rest
+# is a T-pose, far from the clips' shoulders, so the mesh tore open ~17 cm at
+# the shoulder. Made here from the rest pose (as Create Physical Skeleton
+# would): a capsule along the bone, a cone joint at its root. Adding one
+# re-parents the upper arm's joint onto it.
+const CLAVICLE_MASS := 3.0
+const CLAVICLE_RADIUS := 0.05
+const CLAVICLE_SWING := 90.0 # deg
+const CLAVICLE_TWIST := 45.0 # deg
+
+
+func _add_clavicles() -> void:
+	var skeleton: Skeleton3D = _simulator.get_parent()
+	for side in ["Left", "Right"]:
+		var bone := skeleton.find_bone(side + "Shoulder")
+		var arm := skeleton.find_bone(side + "UpperArm")
+		if bone < 0 or arm < 0 or _simulator.get_node_or_null("Physical Bone %sShoulder" % side):
+			continue
+		var along := skeleton.get_bone_rest(arm).origin # the bone, in its own space
+		var axis := along.normalized()
+		var pb := PhysicalBone3D.new()
+		pb.name = "Physical Bone %sShoulder" % side
+		pb.bone_name = side + "Shoulder"
+		pb.mass = CLAVICLE_MASS
+		pb.body_offset = Transform3D(Basis(), along * 0.5)
+		pb.joint_type = PhysicalBone3D.JOINT_TYPE_CONE
+		# The cone twists about its joint's X: along the bone, at its root.
+		pb.joint_offset = Transform3D(Basis(Quaternion(Vector3.RIGHT, axis)), -along * 0.5)
+		pb.set("joint_constraints/swing_span", CLAVICLE_SWING)
+		pb.set("joint_constraints/twist_span", CLAVICLE_TWIST)
+		var shape := CapsuleShape3D.new()
+		shape.radius = CLAVICLE_RADIUS
+		shape.height = along.length() + 2.0 * CLAVICLE_RADIUS
+		var cs := CollisionShape3D.new()
+		cs.shape = shape
+		cs.transform = Transform3D(Basis(Quaternion(Vector3.UP, axis)), Vector3())
+		pb.add_child(cs)
+		# At its rest pose before it joins: the arm's joint is remade against it as it does.
+		pb.transform = _simulator.transform.affine_inverse() * skeleton.get_bone_global_rest(bone) * pb.body_offset
+		_simulator.add_child(pb)
 
 
 # Bones whose capsules overlap in the rest pose -- the stacked torso, the

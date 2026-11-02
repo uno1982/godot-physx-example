@@ -12,6 +12,9 @@ extends SceneTree
 #   acceleration drives turn a 1 kg and a 10 kg box alike (force drives don't);
 #   a new spring equilibrium point takes over from a drive target; drives set before
 #     the Joint3D has made its joint act once it has;
+#   a target given with the time since the last one (delta) is driven at its own
+#     velocity too: a 6DOF SLERP and a hinge then trail a moving target by only the
+#     step it waits for, where without it the drive's damping holds them back;
 #   PhysX.physical_bone_get_joint() finds every PhysicalBone3D's joint, and a mannequin
 #     whose joints are SLERP-driven to the pose they start in holds that pose as it
 #     falls, where a limp one crumples.
@@ -26,6 +29,7 @@ var _driven_bones: Array[PhysicalBone3D] = []
 var _limp_bones: Array[PhysicalBone3D] = []
 var _bone_rest := {}
 var _hinge_spin := {}
+var _simulators: Array[PhysicalBoneSimulator3D] = []
 
 
 func _check(cond: bool, msg: String) -> void:
@@ -80,19 +84,33 @@ func _bone_parent(bone: PhysicalBone3D, bones: Array[PhysicalBone3D]) -> Physica
 	return null
 
 
+# The mass of a bone and every bone beyond it.
+func _carried(bone: PhysicalBone3D) -> float:
+	var m := bone.mass
+	for other in _driven_bones:
+		if other != bone and _bone_parent(other, _driven_bones) == bone:
+			m += _carried(other)
+	return m
+
+
 func _relative(bone: PhysicalBone3D, bones: Array[PhysicalBone3D]) -> Basis:
 	var parent := _bone_parent(bone, bones)
 	return parent.global_basis.inverse() * bone.global_basis
 
 
-func _ragdoll(x: float, into: Array[PhysicalBone3D]) -> void:
+func _ragdoll(x: float) -> void:
 	var mann: Node3D = (load("res://demo/common/mannequin/mannequin_ragdoll.tscn") as PackedScene).instantiate()
 	mann.position = Vector3(x, 1.2, 40)
 	get_root().add_child(mann)
-	var sim: PhysicalBoneSimulator3D = mann.find_child("PhysicalBoneSimulator3D", true, false)
-	for c in sim.get_children():
-		if c is PhysicalBone3D:
-			into.append(c)
+	_simulators.append(mann.find_child("PhysicalBoneSimulator3D", true, false))
+
+
+# Once the mannequins are ready (they add their clavicle bones then).
+func _gather_bones() -> void:
+	for i in 2:
+		for c in _simulators[i].get_children():
+			if c is PhysicalBone3D:
+				(_driven_bones if i == 0 else _limp_bones).append(c)
 
 
 func _initialize() -> void:
@@ -104,6 +122,8 @@ func _initialize() -> void:
 	var hinge := HingeJoint3D.new()
 	_box("hinge", hinge)
 	_box("follow", Generic6DOFJoint3D.new())
+	_box("follow_vel", Generic6DOFJoint3D.new())
+	_box("hinge_vel", HingeJoint3D.new())
 	# Revolute vs D6 hinges side by side: limit [-0.1, 0.5] under a steady torque, then a torque-limited motor.
 	for n in ["hinge_rev", "hinge_d6"]:
 		var h := HingeJoint3D.new()
@@ -146,12 +166,13 @@ func _initialize() -> void:
 	floor.add_child(fcs)
 	floor.position = Vector3(2, -0.5, 40)
 	get_root().add_child(floor)
-	_ragdoll(0.0, _driven_bones)
-	_ragdoll(4.0, _limp_bones)
+	_ragdoll(0.0)
+	_ragdoll(4.0)
 	physics_frame.connect(_tick)
 
 
 func _start() -> void:
+	_gather_bones()
 	PhysX.joint_set_slerp_drive(_rid("slerp6"), true, 200.0, 30.0)
 	PhysX.joint_set_drive_target(_rid("slerp6"), Transform3D(Basis(Vector3(1, 1, 0).normalized(), 0.8), Vector3.ZERO))
 	_check(PhysX.joint_is_slerp_drive_enabled(_rid("slerp6")), "joint_is_slerp_drive_enabled")
@@ -167,6 +188,8 @@ func _start() -> void:
 	PhysX.joint_set_drive_target(_rid("hinge"), Transform3D(Basis(Vector3.BACK, 0.6), Vector3.ZERO))
 
 	PhysX.joint_set_slerp_drive(_rid("follow"), true, 2000.0, 40.0)
+	PhysX.joint_set_slerp_drive(_rid("follow_vel"), true, 2000.0, 90.0)
+	PhysX.joint_set_slerp_drive(_rid("hinge_vel"), true, 2000.0, 90.0)
 
 	PhysX.joint_set_slerp_drive(_rid("hinge_d6"), true) # no stiffness, no damping: only the D6 rebuild
 	PhysX.joint_set_slerp_drive(_rid("motor_d6"), true)
@@ -205,7 +228,9 @@ func _start() -> void:
 		if j.is_valid():
 			found += 1
 			type_ok = type_ok and PhysicsServer3D.joint_get_type(j) == map[b.joint_type]
-			PhysX.joint_set_slerp_drive(j, true, 2000.0, 80.0)
+			# Acceleration drives count only the two bones at the joint: scale by the mass the joint carries.
+			var k := 2000.0 * _carried(b) / b.mass
+			PhysX.joint_set_slerp_drive(j, true, k, 2.0 * sqrt(k))
 			PhysX.joint_set_drive_acceleration(j, true)
 			PhysX.joint_set_drive_target_from_poses(j, _bone_parent(b, _driven_bones).global_transform, b.global_transform)
 	_check(found == with_joint and with_joint >= 10, "physical_bone_get_joint finds %d / %d bone joints" % [found, with_joint])
@@ -242,6 +267,9 @@ func _tick() -> void:
 			(_boxes[n] as RigidBody3D).apply_torque(Vector3(0, 0, -12.0) if _t > 65 else Vector3.ZERO)
 		# A moving target, set every frame in one call: a turn about Y at 1 rad/s.
 		PhysX.joint_set_drive_target(_rid("follow"), Transform3D(Basis(Vector3.UP, (_t - 5) / 60.0), Vector3.ZERO))
+		# The same turn (heavier damping, which alone would lag 0.045 rad), with the time since the last target.
+		PhysX.joint_set_drive_target(_rid("follow_vel"), Transform3D(Basis(Vector3.UP, (_t - 5) / 60.0), Vector3.ZERO), 1.0 / 60.0)
+		PhysX.joint_set_drive_target(_rid("hinge_vel"), Transform3D(Basis(Vector3.BACK, (_t - 5) / 60.0), Vector3.ZERO), 1.0 / 60.0)
 	if _t == 35: # 0.5 s
 		var w := absf((_boxes["torque"] as RigidBody3D).angular_velocity.y)
 		_check(absf(w - 1.5) < 0.25, "angular spring torque limit: 0.5 N m spins up to 1.5 rad/s in 0.5 s (got %.2f)" % w)
@@ -289,10 +317,17 @@ func _tick() -> void:
 		# A drive damps toward zero velocity: it lags a moving target by damping * speed / stiffness = 0.02 rad, plus the
 		# step the new target waits for (1/60 rad).
 		_check(e < 0.05, "a target set every frame is followed: %.3f rad behind" % e)
+		var bv: Node3D = _boxes["follow_vel"]
+		e = _angle(bv.global_basis, Basis(Vector3.UP, (_t - 5) / 60.0))
+		_check(e < 0.02, "with delta, a 6DOF SLERP moves with the target: %.4f rad behind (one step: 0.0167)" % e)
+		var bhv: Node3D = _boxes["hinge_vel"]
+		e = _angle(bhv.global_basis, Basis(Vector3.BACK, (_t - 5) / 60.0))
+		_check(e < 0.02, "with delta, a hinge moves with the target: %.4f rad behind (one step: 0.0167)" % e)
 		var held := _pose_drift(_driven_bones)
 		var limp := _pose_drift(_limp_bones)
 		print("[joint_drive] ragdoll pose drift after 2 s: driven mean %.3f max %.3f, limp mean %.3f max %.3f rad" % [held.x, held.y, limp.x, limp.y])
-		# It lands on its feet: the ankles give a little (~0.5 rad) under the whole body; the limp one folds up.
-		_check(held.x < 0.15 and held.y < 0.7 and limp.x > 5.0 * held.x, "a SLERP-driven ragdoll holds its pose, a limp one doesn't")
+		# Dropped 1.2 m onto the floor with nothing holding it up: the joints take the landing (~0.2 rad on average,
+		# the clavicles and knees most); the limp one folds up.
+		_check(held.x < 0.25 and held.y < 0.7 and limp.x > 4.0 * held.x, "a SLERP-driven ragdoll holds its pose, a limp one doesn't")
 		print("[joint_drive] ", "PASS" if _ok else "FAIL")
 		quit(0 if _ok else 1)

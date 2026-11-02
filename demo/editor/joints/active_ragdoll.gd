@@ -17,7 +17,22 @@ extends Node3D
 #     it carries;
 #   - every physics frame, PhysX.joint_set_drive_target_from_poses() sets each
 #     joint's target from the animated skeleton's bone poses (a bone's body sits
-#     at its bone pose * body_offset).
+#     at its bone pose * body_offset). Passing the frame's delta also drives at
+#     the target's velocity, so the body moves with the animation instead of
+#     trailing it; and this runs after the animation has advanced (process
+#     priority), so the target isn't a frame old.
+# The physical skeleton was made for a limp ragdoll (see ragdoll.gd), and its
+# limits are tighter than these animations: the spine cones (15-25 deg) clamp
+# the clips' torso, and the knee / elbow hinges turn about other axes than the
+# clips bend them. A limb pushed against its limit can't reach its target, and
+# everything beyond it inherits the miss. So the puppet gets limits that hold
+# the animations (_fit_limits()): wider spine cones, cones for the knees and
+# elbows. Its shins and feet are slippery too: these clips walk on the spot,
+# their feet sliding back along the floor, which a gripping foot fights.
+# Only the bones with a PhysicalBone3D are simulated: the ones between them
+# (shoulders, neck, head, hands) keep their pose from the puppet's own
+# animation, so the puppet plays the same clip in step with the target
+# (_play()); the simulator overrides the physical bones on top of it.
 # The drives act at the joints only: they hold the body's shape, not its
 # balance. Here a Generic6DOFJoint3D to a static anchor holds the hips where
 # the animation has them (the "hand of god"); H lets go, and the body falls,
@@ -33,8 +48,13 @@ const SHOT_RANGE := 200.0
 # Drive stiffness in 1/s^2 (acceleration drives); the damping is critical for it.
 const STIFFNESS_STEPS := [250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 # The hips' hold: linear springs plus a SLERP drive toward the animated hips, in
-# 1/s^2 for every kg of the body (the hips carry all of it).
-const HOLD_STIFFNESS := 600.0
+# 1/s^2 for every kg of the body (the hips carry all of it, and every bone
+# inherits how far off they are).
+const HOLD_STIFFNESS := 2400.0
+const SPINE_SPAN := 45.0 # deg, swing and twist
+const KNEE_ELBOW_SWING := 140.0 # deg
+const KNEE_ELBOW_TWIST := 60.0 # deg
+const SOLE_FRICTION := 0.2
 
 @onready var _camera: Camera3D = $Camera3D
 @onready var _hud: Label = $HUD/Label
@@ -45,6 +65,7 @@ var _fly: FlyCamera
 var _target_skeleton: Skeleton3D
 var _puppet_skeleton: Skeleton3D
 var _target_player: AnimationPlayer
+var _puppet_player: AnimationPlayer
 var _bones: Array[PhysicalBone3D] = []
 var _parent_of := {} # PhysicalBone3D -> its parent PhysicalBone3D
 var _joint_of := {} # PhysicalBone3D -> its joint RID
@@ -53,21 +74,26 @@ var _hips: PhysicalBone3D
 var _hold: Generic6DOFJoint3D
 var _holding := true
 var _driven := true
-var _strength := 3
+var _strength := 5
 var _animation := 0
 
 
 func _ready() -> void:
+	process_physics_priority = 1 # after the target's AnimationPlayer
 	_fly = FlyCamera.new(_camera)
 	_target_skeleton = _target.find_children("*", "Skeleton3D")[0]
 	_puppet_skeleton = _puppet.find_children("*", "Skeleton3D")[0]
 	# The target's pose is read every physics frame: animate it there too.
 	_target_player = _target.find_child("AnimationPlayer", true, false)
 	_target_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_PHYSICS
+	_puppet_player = _puppet.find_child("AnimationPlayer", true, false)
+	_puppet_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_PHYSICS
+	_play(ANIMATIONS[_animation])
 	var simulator: PhysicalBoneSimulator3D = _puppet.find_child("PhysicalBoneSimulator3D", true, false)
 	for child in simulator.get_children():
 		if child is PhysicalBone3D:
 			_bones.append(child)
+	_fit_limits()
 	for bone in _bones:
 		var parent := _parent_bone(bone)
 		if parent:
@@ -103,6 +129,28 @@ func _ready() -> void:
 	_set_drives()
 
 
+# Limits the animations stay inside, and slippery soles (see the top).
+func _fit_limits() -> void:
+	for bone in _bones:
+		var name := String(bone.name)
+		if name.ends_with("Spine") or name.ends_with("Chest"):
+			bone.set("joint_constraints/swing_span", SPINE_SPAN)
+			bone.set("joint_constraints/twist_span", SPINE_SPAN)
+		elif bone.joint_type == PhysicalBone3D.JOINT_TYPE_HINGE:
+			bone.joint_type = PhysicalBone3D.JOINT_TYPE_CONE
+			bone.set("joint_constraints/swing_span", KNEE_ELBOW_SWING)
+			bone.set("joint_constraints/twist_span", KNEE_ELBOW_TWIST)
+		if name.ends_with("Foot") or name.ends_with("LowerLeg"):
+			bone.friction = SOLE_FRICTION
+
+
+# The target and the puppet play the same clip from the same moment.
+func _play(animation: String) -> void:
+	for player in [_target_player, _puppet_player]:
+		player.play(animation)
+		player.seek(0.0, true)
+
+
 # The bone's nearest ancestor that has a PhysicalBone3D (what its joint ties it to).
 func _parent_bone(bone: PhysicalBone3D) -> PhysicalBone3D:
 	var id := _puppet_skeleton.get_bone_parent(bone.get_bone_id())
@@ -127,11 +175,11 @@ func _target_pose(bone: PhysicalBone3D) -> Transform3D:
 	return _puppet_skeleton.global_transform * _target_skeleton.get_bone_global_pose(bone.get_bone_id()) * bone.body_offset
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	for bone in _joint_of:
-		PhysX.joint_set_drive_target_from_poses(_joint_of[bone], _target_pose(_parent_of[bone]), _target_pose(bone))
+		PhysX.joint_set_drive_target_from_poses(_joint_of[bone], _target_pose(_parent_of[bone]), _target_pose(bone), delta)
 	if _holding:
-		PhysX.joint_set_drive_target_from_poses(_hold.get_rid(), _anchor.global_transform, _target_pose(_hips))
+		PhysX.joint_set_drive_target_from_poses(_hold.get_rid(), _anchor.global_transform, _target_pose(_hips), delta)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -143,7 +191,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.keycode:
 			KEY_1, KEY_2, KEY_3:
 				_animation = event.keycode - KEY_1
-				_target_player.play(ANIMATIONS[_animation])
+				_play(ANIMATIONS[_animation])
 			KEY_EQUAL, KEY_PLUS, KEY_KP_ADD:
 				_strength = mini(_strength + 1, STIFFNESS_STEPS.size() - 1)
 				_set_drives()
