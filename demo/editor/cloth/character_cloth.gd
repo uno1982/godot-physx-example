@@ -11,6 +11,8 @@ extends Node3D
 #   R     reset the cloth onto the animated pose
 #   B     legs / feet colliders: capsules or boxes (live, no rebuild)
 #   V     show the colliders (capsules green, boxes yellow)
+#   T     the garments' look: the built-in one, or your own material (render_material, one ShaderMaterial shared by
+#         both: cloth_own_material.gdshader; swapped live, no rebuild)
 
 const ANIMS := [
 	["Idle", 0.0],
@@ -47,6 +49,7 @@ var _boxes := false
 var _skel: Skeleton3D
 var _gizmos: Array = [] # [MeshInstance3D, PhysicalBone3D, CollisionShape3D, bone]
 var _show_colliders := false
+var _own_material: ShaderMaterial # null = the built-in look
 
 func _ready() -> void:
 	_ap = character.find_children("*", "AnimationPlayer", true, false)[0]
@@ -149,8 +152,8 @@ func _process(delta: float) -> void:
 		Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		RenderTime.cpu_gpu(_viewport_rid)]
-	_hud.text = "Character cloth -- PhysXSkinnedCloth3D (compute shaders, any GPU)\n1-7 animation   C cloth on/off   M move/stay   F follow/fly (WASD + RMB)   R reset   B leg boxes   V colliders\n%s   cloth %s   legs: %s   %d particles   FPS %d%s" % [
-		ANIMS[_anim][0], "ON" if _cloth_on() else "OFF", "boxes" if _boxes else "capsules", particles, Engine.get_frames_per_second(), timing]
+	_hud.text = "Character cloth -- PhysXSkinnedCloth3D (compute shaders, any GPU)\n1-7 animation   C cloth on/off   M move/stay   F follow/fly (WASD + RMB)   R reset   B leg boxes   V colliders   T look\n%s   cloth %s   legs: %s   look: %s   %d particles   FPS %d%s" % [
+		ANIMS[_anim][0], "ON" if _cloth_on() else "OFF", "boxes" if _boxes else "capsules", "own material" if _own_material else "built-in", particles, Engine.get_frames_per_second(), timing]
 
 func _cloth_on() -> bool:
 	return not _cloths.is_empty() and _cloths[0].is_inside_tree()
@@ -172,9 +175,20 @@ func _unhandled_input(event: InputEvent) -> void:
 			_toggle_boxes()
 		elif k == KEY_V:
 			_show_colliders = not _show_colliders
+		elif k == KEY_T:
+			_toggle_material()
 		elif k == KEY_R:
 			for c in _cloths:
 				c.reset()
+
+func _toggle_material() -> void:
+	if _own_material:
+		_own_material = null
+	else:
+		_own_material = ShaderMaterial.new()
+		_own_material.shader = preload("res://demo/editor/cloth/cloth_own_material.gdshader")
+	for c in _cloths:
+		c.render_material = _own_material
 
 func _toggle_cloth() -> void:
 	# Off: take the cloth nodes out (the skinned garments show again); on: put
