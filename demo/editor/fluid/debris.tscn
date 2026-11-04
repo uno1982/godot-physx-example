@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bt3icywyc1aoj" path="res://demo/editor/fluid/debris.gd" id="1"]
 [ext_resource type="Script" uid="uid://giri0h0owpcn" path="res://demo/common/physx_vortex_3d.gd" id="2"]
 [ext_resource type="Material" uid="uid://b8go3rem4w0yb" path="res://demo/common/materials/fluid_water_red.tres" id="3_jb1rs"]
+[ext_resource type="CompressedTexture3D" uid="uid://qpqq8rvhj7xq" path="res://demo/common/debris.BakedTorusField_data.exr" id="4_torus"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
 
@@ -43,6 +44,10 @@ height = 1.8
 [sub_resource type="SphereMesh" id="SphereMesh_wh2v7"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_jb1rs"]
+
+[sub_resource type="TorusMesh" id="TorusMesh_baked"]
+inner_radius = 0.45
+outer_radius = 0.9
 
 [node name="DebrisShowcase" type="Node3D" unique_id=1542357402]
 script = ExtResource("1")
@@ -193,7 +198,7 @@ particle_count = 10000
 particle_size = 0.02
 mpm_domain_size = Vector3(5, 20, 5)
 mpm_substeps = 3
-mpm_colliders = Array[NodePath]([NodePath("../Ground"), NodePath("../Debris"), NodePath("../MeshInstance3D")])
+mpm_colliders = Array[NodePath]([NodePath("../Ground"), NodePath("../Debris"), NodePath("../MeshInstance3D/CollisionShape3D")])
 mpm_auto_colliders = true
 spawn_region_size = Vector3(1.06, 1.3912094, 0.998)
 spawn_on_ready = false
@@ -239,3 +244,39 @@ mesh = SubResource("SphereMesh_wh2v7")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D" unique_id=1227367464]
 shape = SubResource("SphereShape3D_jb1rs")
+
+[node name="BakedTorus" type="MeshInstance3D" parent="." unique_id=1680443921]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -2, 0.9, -4.12)
+layers = 2
+mesh = SubResource("TorusMesh_baked")
+
+[node name="BakedTorusField" type="GPUParticlesCollisionSDF3D" parent="." unique_id=1680443922]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.9, -4.12)
+size = Vector3(2, 2, 0.6)
+bake_mask = 2
+texture = ExtResource("4_torus")
+
+[node name="PhysXParticleFluid3D5" type="PhysXParticleFluid3D" parent="." unique_id=1680443923]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2.6, -4.12)
+material_override = ExtResource("3_jb1rs")
+solver = 2
+particle_count = 10000
+particle_size = 0.02
+mpm_domain_size = Vector3(5, 20, 5)
+mpm_substeps = 3
+mpm_colliders = Array[NodePath]([NodePath("../Ground"), NodePath("../Debris"), NodePath("../BakedTorusField")])
+mpm_auto_colliders = true
+spawn_region_size = Vector3(1.06, 1.3912094, 0.998)
+spawn_on_ready = false
+emitting = true
+emission_rate = 1500.0
+emission_radius = 0.111
+emission_velocity = Vector3(0, -2.5, 0)
+render_mode = 2
+foam_particle_count = 50
+foam_lifetime = 0.01
+foam_threshold = 220.0
+foam_buoyancy = 1.0
+foam_size = 0.009
+adhesion = 0.2
+surface_friction = 0.5

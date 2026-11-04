@@ -1,0 +1,119 @@
+[gd_scene format=3 uid="uid://dpu1xrl7pcwb8"]
+
+[ext_resource type="ArrayMesh" path="res://demo/common/mannequin/mannequin_statue.res" id="1_statue"]
+[ext_resource type="CompressedTexture3D" uid="uid://c42o2756k0kpt" path="res://demo/common/baked_collider.StatueField_data.exr" id="2_88itn"]
+[ext_resource type="CompressedTexture3D" uid="uid://dipvpwdwsjtaq" path="res://demo/common/baked_collider.BellField_data.exr" id="3_vbuuo"]
+[ext_resource type="Script" uid="uid://dy3ph81t2g6fg" path="res://demo/common/fly_camera_node.gd" id="4_cam"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_1"]
+
+[sub_resource type="Sky" id="Sky_2"]
+sky_material = SubResource("Sky_1")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_2")
+ambient_light_source = 3
+ambient_light_energy = 0.5
+tonemap_mode = 3
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(24, 1, 24)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.32, 0.34, 0.3, 1)
+roughness = 0.95
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(24, 1, 24)
+
+[sub_resource type="StandardMaterial3D" id="Mat_stone"]
+cull_mode = 2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_bell"]
+material = SubResource("Mat_stone")
+top_radius = 0.25
+bottom_radius = 0.6
+height = 1.2
+cap_bottom = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_water"]
+transparency = 1
+albedo_color = Color(0.101960786, 0.34901962, 0.8, 0.56078434)
+metallic = 0.1
+roughness = 0.06
+refraction_enabled = true
+
+[node name="BakedCollider" type="Node3D" unique_id=1121457372]
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1293241083]
+transform = Transform3D(0.7, -0.49, 0.52, 0, 0.73, 0.68, -0.71, -0.48, 0.51, 0, 6, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1217890506]
+environment = SubResource("Environment_1")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1816521973]
+transform = Transform3D(1, 0, 0, 0, 0.99, 0.14, 0, -0.14, 0.99, 1.3, 1.7, 5)
+script = ExtResource("4_cam")
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=1196859039]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=575220416]
+layers = 2
+mesh = SubResource("BoxMesh_ground")
+surface_material_override/0 = SubResource("Mat_ground")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1559083228]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="Statue" type="MeshInstance3D" parent="." unique_id=1427428914]
+mesh = ExtResource("1_statue")
+
+[node name="StatueField" type="GPUParticlesCollisionSDF3D" parent="." unique_id=1025348199]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+size = Vector3(2.2, 2.2, 1)
+bake_mask = 1
+texture = ExtResource("2_88itn")
+
+[node name="Bell" type="MeshInstance3D" parent="." unique_id=1244312500]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0.9, 0)
+mesh = SubResource("CylinderMesh_bell")
+
+[node name="BellField" type="GPUParticlesCollisionSDF3D" parent="." unique_id=1238339004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0.9, 0)
+size = Vector3(1.6, 1.6, 1.6)
+thickness = 2.0
+bake_mask = 1
+texture = ExtResource("3_vbuuo")
+
+[node name="StatuePour" type="PhysXParticleFluid3D" parent="." unique_id=837422495]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.018769242, 2.6, -0.0486266)
+material_override = SubResource("Mat_water")
+solver = 2
+particle_count = 10000
+particle_size = 0.02
+mpm_domain_size = Vector3(5, 20, 5)
+mpm_colliders = Array[NodePath]([NodePath("../Ground"), NodePath("../StatueField")])
+spawn_on_ready = false
+emitting = true
+emission_rate = 1500.0
+emission_radius = 0.111
+emission_velocity = Vector3(0, -2.5, 0)
+render_mode = 2
+
+[node name="BellPour" type="PhysXParticleFluid3D" parent="." unique_id=157149144]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 2.4, 0)
+material_override = SubResource("Mat_water")
+solver = 2
+particle_count = 10000
+particle_size = 0.02
+mpm_domain_size = Vector3(5, 20, 5)
+mpm_colliders = Array[NodePath]([NodePath("../Ground"), NodePath("../BellField")])
+spawn_on_ready = false
+emitting = true
+emission_rate = 1500.0
+emission_radius = 0.111
+emission_velocity = Vector3(0, -2.5, 0)
+render_mode = 2
