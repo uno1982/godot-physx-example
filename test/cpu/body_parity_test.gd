@@ -21,6 +21,7 @@ var _inertia: RigidBody3D # custom inertia
 var _auto_inertia: RigidBody3D # same box, shape-computed inertia
 var _com: RigidBody3D # custom COM, then back to AUTO
 var _spinner: RigidBody3D # velocity at a point
+var _slow_spinner: RigidBody3D # velocity at a point, at a spin too slow to see
 var _axis: RigidBody3D # body_set_axis_velocity
 var _platform: AnimatableBody3D
 var _rider: CharacterBody3D
@@ -56,6 +57,7 @@ func _initialize() -> void:
 	_com.center_of_mass = Vector3(0.5, 0, 0)
 
 	_spinner = _body(root, Vector3(35, 50, 0), _sphere(0.5), 1.0)
+	_slow_spinner = _body(root, Vector3(50, 50, 0), _sphere(0.5), 1.0)
 	_axis = _body(root, Vector3(40, 50, 0), _sphere(0.5), 1.0)
 
 	# Spinning platform with a character standing near its rim.
@@ -138,6 +140,7 @@ func _physics_process(_delta: float) -> bool:
 		_inertia.apply_torque_impulse(Vector3(0, 1, 0))
 		_auto_inertia.apply_torque_impulse(Vector3(0, 1, 0))
 		_spinner.angular_velocity = Vector3(0, 1, 0)
+		_slow_spinner.angular_velocity = Vector3(0, 0.02, 0)
 		_axis.linear_velocity = Vector3(3, 4, 0)
 		PhysicsServer3D.body_set_axis_velocity(_axis.get_rid(), Vector3(0, 7, 0))
 	if _tick == 4:
@@ -158,6 +161,9 @@ func _physics_process(_delta: float) -> bool:
 		_check_near("custom COM relative, rotated: x", com_rel.x, 0.0, 0.02)
 		var vel := _ds(_spinner).get_velocity_at_local_position(Vector3(1, 0, 0))
 		_check_near("velocity at +X on a +Y spin: z", vel.z, -1.0, 0.02)
+		# A raycast vehicle reads its wheels' velocity this way, down to the slowest turn.
+		var slow_vel := _ds(_slow_spinner).get_velocity_at_local_position(Vector3(1, 0, 0))
+		_check_near("velocity at +X on a slow +Y spin: z", slow_vel.z, -0.02, 0.002)
 		_com.center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_AUTO
 	if _tick == 8:
 		_check_near("COM back to AUTO is centered", _ds(_com).center_of_mass_local.length(), 0.0, 0.01)

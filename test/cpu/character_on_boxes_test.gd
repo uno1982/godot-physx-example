@@ -1,11 +1,11 @@
 extends SceneTree
 
 # A CharacterBody3D standing still on a layer of loose boxes stays put, and so
-# do the boxes. The floor velocity a character rides took a resting box's
-# leftover solver spin, times the distance up to the character's origin, as
-# platform motion: the capsule drifted, pushed the box, which spun more -- it
-# was walked off a stack it stood still on (0.3 m in 10 s; Jolt: 0).
-# A real turning platform still carries a rider (body_parity_test).
+# do the boxes. A capsule resting in true contact, not safe_margin above the
+# box, rubbed it through friction, and riding the box's spin fed that back: the
+# box spun up and the character was walked off a stack it stood still on
+# (0.3 m in 10 s; Jolt: 0). A real turning platform still carries a rider
+# (body_parity_test).
 #   godot --path . --script res://test/cpu/character_on_boxes_test.gd
 
 const FP = preload("res://demo/common/first_person_character.gd")
