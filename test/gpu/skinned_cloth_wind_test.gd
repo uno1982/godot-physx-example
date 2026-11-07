@@ -131,7 +131,7 @@ func _initialize() -> void:
 		print("[cloth_wind] SKIP: no PhysXSkinnedCloth3D")
 		quit(0)
 		return
-	# One step per tick: a rig moving in uneven steps sways by itself, with or without wind.
+	# The running rig moves in ticks: one step per tick keeps its numbers comparable to the rigs standing still.
 	Engine.max_fps = 60
 	var cam := Camera3D.new()
 	get_root().add_child(cam)
@@ -149,6 +149,8 @@ func _initialize() -> void:
 	_rig("gale", func(c): c.set("wind", Vector3(0, 0, 200)); c.set("lift", 2.0); c.set("wind_turbulence", 2.0))
 	_rig("selfcol", func(c): c.set("wind", Vector3(0, 0, 5)); c.set("self_collision", true))
 	_rig("running", func(c): c.set("wind", Vector3(0, 0, 5)))
+	# As a gust fading away leaves it: too small for its length to be anything but 0.
+	_rig("fading", func(c): c.set("wind", Vector3(0, 0, 1e-25)); c.set("wind_turbulence", 1.0))
 
 	# An Area3D blowing +Z, its wind source behind the strip.
 	var area := Area3D.new()
@@ -207,6 +209,7 @@ func _finish() -> void:
 	_check(_rigs["area"].cloth.call("get_effective_wind").is_equal_approx(Vector3(0, 0, 5)), "get_effective_wind reports it: %s" % _rigs["area"].cloth.call("get_effective_wind"))
 	_check(_turb_hi - _turb_lo > (_steady_hi - _steady_lo) + 0.05, "turbulence keeps it moving: %.3f m of swing, %.3f m steady" % [_turb_hi - _turb_lo, _steady_hi - _steady_lo])
 	_check(_all_finite("gale"), "a gale stays finite")
+	_check(_rigs["fading"].cloth.call("get_effective_wind").is_finite() and _all_finite("fading"), "and so does wind that has faded to next to nothing")
 	var selfcol := _tip("selfcol")
 	_check(selfcol.z > into.z * 0.7, "self collision on too: tip z %.3f" % selfcol.z)
 	var run_mean := _run_sum / _samples
