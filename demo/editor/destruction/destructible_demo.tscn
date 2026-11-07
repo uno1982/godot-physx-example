@@ -5,6 +5,7 @@
 [ext_resource type="Material" uid="uid://d3n64ggcklfp4" path="res://demo/common/materials/glowing_blue.tres" id="3_sg5i3"]
 [ext_resource type="PhysXBlastAsset" uid="uid://cb4rwvkqikmlf" path="res://demo/common/blast/StaticSphere_blast.tres" id="3_uspjk"]
 [ext_resource type="Material" uid="uid://c7r7eg7r0iwyw" path="res://demo/common/materials/glowing_red.tres" id="5_sg5i3"]
+[ext_resource type="PhysXBlastAsset" uid="uid://do32b5evl16js" path="res://demo/common/blast/MeshInstance3D5_blast.tres" id="6_iqfyv"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
 size = Vector3(40, 0.1, 40)
@@ -40,6 +41,23 @@ volumetric_fog_gi_inject = 1.91
 volumetric_fog_length = 245.83
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_wh2v7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jrypa"]
+albedo_color = Color(0.423512, 0.9999998, 0.4254234, 1)
+
+[sub_resource type="Shader" id="Shader_interior_grid"]
+code = "shader_type spatial;
+// Checker through the cut faces' UVs, which are in mesh units: 4 cells to a unit.
+void fragment() {
+	vec2 cell = floor(UV * 4.0);
+	ALBEDO = mix(vec3(0.12, 0.13, 0.15), vec3(0.85, 0.86, 0.88), mod(cell.x + cell.y, 2.0));
+	ROUGHNESS = 0.9;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_interior_grid"]
+render_priority = 0
+shader = SubResource("Shader_interior_grid")
 
 [node name="DestructibleDemo" type="Node3D" unique_id=372068557]
 
@@ -488,7 +506,7 @@ freeze_when_asleep = true
 [node name="Label3D" type="Label3D" parent="." unique_id=1288668664]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.559662, 4.9684186, -1.8917532)
 text = "Static Objects can be broken by using groups and listening via gdscript for the event.
-Both spheres are a part of \"destructible\" group"
+The sphere and Torus are a part of \"destructible\" group"
 
 [node name="Label3D2" type="Label3D" parent="." unique_id=1519490080]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9631996, 4.9684186, -6.386402)
@@ -507,20 +525,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7410135, 4.9684186, -6.386
 text = "Freeze"
 font_size = 72
 
+[node name="Label3D5" type="Label3D" parent="." unique_id=308436963]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.462346, 2.3644881, -1.0113969)
+text = "Interior
+Materials"
+font_size = 72
+
 [node name="StaticSphere" type="PhysXDestructible3D" parent="." unique_id=2129192161 groups=["destructible"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.81911, 3.4984741, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.81911, 3.4984741, -1.3909006)
 blast_asset = ExtResource("3_uspjk")
 shatter_speed = 3.9
 auto_mass = false
 mass = 1147.4635
 impact_radius = 2.8
-
-[node name="StaticSphere2" type="PhysXDestructible3D" parent="." unique_id=21762866 groups=["destructible"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.176833, 3.4984741, 0)
-blast_asset = ExtResource("3_uspjk")
-auto_mass = false
-mass = 1147.4635
-impact_radius = 2.5
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=981424132]
 transform = Transform3D(2.625, 0, 0, 0, 2.625, 0, 0, 0, 2.625, -17.881096, 2.5954487, 0)
@@ -541,3 +558,11 @@ mesh = SubResource("CylinderMesh_wh2v7")
 transform = Transform3D(2.625, 0, 0, 0, 2.625, 0, 0, 0, 2.625, -18.28561, 2.5954487, -18.621)
 material_override = ExtResource("3_sg5i3")
 mesh = SubResource("CylinderMesh_wh2v7")
+
+[node name="MeshInstance3D5" type="PhysXDestructible3D" parent="." unique_id=234087800 groups=["destructible"]]
+transform = Transform3D(2, 0, 0, 0, -8.742278e-08, -2, 0, 2, -8.742278e-08, -11.520284, 1.9999115, -1.680573)
+blast_asset = ExtResource("6_iqfyv")
+material_override = SubResource("StandardMaterial3D_jrypa")
+interior_material = SubResource("ShaderMaterial_interior_grid")
+auto_mass = false
+mass = 35.0
