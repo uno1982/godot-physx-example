@@ -80,6 +80,7 @@ viewport gizmo and inspector, then press Play.
 | `cloth_ball_gpu_solver.tscn` | A 48×48 `PhysXCloth3D` sheet draping over a sphere plus a wind-blown flag — the resolution and drape the GPU deformable surface allows. SPACE drops a ball. Falls back to the CPU solver without CUDA. |
 | `cloth_ball_cpu_solver.tscn` | The same scene with both cloths forced onto the CPU solver (`simulation_mode`), to compare the two. |
 | `character_cloth.tscn` | The mannequin in a long skirt and a cape, each a `PhysXSkinnedCloth3D` (compute shaders, any GPU), animating around a circle so the cloth reacts to real movement; `1`-`7` switch animations. |
+| `cloth_wind.tscn` | One gusting `Area3D` driving `PhysXCloth3D` flags and banners and the mannequin's skirt and cape (`wind_area`), with tumbling crates and drifting leaves. Walkable; `F` toggles the wind, `[` `]` set the gusts, `1`-`4` switch animations. |
 | `soft_body.tscn` | Stock `SoftBody3D` blobs (sphere, subdivided box) on the PhysX backend — select one to paint pinned vertices with its gizmo and tune `pressure_coefficient` / `linear_stiffness` / `total_mass` in the inspector. Press Play, `SPACE` drops a heavy ball on them. |
 
 **`fluid/`**
