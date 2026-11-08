@@ -200,8 +200,10 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   `particle_foam_test`, `soft_body_gpu_test` (`PxDeformableVolume` — fall,
   collide, deform, impulse, pin). These `SKIP` (exit 0) without a CUDA device.
   `groom_render_test` (hair in both render modes, switching modes, hide and
-  show, two grooms with their own colours) needs no CUDA but runs
-  **windowed**, Forward+ or Mobile.
+  show, two grooms with their own colours) and `groom_sim_test` (simulated
+  hair draws in both modes, wind, a sphere collider and a physical bone's,
+  a teleport, simulation off) need no CUDA but run **windowed**, Forward+ or
+  Mobile.
 - **`test/flow/`** — `flow_smoke_test` (gas rises, `sample_smoke`),
   `flow_targets_test` (emitters feed the flow their `flow` path names),
   `flow_render_test` (the render effect draws), `flow_compositor_test` (user

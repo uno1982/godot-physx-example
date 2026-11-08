@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/hair_curly.abc-b527afbd8e2e09bb565c30150bd140
 
 [params]
 
-scale=1.0
+scale=0.1
 default_width=8e-05
 self_shadow/rays=32
 self_shadow/reach=0.15

@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/hair_long.abc-f389c1b115ecaa595a7fc7cd990be86
 
 [params]
 
-scale=1.0
+scale=0.1
 default_width=8e-05
 self_shadow/rays=32
 self_shadow/reach=0.15

@@ -14,69 +14,148 @@ ambient_light_color = Color(0.62, 0.66, 0.72, 1)
 ambient_light_energy = 0.45
 tonemap_mode = 2
 
-[node name="HairStyles" type="Node3D" unique_id=539162139]
+[sub_resource type="StandardMaterial3D" id="Material_body"]
+albedo_color = Color(0.42, 0.44, 0.48, 1)
+roughness = 0.8
+
+[sub_resource type="CapsuleMesh" id="Mesh_shoulders"]
+material = SubResource("Material_body")
+radius = 0.06
+height = 0.4
+
+[sub_resource type="CapsuleShape3D" id="Shape_shoulders"]
+radius = 0.06
+height = 0.4
+
+[sub_resource type="CylinderMesh" id="Mesh_neck"]
+material = SubResource("Material_body")
+top_radius = 0.045
+bottom_radius = 0.05
+height = 0.12
+
+[sub_resource type="CapsuleShape3D" id="Shape_neck"]
+radius = 0.045
+height = 0.14
+
+[node name="HairStyles" type="Node3D"]
 script = ExtResource("1_lrkht")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=979855633]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_g0ch0")
 
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1103852119]
+[node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.76604444, -0.3686878, 0.52654076, 0, 0.81915206, 0.57357645, -0.6427876, -0.43938506, 0.62750685, 0, 0, 0)
 shadow_enabled = true
 
-[node name="BackLight" type="OmniLight3D" parent="." unique_id=640609332]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 16, -10)
+[node name="BackLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 1.6, -1)
 light_color = Color(1, 0.92, 0.8, 1)
 light_energy = 2.0
 shadow_enabled = true
-omni_range = 30.0
+omni_range = 3.0
 
-[node name="Mesh" type="Node3D" parent="." unique_id=2027332851]
+[node name="Long" type="Node3D" parent="." groups=["bust"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
+
+[node name="Body" type="AnimatableBody3D" parent="Long"]
+
+[node name="Shoulders" type="CollisionShape3D" parent="Long/Body"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 1.22, 0.02)
+shape = SubResource("Shape_shoulders")
+
+[node name="ShouldersMesh" type="MeshInstance3D" parent="Long/Body"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 1.22, 0.02)
+mesh = SubResource("Mesh_shoulders")
+
+[node name="Neck" type="CollisionShape3D" parent="Long/Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0.02)
+shape = SubResource("Shape_neck")
+
+[node name="NeckMesh" type="MeshInstance3D" parent="Long/Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0.02)
+mesh = SubResource("Mesh_neck")
+
+[node name="Head" type="Node3D" parent="Long" groups=["head"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.36, 0.02)
+
+[node name="Mesh" parent="Long/Head" instance=ExtResource("6_uoqnm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.36, -0.02)
+
+[node name="MeshHair" type="PhysXGroom3D" parent="Long/Head" groups=["mesh_hair"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, -1.36, -0.02)
 visible = false
-
-[node name="Long" type="PhysXGroom3D" parent="Mesh" unique_id=1448343826]
 groom = ExtResource("3_tm5ut")
+colliders = Array[NodePath]([NodePath("../../Body")])
 
-[node name="Curly" type="PhysXGroom3D" parent="Mesh" unique_id=465748455]
-groom = ExtResource("4_ggiws")
-
-[node name="ScreenSpace" type="Node3D" parent="." unique_id=734988646]
-
-[node name="Long" type="PhysXGroom3D" parent="ScreenSpace" unique_id=1778388386]
+[node name="ScreenHair" type="PhysXGroom3D" parent="Long/Head" groups=["screen_hair"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, -1.36, -0.02)
 groom = ExtResource("3_tm5ut")
 render_mode = 1
+colliders = Array[NodePath]([NodePath("../../Body")])
 
-[node name="Curly" type="PhysXGroom3D" parent="ScreenSpace" unique_id=792390]
-groom = ExtResource("4_ggiws")
-render_mode = 1
-
-[node name="Long_head" parent="." unique_id=485024670 instance=ExtResource("6_uoqnm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0)
-
-[node name="Long_label" type="Label3D" parent="." unique_id=1290994738]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 12.6, 1.2)
+[node name="Label" type="Label3D" parent="Long"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.76, 0.1)
+pixel_size = 0.0008
 text = "Long"
 font_size = 48
 
-[node name="Curly_head" parent="." unique_id=1814011394 instance=ExtResource("6_uoqnm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 0)
+[node name="Curly" type="Node3D" parent="." groups=["bust"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
 
-[node name="Curly_label" type="Label3D" parent="." unique_id=1657307750]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 12.6, 1.2)
+[node name="Body" type="AnimatableBody3D" parent="Curly"]
+
+[node name="Shoulders" type="CollisionShape3D" parent="Curly/Body"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 1.22, 0.02)
+shape = SubResource("Shape_shoulders")
+
+[node name="ShouldersMesh" type="MeshInstance3D" parent="Curly/Body"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 1.22, 0.02)
+mesh = SubResource("Mesh_shoulders")
+
+[node name="Neck" type="CollisionShape3D" parent="Curly/Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0.02)
+shape = SubResource("Shape_neck")
+
+[node name="NeckMesh" type="MeshInstance3D" parent="Curly/Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0.02)
+mesh = SubResource("Mesh_neck")
+
+[node name="Head" type="Node3D" parent="Curly" groups=["head"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.36, 0.02)
+
+[node name="Mesh" parent="Curly/Head" instance=ExtResource("6_uoqnm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.36, -0.02)
+
+[node name="MeshHair" type="PhysXGroom3D" parent="Curly/Head" groups=["mesh_hair"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -1.36, -0.02)
+visible = false
+groom = ExtResource("4_ggiws")
+colliders = Array[NodePath]([NodePath("../../Body")])
+
+[node name="ScreenHair" type="PhysXGroom3D" parent="Curly/Head" groups=["screen_hair"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -1.36, -0.02)
+groom = ExtResource("4_ggiws")
+render_mode = 1
+colliders = Array[NodePath]([NodePath("../../Body")])
+
+[node name="Label" type="Label3D" parent="Curly"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.76, 0.1)
+pixel_size = 0.0008
 text = "Curly"
 font_size = 48
 
-[node name="HUD" type="CanvasLayer" parent="." unique_id=215732180]
+[node name="HUD" type="CanvasLayer" parent="."]
 
-[node name="Mode" type="Label" parent="HUD" unique_id=228972464]
+[node name="Help" type="Label" parent="HUD"]
 offset_left = 16.0
 offset_top = 12.0
 offset_right = 16.0
 offset_bottom = 12.0
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1620086617]
-transform = Transform3D(1, 0, 0, 0, 0.99778515, 0.06651895, 0, -0.06651895, 0.99778515, 7.5, 15.2, 9)
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.99778515, 0.06651895, 0, -0.06651895, 0.99778515, 0.75, 1.52, 0.9)
 current = true
+fov = 50.0
 script = ExtResource("7_bilg6")
-fly_speed = 4.0
+fly_speed = 0.5
