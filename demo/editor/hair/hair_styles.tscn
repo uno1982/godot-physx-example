@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://bv8fkj3ra30qu"]
 
 [ext_resource type="Script" uid="uid://cl15ud1bn3l6b" path="res://demo/editor/hair/hair_styles.gd" id="1_lrkht"]
-[ext_resource type="PhysXGroom" uid="uid://dacgdkhvsoe1e" path="res://demo/common/hair/cyberpunk.abc" id="2_oy4oy"]
 [ext_resource type="PhysXGroom" uid="uid://b0b3jkpiqkw1w" path="res://demo/common/hair/hair_long.abc" id="3_tm5ut"]
 [ext_resource type="PhysXGroom" uid="uid://r4oyhr4sobhn" path="res://demo/common/hair/hair_curly.abc" id="4_ggiws"]
 [ext_resource type="PackedScene" uid="uid://bc53ap1faa57e" path="res://demo/common/hair/head.glb" id="6_uoqnm"]
@@ -60,12 +59,6 @@ shadow_enabled = true
 shadow_bias = 0.02
 shadow_normal_bias = 0.5
 omni_range = 3.0
-
-[node name="ScreenHair2" type="PhysXGroom3D" parent="." unique_id=1006661781 groups=["screen_hair"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.059290648, 0, 0)
-groom = ExtResource("2_oy4oy")
-render_mode = 1
-colliders = Array[NodePath]([NodePath("../Long/Body")])
 
 [node name="Long" type="Node3D" parent="." unique_id=807326802 groups=["bust"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)

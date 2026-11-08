@@ -6,6 +6,7 @@ extends SceneTree
 # - Screen Space, Mesh, Screen Space again (the Tab toggle in the hair demo: it came back empty).
 # - Screen Space hidden and shown again (its proxy stayed hidden).
 # - Two Screen Space grooms each keep their own look (both took the colors of the one nearest the camera).
+# - A transparent object behind Screen Space hair stays behind it (the hair wrote no depth: it drew over the hair).
 # Needs a window (the screen-space passes run on the RenderingDevice):
 #   godot --path . --script res://test/gpu/groom_render_test.gd
 
@@ -133,6 +134,25 @@ func _run() -> void:
 	# Measured against the (bluish) background: red where the red groom is, more blue where the blue one is.
 	_check(c_red.r > _background.r + 0.05 and c_red.b < _background.b - 0.05, "the red groom draws red (%s)" % c_red)
 	_check(c_blue.r < _background.r - 0.05 and c_blue.b - c_blue.r > _background.b - _background.r + 0.05, "the blue groom draws blue (%s)" % c_blue)
+
+	# A transparent green panel behind the red groom: Screen Space hair writes its depth, so the panel stays behind it
+	# (it drew over the hair: transparent objects tested only the scene's depth). Beside the hair, the panel shows.
+	var panel := MeshInstance3D.new()
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.9, 0.9)
+	panel.mesh = quad
+	var glass := StandardMaterial3D.new()
+	glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	glass.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glass.albedo_color = Color(0.1, 1.0, 0.1, 0.8)
+	panel.material_override = glass
+	_root.add_child(panel)
+	panel.global_position = red.global_position + box.get_center() + Vector3(0, 0, -box.size.z * 0.5 - 0.15)
+	await _frames(8)
+	var c_behind := _color_at(_spot(red, groom))
+	var c_beside := _color_at(_spot(red, groom) + Vector3(-box.size.x * 0.5 - 0.12, 0, 0))
+	_check(c_beside.g > c_beside.r + 0.3, "the transparent panel shows beside the hair (%s)" % c_beside)
+	_check(c_behind.r > c_behind.g, "the transparent panel behind the hair stays behind it (%s)" % c_behind)
 
 	print("[groom_render] %s" % ("PASS" if _ok else "FAIL"))
 	quit(0 if _ok else 1)
