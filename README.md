@@ -190,12 +190,18 @@ godot --headless --path . --script res://test/cpu/physics_smoke.gd
   `query_filter_test` (`collide_with_bodies` / `collide_with_areas` across
   rays, point/shape overlaps, casts, rest info and a `RayCast3D`),
   `separation_ray_test` (a character standing on a ray: rest height, up and
-  down a step; a ray-only character; a rigid body on a ray).
+  down a step; a ray-only character; a rigid body on a ray),
+  `groom_import_test` (a Blender groom imported from Alembic: Y-up, widths,
+  shuffled strands, the self-shadowing bake, a save round trip; `SKIP`s in an
+  editor built without `alembic_sdk=`).
   `physics_bench.gd` is a step-time benchmark across body counts (run once per
   engine, flipping `physics/3d/physics_engine`).
 - **`test/gpu/`** — `particle_fluid_test`, `particle_emit_test`,
   `particle_foam_test`, `soft_body_gpu_test` (`PxDeformableVolume` — fall,
   collide, deform, impulse, pin). These `SKIP` (exit 0) without a CUDA device.
+  `groom_render_test` (hair in both render modes, switching modes, hide and
+  show, two grooms with their own colours) needs no CUDA but runs
+  **windowed**, Forward+ or Mobile.
 - **`test/flow/`** — `flow_smoke_test` (gas rises, `sample_smoke`),
   `flow_targets_test` (emitters feed the flow their `flow` path names),
   `flow_render_test` (the render effect draws), `flow_compositor_test` (user
