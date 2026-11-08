@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://bv8fkj3ra30qu"]
+
+[ext_resource type="Script" uid="uid://cl15ud1bn3l6b" path="res://demo/editor/hair/hair_styles.gd" id="1_lrkht"]
+[ext_resource type="PhysXGroom" uid="uid://b0b3jkpiqkw1w" path="res://demo/common/hair/hair_long.abc" id="3_tm5ut"]
+[ext_resource type="PhysXGroom" uid="uid://r4oyhr4sobhn" path="res://demo/common/hair/hair_curly.abc" id="4_ggiws"]
+[ext_resource type="PackedScene" uid="uid://bc53ap1faa57e" path="res://demo/common/hair/head.glb" id="6_uoqnm"]
+[ext_resource type="Script" uid="uid://dy3ph81t2g6fg" path="res://demo/common/fly_camera_node.gd" id="7_bilg6"]
+
+[sub_resource type="Environment" id="Environment_g0ch0"]
+background_mode = 1
+background_color = Color(0.32, 0.35, 0.4, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.62, 0.66, 0.72, 1)
+ambient_light_energy = 0.45
+tonemap_mode = 2
+
+[node name="HairStyles" type="Node3D" unique_id=539162139]
+script = ExtResource("1_lrkht")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=979855633]
+environment = SubResource("Environment_g0ch0")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1103852119]
+transform = Transform3D(0.76604444, -0.3686878, 0.52654076, 0, 0.81915206, 0.57357645, -0.6427876, -0.43938506, 0.62750685, 0, 0, 0)
+shadow_enabled = true
+
+[node name="BackLight" type="OmniLight3D" parent="." unique_id=640609332]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 16, -10)
+light_color = Color(1, 0.92, 0.8, 1)
+light_energy = 2.0
+shadow_enabled = true
+omni_range = 30.0
+
+[node name="Mesh" type="Node3D" parent="." unique_id=2027332851]
+visible = false
+
+[node name="Long" type="PhysXGroom3D" parent="Mesh" unique_id=1448343826]
+groom = ExtResource("3_tm5ut")
+
+[node name="Curly" type="PhysXGroom3D" parent="Mesh" unique_id=465748455]
+groom = ExtResource("4_ggiws")
+
+[node name="ScreenSpace" type="Node3D" parent="." unique_id=734988646]
+
+[node name="Long" type="PhysXGroom3D" parent="ScreenSpace" unique_id=1778388386]
+groom = ExtResource("3_tm5ut")
+render_mode = 1
+
+[node name="Curly" type="PhysXGroom3D" parent="ScreenSpace" unique_id=792390]
+groom = ExtResource("4_ggiws")
+render_mode = 1
+
+[node name="Long_head" parent="." unique_id=485024670 instance=ExtResource("6_uoqnm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0)
+
+[node name="Long_label" type="Label3D" parent="." unique_id=1290994738]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 12.6, 1.2)
+text = "Long"
+font_size = 48
+
+[node name="Curly_head" parent="." unique_id=1814011394 instance=ExtResource("6_uoqnm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 0)
+
+[node name="Curly_label" type="Label3D" parent="." unique_id=1657307750]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 12.6, 1.2)
+text = "Curly"
+font_size = 48
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=215732180]
+
+[node name="Mode" type="Label" parent="HUD" unique_id=228972464]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 16.0
+offset_bottom = 12.0
+theme_override_font_sizes/font_size = 22
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1620086617]
+transform = Transform3D(1, 0, 0, 0, 0.99778515, 0.06651895, 0, -0.06651895, 0.99778515, 7.5, 15.2, 9)
+current = true
+script = ExtResource("7_bilg6")
+fly_speed = 4.0

@@ -217,3 +217,10 @@ This project (scenes, scripts, tests) is under the MIT License — see
 
 It targets the `godot_physx` engine module, which links NVIDIA PhysX 5
 (BSD-3-Clause); that licensing lives with the engine build, not here.
+
+Third-party assets keep their own licenses, noted next to them:
+
+- `demo/common/mannequin/` -- Quaternius's mannequin and animations, CC0
+  ([LICENSE.md](demo/common/mannequin/LICENSE.md)).
+- `demo/common/hair/` -- head and hairstyles from Blender's "Hair Styles"
+  demo by Daniel Bystedt, CC BY-SA ([LICENSE.md](demo/common/hair/LICENSE.md)).
