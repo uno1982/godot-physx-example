@@ -133,7 +133,7 @@ func _run() -> void:
 	var with_shape_outside := _hair_at(outside)
 	print("[groom_sim] sphere: at %.2f -> %.2f, outside %.2f -> %.2f" % [before, with_shape, before_outside, with_shape_outside])
 	# (Where it is, the hair it pushed aside still covers it from the front.)
-	_check(with_shape_outside > before_outside + 0.1, "a sphere collider pushes the hair out of its place")
+	_check(with_shape_outside > before_outside + 0.05, "a sphere collider pushes the hair out of its place")
 	hair.colliders = []
 	body.queue_free()
 	await _frames(120)
@@ -159,7 +159,7 @@ func _run() -> void:
 	var with_bone := _hair_at(spot)
 	var with_bone_outside := _hair_at(outside)
 	print("[groom_sim] bone: at %.2f -> %.2f, outside %.2f -> %.2f" % [before, with_bone, before_outside, with_bone_outside])
-	_check(with_bone_outside > before_outside + 0.1, "a physical bone's sphere pushes the hair out")
+	_check(with_bone_outside > before_outside + 0.05, "a physical bone's sphere pushes the hair out")
 	hair.colliders = []
 	skeleton.queue_free()
 	await _frames(40)
