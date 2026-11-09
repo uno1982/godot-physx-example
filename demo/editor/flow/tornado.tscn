@@ -1,0 +1,155 @@
+[gd_scene format=3 uid="uid://bo085s182vkjx"]
+
+[ext_resource type="Script" uid="uid://dy3ph81t2g6fg" path="res://demo/common/fly_camera_node.gd" id="1_cam"]
+[ext_resource type="Script" uid="uid://b3u647gyny5pj" path="res://demo/editor/flow/tornado.gd" id="2_tornado"]
+[ext_resource type="Script" uid="uid://um50n4gyowcm" path="res://demo/editor/flow/desert_scrub.gd" id="3_scrub"]
+[ext_resource type="Script" path="res://demo/editor/flow/desert_ground.gd" id="4_ground"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_top_color = Color(0.32, 0.38, 0.46, 1)
+sky_horizon_color = Color(0.62, 0.6, 0.55, 1)
+ground_bottom_color = Color(0.45, 0.4, 0.33, 1)
+ground_horizon_color = Color(0.62, 0.6, 0.55, 1)
+sun_angle_max = 20.0
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+ambient_light_color = Color(0.7, 0.68, 0.62, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 4
+glow_enabled = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0015
+volumetric_fog_albedo = Color(0.85, 0.78, 0.65, 1)
+volumetric_fog_anisotropy = 0.6
+volumetric_fog_length = 150.0
+
+[sub_resource type="PhysXLensFlareSettings" id="LensFlare_settings"]
+threshold_range = 1.15
+ghost_intensity = 0.13
+ghost_chroma_shift = 0.2
+ghost_scales = PackedFloat32Array(-2.51, 5.295, -5, 10, 0.7, -0.4, -0.625, -1.35)
+halo_intensity = 1.59
+halo_compression = 0.19
+halo_chroma_shift = -0.083
+
+[sub_resource type="BoxShape3D" id="Shape_ground"]
+size = Vector3(400, 1, 400)
+
+[sub_resource type="FastNoiseLite" id="Noise_sand"]
+frequency = 0.02
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="Tex_sand_normal"]
+width = 1024
+height = 1024
+noise = SubResource("Noise_sand")
+seamless = true
+as_normal_map = true
+bump_strength = 6.0
+
+[sub_resource type="FastNoiseLite" id="Noise_patches"]
+seed = 3
+frequency = 0.008
+fractal_octaves = 4
+
+[sub_resource type="Gradient" id="Patch_colors"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(0.5, 0.41, 0.29, 1, 0.74, 0.65, 0.5, 1, 0.93, 0.86, 0.71, 1)
+
+[sub_resource type="NoiseTexture2D" id="Tex_sand_patches"]
+width = 1024
+height = 1024
+noise = SubResource("Noise_patches")
+color_ramp = SubResource("Patch_colors")
+
+[sub_resource type="FastNoiseLite" id="Noise_bumps"]
+seed = 5
+frequency = 0.05
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="Tex_sand_bumps"]
+width = 1024
+height = 1024
+noise = SubResource("Noise_bumps")
+as_normal_map = true
+bump_strength = 4.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_texture = SubResource("Tex_sand_patches")
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.7
+normal_texture = SubResource("Tex_sand_bumps")
+detail_enabled = true
+detail_blend_mode = 3
+detail_uv_layer = 1
+detail_normal = SubResource("Tex_sand_normal")
+uv2_scale = Vector3(100, 260, 1)
+
+[node name="FlowTornado" type="Node3D" unique_id=222101013]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1699805681]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1700092557]
+transform = Transform3D(-0.943858, -0.0612785, 0.324617, 0, 0.982645, 0.185496, -0.33035, 0.175082, -0.927478, 0, 30, 0)
+light_color = Color(1, 0.93, 0.8, 1)
+light_energy = 1.8
+light_volumetric_fog_energy = 1.5
+shadow_enabled = true
+directional_shadow_max_distance = 200.0
+
+[node name="LensFlare" type="PhysXLensFlare3D" parent="Sun" unique_id=2036902072]
+settings = SubResource("LensFlare_settings")
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=942973564]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=14719790]
+shape = SubResource("Shape_ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=393978962]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = SubResource("Mat_ground")
+script = ExtResource("4_ground")
+flat_spots = Array[Vector3]([Vector3(0, 62, 12)])
+
+[node name="PhysXFlow3D" type="PhysXFlow3D" parent="." unique_id=1880628478]
+cell_size = 0.15
+max_blocks = 2048
+buoyancy = 1.0
+cooling_rate = 0.3
+smoke_fade = 0.03
+vorticity = 0.8
+combustion = false
+collision_range = 60.0
+smoke_density = 2.0
+smoke_color = Color(0.78, 0.68, 0.52, 1)
+emission_strength = 0.0
+light_scattering = true
+scattering_strength = 0.26
+scattering_anisotropy = 0.59
+scattering_directional = true
+scattering_receive_shadows = 0
+
+[node name="Scrub" type="Node3D" parent="." unique_id=1307680093 node_paths=PackedStringArray("tornado", "ground")]
+script = ExtResource("3_scrub")
+tornado = NodePath("../Tornado")
+ground = NodePath("../Ground/MeshInstance3D")
+vortex_reach = 26.0
+vortex_strength = 2.12
+
+[node name="Tornado" type="Node3D" parent="." unique_id=1208076117]
+script = ExtResource("2_tornado")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1455143241]
+transform = Transform3D(1, 0, 0, 0, 0.981627, -0.190809, 0, 0.190809, 0.981627, 0, 3, 62)
+fov = 55.0
+far = 1000.0
+script = ExtResource("1_cam")
