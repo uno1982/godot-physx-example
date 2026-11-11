@@ -28,17 +28,17 @@ func _strip(asset: Resource) -> Resource:
 
 # Breaks a dynamic destructible over a floor and lets the pieces settle; returns where they are.
 func _drop(asset: Resource, label: String) -> PackedVector3Array:
-	var root := Node3D.new()
-	get_root().add_child(root)
+	var scene := Node3D.new()
+	get_root().add_child(scene)
 	var floor_body := StaticBody3D.new()
 	var floor_shape := CollisionShape3D.new()
 	floor_shape.shape = WorldBoundaryShape3D.new()
 	floor_body.add_child(floor_shape)
-	root.add_child(floor_body)
+	scene.add_child(floor_body)
 	var node: Node3D = ClassDB.instantiate("PhysXDestructible3D")
 	node.blast_asset = asset
 	node.position = Vector3(0, 1.5, 0)
-	root.add_child(node)
+	scene.add_child(node)
 	for i in 3:
 		await physics_frame
 	node.apply_radial_damage(node.global_position, 1000.0, 5.0, 10.0)
@@ -51,7 +51,7 @@ func _drop(asset: Resource, label: String) -> PackedVector3Array:
 		at.append(p)
 		lowest = minf(lowest, p.y)
 	_check(node.is_fractured() and node.get_piece_count() > 1 and lowest > -2.0, "%s: breaks, and the pieces stay on the floor (%d pieces, lowest %.3f)" % [label, node.get_piece_count(), lowest])
-	root.queue_free()
+	scene.queue_free()
 	await process_frame
 	return at
 
