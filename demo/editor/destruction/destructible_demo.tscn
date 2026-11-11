@@ -6,7 +6,7 @@
 [ext_resource type="PhysXBlastAsset" uid="uid://cb4rwvkqikmlf" path="res://demo/common/blast/StaticSphere_blast.tres" id="3_uspjk"]
 [ext_resource type="Material" uid="uid://c7r7eg7r0iwyw" path="res://demo/common/materials/glowing_red.tres" id="5_sg5i3"]
 [ext_resource type="PhysXBlastAsset" uid="uid://do32b5evl16js" path="res://demo/common/blast/MeshInstance3D5_blast.tres" id="6_iqfyv"]
-[ext_resource type="PhysXBlastAsset" uid="uid://sr7cx4mn6tx2" path="res://demo/common/blast/MeshInstance3D6_blast.tres" id="7_jnxmh"]
+[ext_resource type="PhysXBlastAsset" uid="uid://sr7cx4mn6tx2" path="res://demo/common/blast/two_material_crate_blast.tres" id="7_jnxmh"]
 [ext_resource type="Material" uid="uid://e63qijc10kbk" path="res://demo/common/materials/Wood.tres" id="8_1ita5"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
