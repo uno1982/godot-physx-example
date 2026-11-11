@@ -6,6 +6,8 @@
 [ext_resource type="PhysXBlastAsset" uid="uid://cb4rwvkqikmlf" path="res://demo/common/blast/StaticSphere_blast.tres" id="3_uspjk"]
 [ext_resource type="Material" uid="uid://c7r7eg7r0iwyw" path="res://demo/common/materials/glowing_red.tres" id="5_sg5i3"]
 [ext_resource type="PhysXBlastAsset" uid="uid://do32b5evl16js" path="res://demo/common/blast/MeshInstance3D5_blast.tres" id="6_iqfyv"]
+[ext_resource type="PhysXBlastAsset" uid="uid://sr7cx4mn6tx2" path="res://demo/common/blast/MeshInstance3D6_blast.tres" id="7_jnxmh"]
+[ext_resource type="Material" uid="uid://e63qijc10kbk" path="res://demo/common/materials/Wood.tres" id="8_1ita5"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
 size = Vector3(40, 0.1, 40)
@@ -531,6 +533,12 @@ text = "Interior
 Materials"
 font_size = 72
 
+[node name="Label3D6" type="Label3D" parent="." unique_id=935509242]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.169419, 2.828806, -1.6725647)
+text = "Multiple
+Materials"
+font_size = 72
+
 [node name="StaticSphere" type="PhysXDestructible3D" parent="." unique_id=2129192161 groups=["destructible"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.81911, 3.4984741, -1.3909006)
 blast_asset = ExtResource("3_uspjk")
@@ -566,3 +574,10 @@ material_override = SubResource("StandardMaterial3D_jrypa")
 interior_material = SubResource("ShaderMaterial_interior_grid")
 auto_mass = false
 mass = 35.0
+
+[node name="MeshInstance3D6" type="PhysXDestructible3D" parent="." unique_id=1885166744 groups=["destructible"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.120633, 1.6481916, -1.7889771)
+blast_asset = ExtResource("7_jnxmh")
+interior_material = ExtResource("8_1ita5")
+auto_mass = false
+mass = 55.0
