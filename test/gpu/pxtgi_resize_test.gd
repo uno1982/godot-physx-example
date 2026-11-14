@@ -5,7 +5,8 @@ extends SceneTree
 # Traced + Probes. Nothing in it has a color, so a pixel with one (the blue clouds, the yellow specks seen on metal
 # after a resize) is garbage. Counted at a few spots in the run:
 #   1. settled at the first size: no garbage;
-#   2. through the frames after a resize to a smaller size, and after one back: none.
+#   2. through the frames after a resize to a smaller size, and after one back: none;
+#   3. dragged to a new size every frame, every frame looked at: none.
 # The garbage was Godot's image right after a resize (a new texture, never drawn into) read as last frame's light:
 # Vulkan hands a new texture back with whatever its memory held, D3D12 mostly zeroed, so run it on Vulkan to catch it
 # (this project's default is D3D12, where it passed even with the bug). Needs a window (a compositor effect):
@@ -14,6 +15,7 @@ extends SceneTree
 
 const SETTLE := 400
 const AFTER := 300
+const DRAG := 60
 var _t := 0
 var _phase := 0
 var _ok := true
@@ -149,6 +151,20 @@ func _frame() -> void:
 			_phase = 1
 			_t = 0
 		return
+	# Dragged: a new size every frame, as dragging an editor split does, and every frame looked at (the GI buffers are
+	# remade each time, and one frame of garbage each time was what showed).
+	if _phase == 3:
+		if _t <= DRAG:
+			var n := _garbage()
+			_worst["drag"] = maxi(_worst.get("drag", 0), n)
+			if n > 0:
+				print("[gi-resize] drag f%d (%s): %d colored samples" % [_t, get_root().get_texture().get_size(), n])
+			DisplayServer.window_set_size(Vector2i(1280 - 6 * _t, 720 - 3 * _t))
+			return
+		_check(_worst.get("drag", 0) == 0, "while dragged to a new size every frame: no garbage in any frame (worst %d)" % _worst.get("drag", 0))
+		print("[gi-resize] %s" % ("PASS" if _ok else "FAIL"))
+		quit(0 if _ok else 1)
+		return
 	if _t % 15 == 0:
 		var n := _garbage()
 		var key := "smaller" if _phase == 1 else "back"
@@ -162,6 +178,8 @@ func _frame() -> void:
 		_phase = 2
 		_t = 0
 		return
-	_check(_worst.get("back", 0) == 0, "after a resize back: no garbage (worst %d)" % _worst.get("back", 0))
-	print("[gi-resize] %s" % ("PASS" if _ok else "FAIL"))
-	quit(0 if _ok else 1)
+	if _phase == 2:
+		_check(_worst.get("back", 0) == 0, "after a resize back: no garbage (worst %d)" % _worst.get("back", 0))
+		_phase = 3
+		_t = 0
+		return
