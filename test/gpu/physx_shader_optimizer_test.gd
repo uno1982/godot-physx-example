@@ -5,7 +5,8 @@ extends SceneTree
 #   2. find_groups: same code (A, A2) and code differing only in a default (B) are one group, kept = the most used;
 #      a structural difference (C) and a differing instance-uniform default (I1, I2) aren't grouped;
 #   3. the materials' values: one relying on B's default gets it set; one setting it itself, and A2's, get nothing;
-#   4. a default texture the kept shader has and another lacks: that one is skipped (a material can't say "none");
+#   4. default textures (a VisualShader's texture nodes) must match: a material can't be given its own (Godot hides
+#      those parameters from it, and doesn't save one set), so only shaders with the same default textures are grouped;
 #   5. merge_group moves the materials, and saved and read back they keep the kept shader and their values.
 # Needs a rendering device (shaders report no parameters headless):
 #   godot --path . --script res://test/gpu/physx_shader_optimizer_test.gd
@@ -84,8 +85,13 @@ func _run() -> void:
 	# A default texture (set from code, as the VisualShader editor does): kept in memory under its file's path, as a text
 	# shader's file doesn't hold one.
 	var t1 := _shader("sh_t1", TEX)
-	t1.set_default_texture_parameter("tex", GradientTexture2D.new())
+	var gradient := GradientTexture2D.new()
+	t1.set_default_texture_parameter("tex", gradient)
 	var t2 := _shader("sh_t2", TEX)
+	var t3 := _shader("sh_t3", TEX)
+	t3.set_default_texture_parameter("tex", gradient)
+	var t4 := _shader("sh_t4", TEX)
+	t4.set_default_texture_parameter("tex", GradientTexture2D.new())
 
 	var m_a1 := _material("m_a1", a)
 	var _m_a1b := _material("m_a1b", a)
@@ -97,11 +103,13 @@ func _run() -> void:
 	var _m_i2 := _material("m_i2", i2)
 	var _m_t1 := _material("m_t1", t1)
 	var _m_t1b := _material("m_t1b", t1)
-	var m_t2 := _material("m_t2", t2)
+	var _m_t2 := _material("m_t2", t2)
+	var _m_t3 := _material("m_t3", t3)
+	var _m_t4 := _material("m_t4", t4)
 
 	# 2.
 	var materials: Array = PhysXShaderOptimizer.find_materials(DIR)
-	_check(materials.size() == 11, "find_materials: the 11 material files, not the shaders (%d)" % materials.size())
+	_check(materials.size() == 13, "find_materials: the 13 material files, not the shaders (%d)" % materials.size())
 	var groups: Array = PhysXShaderOptimizer.find_groups(materials)
 	var g: Dictionary = _group_of(groups, a)
 	_check(not g.is_empty() and g.shader == a and g.shaders.size() == 3 and g.shaders.has(a2) and g.shaders.has(b), "A, A2 and B (a default differs) are one group, A kept (used most)")
@@ -120,7 +128,9 @@ func _run() -> void:
 
 	# 4.
 	var gt: Dictionary = _group_of(groups, t1)
-	_check(not gt.is_empty() and gt.shader == t1 and gt.skipped.has(t2) and not gt.materials.has(m_t2), "a shader lacking the kept one's default texture is skipped")
+	_check(not gt.is_empty() and gt.shader == t1 and gt.shaders.size() == 2 and gt.shaders.has(t3), "the same default texture: grouped (T1, T3)")
+	_check(_group_of(groups, t2).is_empty(), "no default texture where the others have one: not grouped (T2)")
+	_check(_group_of(groups, t4).is_empty(), "a different default texture: not grouped (T4; a material can't be given it)")
 
 	# 5.
 	PhysXShaderOptimizer.merge_group(g)
