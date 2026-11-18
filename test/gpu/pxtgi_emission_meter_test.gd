@@ -9,9 +9,11 @@ extends SceneTree
 #   4. a glow animated by TIME is flagged as changing, the constant ones aren't;
 #   5. find_untagged lists only the ShaderMaterials with no pxtgi_emission on the material or its mesh;
 #   6. emission_tag encodes a glow as PXTGI reads it (srgb_to_linear gives it back);
-#   7. albedo (the diffuse share of an even white light, as PXTGI bounces it): a StandardMaterial3D's sRGB gray, a
-#      two-color albedo texture averaged, that texture tinted, a metal (dark), a ShaderMaterial's ALBEDO with and
-#      without a glow, AO taken in: each within 0.01;
+#   7. albedo (the share of white light a surface bounces: diffuse under an even ambient light, plus what a metal
+#      reflects of a white sky): a StandardMaterial3D's sRGB gray, a two-color albedo texture averaged, that texture
+#      tinted, a ShaderMaterial's ALBEDO with and without a glow, AO taken in: each within 0.01; a glossy dielectric
+#      (its albedo and a little more) and a glossy metal (about its color) within 0.03; rough metals a share of their
+#      color (Godot draws a rough metal's reflection dimmer: about half at roughness 1);
 #   8. find_untagged_albedo lists ShaderMaterials and textured BaseMaterial3Ds with no pxtgi_albedo, not a plain
 #      StandardMaterial3D (PXTGI reads its color); albedo_tag encodes an albedo as PXTGI reads it.
 # Needs a window (the measuring draws):
@@ -122,12 +124,23 @@ func _run() -> void:
 	tinted.albedo_color = Color(0.5, 0.5, 0.5)
 	var metal := StandardMaterial3D.new()
 	metal.metallic = 1.0
+	metal.albedo_color = Color(0.5, 0.5, 0.5)
+	var gold := StandardMaterial3D.new()
+	gold.metallic = 1.0
+	gold.roughness = 0.2
+	gold.albedo_color = Color(1.0, 0.75, 0.3)
+	var glossy := StandardMaterial3D.new()
+	glossy.roughness = 0.1
+	glossy.albedo_color = Color(0.5, 0.5, 0.5)
 	var half := Color(0.5, 0.5, 0.5).srgb_to_linear().r
 	var albedo_cases := [
 		["StandardMaterial3D sRGB 0.5 gray", gray, Color(half, half, half)],
 		["two-color texture", textured_albedo, Color(0.5, 0.0, 0.5)],
 		["two-color texture x sRGB 0.5", tinted, Color(0.5 * half, 0.0, 0.5 * half)],
-		["metal", metal, Color(0, 0, 0)],
+		["metal sRGB 0.5 gray, roughness 1", metal, Color(half, half, half), 0.0, Vector2(0.35, 0.65)],
+		["gold metal, roughness 0.2", gold, Color(1.0, 0.75, 0.3).srgb_to_linear(), 0.03],
+		["glossy dielectric sRGB 0.5 gray", glossy, Color(half, half, half), 0.03],
+		["ShaderMaterial metal 0.4, roughness 0.6", _shader("void fragment() { ALBEDO = vec3(0.4); METALLIC = 1.0; ROUGHNESS = 0.6; }"), Color(0.4, 0.4, 0.4), 0.0, Vector2(0.65, 0.95)],
 		["ShaderMaterial ALBEDO 0.3", _shader("void fragment() { ALBEDO = vec3(0.3, 0.2, 0.1); }"), Color(0.3, 0.2, 0.1)],
 		["ShaderMaterial ALBEDO 0.3 glowing 250", _shader("void fragment() { ALBEDO = vec3(0.3); EMISSION = vec3(250.0); }"), Color(0.3, 0.3, 0.3)],
 		["ShaderMaterial ALBEDO 0.6 AO 0.5", _shader("void fragment() { ALBEDO = vec3(0.6); AO = 0.5; }"), Color(0.3, 0.3, 0.3)],
@@ -140,8 +153,16 @@ func _run() -> void:
 	for i in mini(albedo_results.size(), albedo_cases.size()):
 		var a: Color = albedo_results[i].albedo
 		var e: Color = albedo_cases[i][2]
-		var close := absf(a.r - e.r) <= 0.01 and absf(a.g - e.g) <= 0.01 and absf(a.b - e.b) <= 0.01
-		_check(close, "albedo %s: (%.3f, %.3f, %.3f), expected (%.3f, %.3f, %.3f)" % [albedo_cases[i][0], a.r, a.g, a.b, e.r, e.g, e.b])
+		var tolerance: float = albedo_cases[i][3] if albedo_cases[i].size() > 3 else 0.01
+		var close := absf(a.r - e.r) <= tolerance and absf(a.g - e.g) <= tolerance and absf(a.b - e.b) <= tolerance
+		var want := "(%.3f, %.3f, %.3f)" % [e.r, e.g, e.b]
+		if albedo_cases[i].size() > 4:
+			var r: Vector2 = albedo_cases[i][4]
+			close = true
+			for c in 3:
+				close = close and a[c] >= e[c] * r.x and a[c] <= e[c] * r.y
+			want = "%.2f-%.2f of %s" % [r.x, r.y, want]
+		_check(close, "albedo %s: (%.3f, %.3f, %.3f), expected %s" % [albedo_cases[i][0], a.r, a.g, a.b, want])
 
 	# 8. find_untagged_albedo and albedo_tag.
 	var root2 := Node3D.new()
