@@ -14,7 +14,8 @@ extends Node3D
 # any other intensity, Godot's own probe would replace the traced reflections inside its box).
 #
 #   T        the walls' pxtgi_albedo tags off / on (to compare; needs them tagged first)
-#   R        reflections: traced / traced + probes
+#   R        reflections: traced / traced + probes (the room never changes: the probe updates once; set to Always, Godot
+#            draws its shadows into some captures and not others, and the reflection flickers at the corners)
 #   WASD, Space / Ctrl, Shift, hold right mouse: fly
 
 @onready var _label: Label = $HUD/Label
