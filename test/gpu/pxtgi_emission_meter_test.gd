@@ -8,7 +8,12 @@ extends SceneTree
 #   3. no emission: 0;
 #   4. a glow animated by TIME is flagged as changing, the constant ones aren't;
 #   5. find_untagged lists only the ShaderMaterials with no pxtgi_emission on the material or its mesh;
-#   6. emission_tag encodes a glow as PXTGI reads it (srgb_to_linear gives it back).
+#   6. emission_tag encodes a glow as PXTGI reads it (srgb_to_linear gives it back);
+#   7. albedo (the diffuse share of an even white light, as PXTGI bounces it): a StandardMaterial3D's sRGB gray, a
+#      two-color albedo texture averaged, that texture tinted, a metal (dark), a ShaderMaterial's ALBEDO with and
+#      without a glow, AO taken in: each within 0.01;
+#   8. find_untagged_albedo lists ShaderMaterials and textured BaseMaterial3Ds with no pxtgi_albedo, not a plain
+#      StandardMaterial3D (PXTGI reads its color); albedo_tag encodes an albedo as PXTGI reads it.
 # Needs a window (the measuring draws):
 #   godot --path . --script res://test/gpu/pxtgi_emission_meter_test.gd
 
@@ -101,6 +106,59 @@ func _run() -> void:
 	_check(found.size() == 1 and found.has(untagged), "find_untagged: only the untagged ShaderMaterial (%d found)" % found.size())
 	_check(found.has(untagged) and (found[untagged] as Array).size() == 2, "find_untagged: both meshes using it listed")
 	root.free()
+
+	# 7. Albedo.
+	var img := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in 64:
+		for x in 64:
+			img.set_pixel(x, y, Color(1, 0, 0) if x < 32 else Color(0, 0, 1))
+	var two_color := ImageTexture.create_from_image(img)
+	var gray := StandardMaterial3D.new()
+	gray.albedo_color = Color(0.5, 0.5, 0.5)
+	var textured_albedo := StandardMaterial3D.new()
+	textured_albedo.albedo_texture = two_color
+	var tinted := StandardMaterial3D.new()
+	tinted.albedo_texture = two_color
+	tinted.albedo_color = Color(0.5, 0.5, 0.5)
+	var metal := StandardMaterial3D.new()
+	metal.metallic = 1.0
+	var half := Color(0.5, 0.5, 0.5).srgb_to_linear().r
+	var albedo_cases := [
+		["StandardMaterial3D sRGB 0.5 gray", gray, Color(half, half, half)],
+		["two-color texture", textured_albedo, Color(0.5, 0.0, 0.5)],
+		["two-color texture x sRGB 0.5", tinted, Color(0.5 * half, 0.0, 0.5 * half)],
+		["metal", metal, Color(0, 0, 0)],
+		["ShaderMaterial ALBEDO 0.3", _shader("void fragment() { ALBEDO = vec3(0.3, 0.2, 0.1); }"), Color(0.3, 0.2, 0.1)],
+		["ShaderMaterial ALBEDO 0.3 glowing 250", _shader("void fragment() { ALBEDO = vec3(0.3); EMISSION = vec3(250.0); }"), Color(0.3, 0.3, 0.3)],
+		["ShaderMaterial ALBEDO 0.6 AO 0.5", _shader("void fragment() { ALBEDO = vec3(0.6); AO = 0.5; }"), Color(0.3, 0.3, 0.3)],
+	]
+	var albedo_materials: Array[Material] = []
+	for c in albedo_cases:
+		albedo_materials.append(c[1])
+	meter.measure(albedo_materials)
+	var albedo_results: Array = await meter.finished
+	for i in mini(albedo_results.size(), albedo_cases.size()):
+		var a: Color = albedo_results[i].albedo
+		var e: Color = albedo_cases[i][2]
+		var close := absf(a.r - e.r) <= 0.01 and absf(a.g - e.g) <= 0.01 and absf(a.b - e.b) <= 0.01
+		_check(close, "albedo %s: (%.3f, %.3f, %.3f), expected (%.3f, %.3f, %.3f)" % [albedo_cases[i][0], a.r, a.g, a.b, e.r, e.g, e.b])
+
+	# 8. find_untagged_albedo and albedo_tag.
+	var root2 := Node3D.new()
+	var shader_untagged := _shader("void fragment() { ALBEDO = vec3(0.3); }")
+	var shader_tagged := _shader("void fragment() { ALBEDO = vec3(0.3); }")
+	shader_tagged.set_meta("pxtgi_albedo", Color(0.5, 0.5, 0.5))
+	for m in [shader_untagged, shader_tagged, gray, textured_albedo]:
+		var mi := MeshInstance3D.new()
+		mi.mesh = BoxMesh.new()
+		mi.material_override = m
+		root2.add_child(mi)
+	var found_albedo: Dictionary = ClassDB.class_call_static("PXTGIEmissionMeter", "find_untagged_albedo", root2)
+	_check(found_albedo.size() == 2 and found_albedo.has(shader_untagged) and found_albedo.has(textured_albedo), "find_untagged_albedo: the untagged ShaderMaterial and the textured StandardMaterial3D only (%d found)" % found_albedo.size())
+	root2.free()
+	var tag_albedo: Color = ClassDB.class_call_static("PXTGIEmissionMeter", "albedo_tag", Color(0.3, 0.2, 0.1))
+	var back := tag_albedo.srgb_to_linear()
+	_check(absf(back.r - 0.3) < 0.001 and absf(back.g - 0.2) < 0.001 and absf(back.b - 0.1) < 0.001, "albedo_tag reads back as the albedo (%s)" % back)
 
 	# emission_tag: what PXTGI reads back (srgb_to_linear) is the glow.
 	for glow in [0.5, 100.0, 1128.0]:
