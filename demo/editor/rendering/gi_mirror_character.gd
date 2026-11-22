@@ -26,17 +26,21 @@ extends Node3D
 #   T          the bones' pxtgi_albedo tags on / off
 #   R          reflections: traced (on screen and off) / on screen only
 #   C          camera: first person / third person
-#   P          the mirror: PXTGI's traced reflection / a scene capture (scene_capture_mirror.gd: a second camera
-#              renders the mirrored view into a texture the glass shows, as Unreal's SceneCaptureComponent2D)
-#   K          the scene capture's resolution: 1024 / 512 / 256 pixels high
+#   P          the mirror: PXTGI's traced reflection / the PhysXMirror3D in front of it (a scene capture: a second
+#              camera renders the mirrored view into a texture its glass shows, as Unreal's SceneCaptureComponent2D)
+#   K          the capture's resolution: the full view's height / half / a quarter
+#   G          the capture lit by PXTGI or not (off: direct light only, and PXTGI doesn't run for it)
+#
+# Which to use: PXTGI's traced reflection is cheap and works on any smooth surface (curved metal, glossy floors, many
+# at once), but shows a character as its traced mesh (one color per triangle). The PhysXMirror3D shows the real
+# render (textures, normal maps, Godot's shadows) of one flat rectangle, at the cost of drawing what it sees again.
 
 const SOURCES := ["the traced mesh", "the bones' capsules", "nothing"]
 const WALK_SPEED := 1.3 # m/s, about the Walk clip's pace
 const TURN := 0.003 # rad per pixel of mouse motion
 const ROOM := 2.6 # how far from the room's middle the mannequin may walk (the walls are at 3)
 const BODY_LAYER := 1 << 1 # the mannequin's mesh: drawn for everything but the first person camera
-const CaptureMirror := preload("res://demo/editor/rendering/scene_capture_mirror.gd")
-const CAPTURE_HEIGHTS := [1024, 512, 256]
+const CAPTURE_SCALES := [1.0, 0.5, 0.25]
 
 @onready var _label: Label = $HUD/Label
 @onready var _gi: Node3D = $GI
@@ -55,8 +59,8 @@ var _first_person := true
 var _yaw := 0.0 # the mannequin's heading (0: facing the mirror, -z)
 var _pitch := -0.1
 var _animation := ""
-var _capture: Node3D
-var _capture_height := 0
+@onready var _capture: Node3D = $CaptureMirror
+var _capture_scale := 0
 
 
 func _ready() -> void:
@@ -76,13 +80,6 @@ func _ready() -> void:
 	_set_source()
 	_set_camera()
 	_play("Idle")
-	# The scene capture mirror, on the same glass (a centimeter in front of it), shown with P.
-	_capture = CaptureMirror.new()
-	_capture.viewer = _camera
-	_capture.size = Vector2(2.4, 2.2)
-	_capture.position = Vector3(0, 1.4, -2.935)
-	_capture.visible = false
-	add_child(_capture)
 	_show()
 
 
@@ -201,8 +198,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_P:
 			_capture.visible = not _capture.visible
 		KEY_K:
-			_capture_height = (_capture_height + 1) % CAPTURE_HEIGHTS.size()
-			_capture.set_resolution(CAPTURE_HEIGHTS[_capture_height])
+			_capture_scale = (_capture_scale + 1) % CAPTURE_SCALES.size()
+			_capture.resolution_scale = CAPTURE_SCALES[_capture_scale]
+		KEY_G:
+			_capture.gi = not _capture.gi
 		_:
 			return
 	_show()
@@ -218,5 +217,7 @@ func _show() -> void:
 " % ["first person" if _first_person else "third person"]
 	text += "P  mirror: %s
 " % ["scene capture" if _capture.visible else "PXTGI traced"]
-	text += "K  capture resolution: %d high" % CAPTURE_HEIGHTS[_capture_height]
+	text += "K  capture resolution: %d%% of the view's height
+" % int(CAPTURE_SCALES[_capture_scale] * 100)
+	text += "G  capture lit by PXTGI: %s" % ["ON" if _capture.gi else "OFF"]
 	_label.text = text
