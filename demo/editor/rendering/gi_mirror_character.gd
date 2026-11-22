@@ -8,9 +8,9 @@ extends Node3D
 # shapes and the mirror shows only the room. With reflections on screen only (R), the mirror is black: nothing it
 # shows is on screen.
 #
-# Behind the mannequin (C), its back is on screen. The reflected ray passes it on its way to the front, and the screen
-# trace takes the back it finds there: the mirror shows a dithered figure in the back's colors where the front should
-# be, not the capsules.
+# Behind the mannequin (C), its back is on screen, but not the front the mirror shows. A reflected ray that passes
+# behind what's on screen (the back faces away from it, or the ray never comes up to it) doesn't take the screen's
+# view of it: the capsules are traced, as off screen.
 #
 # A physical bone's color: PXTGI colors a body by the mesh it belongs to, and a bone isn't next to the character's
 # mesh, so it would be neutral gray. The script gives every bone a pxtgi_albedo tag of the mesh's color (T switches
