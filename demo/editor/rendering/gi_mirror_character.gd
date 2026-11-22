@@ -26,12 +26,17 @@ extends Node3D
 #   T          the bones' pxtgi_albedo tags on / off
 #   R          reflections: traced (on screen and off) / on screen only
 #   C          camera: first person / third person
+#   P          the mirror: PXTGI's traced reflection / a scene capture (scene_capture_mirror.gd: a second camera
+#              renders the mirrored view into a texture the glass shows, as Unreal's SceneCaptureComponent2D)
+#   K          the scene capture's resolution: 1024 / 512 / 256 pixels high
 
 const SOURCES := ["the traced mesh", "the bones' capsules", "nothing"]
 const WALK_SPEED := 1.3 # m/s, about the Walk clip's pace
 const TURN := 0.003 # rad per pixel of mouse motion
 const ROOM := 2.6 # how far from the room's middle the mannequin may walk (the walls are at 3)
 const BODY_LAYER := 1 << 1 # the mannequin's mesh: drawn for everything but the first person camera
+const CaptureMirror := preload("res://demo/editor/rendering/scene_capture_mirror.gd")
+const CAPTURE_HEIGHTS := [1024, 512, 256]
 
 @onready var _label: Label = $HUD/Label
 @onready var _gi: Node3D = $GI
@@ -50,6 +55,8 @@ var _first_person := true
 var _yaw := 0.0 # the mannequin's heading (0: facing the mirror, -z)
 var _pitch := -0.1
 var _animation := ""
+var _capture: Node3D
+var _capture_height := 0
 
 
 func _ready() -> void:
@@ -69,6 +76,13 @@ func _ready() -> void:
 	_set_source()
 	_set_camera()
 	_play("Idle")
+	# The scene capture mirror, on the same glass (a centimeter in front of it), shown with P.
+	_capture = CaptureMirror.new()
+	_capture.viewer = _camera
+	_capture.size = Vector2(2.4, 2.2)
+	_capture.position = Vector3(0, 1.4, -2.935)
+	_capture.visible = false
+	add_child(_capture)
 	_show()
 
 
@@ -184,6 +198,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_C:
 			_first_person = not _first_person
 			_set_camera()
+		KEY_P:
+			_capture.visible = not _capture.visible
+		KEY_K:
+			_capture_height = (_capture_height + 1) % CAPTURE_HEIGHTS.size()
+			_capture.set_resolution(CAPTURE_HEIGHTS[_capture_height])
 		_:
 			return
 	_show()
@@ -195,5 +214,9 @@ func _show() -> void:
 	text += "M  the mirror shows: %s\n" % SOURCES[_source]
 	text += "T  bone color tags: %s\n" % ["ON" if _tags_on else "OFF (gray)"]
 	text += "R  reflections: %s\n" % ["traced, on screen and off" if int(_gi.get("reflection_mode")) == 2 else "on screen only"]
-	text += "C  camera: %s" % ["first person" if _first_person else "third person"]
+	text += "C  camera: %s
+" % ["first person" if _first_person else "third person"]
+	text += "P  mirror: %s
+" % ["scene capture" if _capture.visible else "PXTGI traced"]
+	text += "K  capture resolution: %d high" % CAPTURE_HEIGHTS[_capture_height]
 	_label.text = text
