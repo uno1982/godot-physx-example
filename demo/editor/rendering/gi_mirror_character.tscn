@@ -1,0 +1,154 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/editor/rendering/gi_mirror_character.gd" id="1_mirror"]
+[ext_resource type="Script" path="res://demo/common/fly_camera_node.gd" id="2_fly"]
+[ext_resource type="PackedScene" path="res://demo/common/mannequin/mannequin_ragdoll.tscn" id="3_mannequin"]
+
+[sub_resource type="Environment" id="Environment_mirror"]
+background_mode = 1
+ambient_light_source = 2
+ambient_light_energy = 0.0
+tonemap_mode = 4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_white"]
+resource_name = "white"
+albedo_color = Color(0.8, 0.8, 0.8, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blue"]
+resource_name = "blue"
+albedo_color = Color(0.25, 0.4, 0.8, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mirror"]
+resource_name = "mirror"
+metallic = 1.0
+roughness = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frame"]
+resource_name = "frame"
+albedo_color = Color(0.15, 0.1, 0.08, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_flat"]
+size = Vector3(6, 0.2, 6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_flat"]
+size = Vector3(6, 0.2, 6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_z"]
+size = Vector3(6, 3.4, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_z"]
+size = Vector3(6, 3.4, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_x"]
+size = Vector3(0.2, 3.4, 6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_x"]
+size = Vector3(0.2, 3.4, 6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_frame"]
+size = Vector3(2.6, 2.4, 0.04)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mirror"]
+size = Vector3(2.4, 2.2, 0.02)
+
+[node name="GIMirrorCharacter" type="Node3D"]
+script = ExtResource("1_mirror")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_mirror")
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_flat")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+material_override = SubResource("StandardMaterial3D_white")
+mesh = SubResource("BoxMesh_flat")
+
+[node name="Ceiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
+shape = SubResource("BoxShape3D_flat")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
+material_override = SubResource("StandardMaterial3D_white")
+mesh = SubResource("BoxMesh_flat")
+
+[node name="BackWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -3.1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall"]
+shape = SubResource("BoxShape3D_wall_z")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
+material_override = SubResource("StandardMaterial3D_white")
+mesh = SubResource("BoxMesh_wall_z")
+
+[node name="FrontWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 3.1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FrontWall"]
+shape = SubResource("BoxShape3D_wall_z")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FrontWall"]
+material_override = SubResource("StandardMaterial3D_blue")
+mesh = SubResource("BoxMesh_wall_z")
+
+[node name="LeftWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 1.7, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall"]
+shape = SubResource("BoxShape3D_wall_x")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
+material_override = SubResource("StandardMaterial3D_white")
+mesh = SubResource("BoxMesh_wall_x")
+
+[node name="RightWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 1.7, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall"]
+shape = SubResource("BoxShape3D_wall_x")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
+material_override = SubResource("StandardMaterial3D_white")
+mesh = SubResource("BoxMesh_wall_x")
+
+[node name="MirrorFrame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.98)
+material_override = SubResource("StandardMaterial3D_frame")
+mesh = SubResource("BoxMesh_frame")
+
+[node name="Mirror" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.95)
+material_override = SubResource("StandardMaterial3D_mirror")
+mesh = SubResource("BoxMesh_mirror")
+
+[node name="Mannequin" parent="." instance=ExtResource("3_mannequin")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.55, 0, -1.3)
+start_limp = false
+animation = "Idle"
+
+[node name="Light" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 0.8)
+light_energy = 3.0
+shadow_enabled = true
+omni_range = 12.0
+
+[node name="GI" type="PXTGI3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 2.4)
+fov = 70.0
+script = ExtResource("2_fly")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 12.0
+offset_bottom = 8.0
