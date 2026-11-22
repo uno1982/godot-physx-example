@@ -5,16 +5,19 @@ extends Node3D
 # traces it: the mirror shows you, walking and turning as you do, and nothing else shows you (your shadow aside).
 #
 # What the mirror can show of a character (M):
-#   - its mesh: a skinned MeshInstance3D with "pxtgi_traced" true in its metadata is traced as its own triangles (its
-#     coarsest LOD with about 3000, skinned to the pose every frame), each in its surface's color: the mirror shows the
-#     character's shape and colors (here the purple joints too);
+#   - its mesh: a skinned MeshInstance3D with "pxtgi_traced" true in its metadata (set in this scene on the
+#     mannequin's mesh: Mannequin > Mannequin > Armature > GeneralSkeleton > Mannequin, the Inspector's Metadata; an
+#     int instead of true is the number of triangles to trace it with) is traced as its own triangles (its coarsest
+#     LOD with about 3000, skinned to the pose every frame), each in its surface's color: the mirror shows the
+#     character's shape and colors (here the purple joints too). Reflections don't take the screen's view inside its
+#     bounds (the side of it the camera sees): they trace the mesh, so it shows its front in third person too;
 #   - its physical bones' capsules, which follow the animation while the body isn't limp: a figure of capsules in the
 #     character's pose. PXTGI colors a body by the mesh it belongs to, and a bone isn't next to the character's mesh,
 #     so the script gives every bone a pxtgi_albedo tag of the mesh's color (T switches them off: gray);
 #   - nothing: a character with neither has no shapes, and the mirror shows only the room.
-# In third person (C) the camera is behind the mannequin and its back is on screen: where a reflected ray passes
-# behind it on screen, the reflection may take the back from the screen. With reflections on screen only (R), the
-# mirror shows only what the camera sees (in first person, not you). Reflection probes don't help with a character
+# In third person (C) the camera is behind the mannequin and its back is on screen: with the capsules or nothing
+# traced, where a reflected ray passes behind it on screen, the reflection takes its back from the screen. With
+# reflections on screen only (R), the mirror shows only what the camera sees (in first person, not you). Reflection probes don't help with a character
 # (traced + probes takes probe colors on static bodies only).
 #
 #   WASD       walk          mouse  look (click to capture it, Esc to let go)
@@ -60,6 +63,9 @@ func _ready() -> void:
 		_bones.append(bone)
 	_color = _mesh_color()
 	_tag_bones()
+	# The scene gives the mesh its pxtgi_traced tag (select Mannequin > ... > GeneralSkeleton > Mannequin: Metadata in
+	# the Inspector); M changes it at run time.
+	_source = 0 if bool(_mesh.get_meta("pxtgi_traced", false)) else 2
 	_set_source()
 	_set_camera()
 	_play("Idle")
