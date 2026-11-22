@@ -10,7 +10,8 @@ extends Node3D
 #
 # Behind the mannequin (C), its back is on screen, but not the front the mirror shows. A reflected ray that passes
 # behind what's on screen (the back faces away from it, or the ray never comes up to it) doesn't take the screen's
-# view of it: the capsules are traced, as off screen.
+# view of it when the collision shapes have that surface (the capsules): they are traced, as off screen. With the
+# bones off, nothing has it, and the mirror shows the screen's view of the back, the nearest PXTGI has.
 #
 # A physical bone's color: PXTGI colors a body by the mesh it belongs to, and a bone isn't next to the character's
 # mesh, so it would be neutral gray. The script gives every bone a pxtgi_albedo tag of the mesh's color (T switches
