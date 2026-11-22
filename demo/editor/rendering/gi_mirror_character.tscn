@@ -148,6 +148,16 @@ omni_range = 12.0
 
 [node name="GI" type="PXTGI3D" parent="."]
 
+[node name="ReflectionProbe" type="ReflectionProbe" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+visible = false
+intensity = 0.0
+size = Vector3(6.2, 3.6, 6.2)
+box_projection = true
+enable_shadows = true
+cull_mask = 524285
+ambient_mode = 0
+
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 2.4)
 fov = 75.0

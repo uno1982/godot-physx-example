@@ -18,10 +18,18 @@ extends Node3D
 # (textures, normal maps, Godot's shadows) of one flat rectangle, at the cost of drawing what it sees again. It can be
 # lit by PXTGI (G), which costs PXTGI again at its resolution (K).
 #
+# PXTGI's reflections, traced or traced + probes (R): with traced + probes PXTGI also draws the room's
+# ReflectionProbe (intensity 0, so Godot doesn't draw it too), taking off-screen colors on static bodies from its
+# capture (textures the collision shapes don't have). The room never changes, so the probe updates once, and its cull
+# mask leaves out the mannequin (layer 2: it moves, and a moving body takes nothing from a probe anyway) and the
+# PhysXMirror3D's glass (layer 20). The probe is shown only then: at any other intensity Godot's own probe would
+# replace the traced reflections inside its box.
+#
 #   WASD       walk          mouse  look (click to capture it, Esc to let go)
 #   3          dance (until you walk)
 #   P          the mirror: PXTGI's traced reflection / the PhysXMirror3D
 #   M          the mannequin's pxtgi_traced tag on / off (off: PXTGI sees its physical bones' capsules)
+#   R          PXTGI's reflections: traced / traced + probes
 #   C          camera: first person / third person
 #   K          the PhysXMirror3D's resolution: the full view's height / half / a quarter
 #   G          the PhysXMirror3D lit by PXTGI or not (off: direct light only, and PXTGI doesn't run for it)
@@ -36,6 +44,8 @@ const CAPTURE_SCALES := [1.0, 0.5, 0.25]
 @onready var _mannequin: Node3D = $Mannequin
 @onready var _camera: Camera3D = $Camera3D
 @onready var _capture: Node3D = $CaptureMirror
+@onready var _gi: Node3D = $GI
+@onready var _probe: ReflectionProbe = $ReflectionProbe
 
 var _mesh: MeshInstance3D
 var _skeleton: Skeleton3D
@@ -56,8 +66,13 @@ func _ready() -> void:
 	_mesh.layers = BODY_LAYER
 	_mannequin.position = Vector3(0, 0, 1.0) # a few steps back from the mirror
 	_set_camera()
+	_sync_probe()
 	_play("Idle")
 	_show()
+
+
+func _sync_probe() -> void:
+	_probe.visible = int(_gi.get("reflection_mode")) == 3
 
 
 func _traced() -> bool:
@@ -125,6 +140,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_capture.visible = not _capture.visible
 		KEY_M:
 			_mesh.set_meta("pxtgi_traced", not _traced())
+		KEY_R:
+			_gi.set("reflection_mode", 2 if int(_gi.get("reflection_mode")) == 3 else 3)
+			_sync_probe()
 		KEY_C:
 			_first_person = not _first_person
 			_set_camera()
@@ -144,6 +162,7 @@ func _show() -> void:
 		"WASD walk   mouse look (click to capture, Esc to let go)   3 dance",
 		"P  the mirror: %s" % ["PhysXMirror3D (scene capture)" if _capture.visible else "PXTGI's traced reflection"],
 		"M  pxtgi_traced: %s" % ["ON (the mesh)" if _traced() else "OFF (its physical bones' capsules)"],
+		"R  PXTGI's reflections: %s" % ["traced + probes" if int(_gi.get("reflection_mode")) == 3 else "traced"],
 		"C  camera: %s" % ["first person" if _first_person else "third person"],
 		"K  PhysXMirror3D resolution: %d%% of the view's height" % int(CAPTURE_SCALES[_capture_scale] * 100),
 		"G  PhysXMirror3D lit by PXTGI: %s" % ["ON" if _capture.gi else "OFF"],
