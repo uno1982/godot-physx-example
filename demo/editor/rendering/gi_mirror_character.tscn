@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://demo/editor/rendering/gi_mirror_character.gd" id="1_mirror"]
-[ext_resource type="Script" path="res://demo/common/fly_camera_node.gd" id="2_fly"]
 [ext_resource type="PackedScene" path="res://demo/common/mannequin/mannequin_ragdoll.tscn" id="3_mannequin"]
 
 [sub_resource type="Environment" id="Environment_mirror"]
@@ -142,8 +141,7 @@ omni_range = 12.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 2.4)
-fov = 70.0
-script = ExtResource("2_fly")
+fov = 75.0
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

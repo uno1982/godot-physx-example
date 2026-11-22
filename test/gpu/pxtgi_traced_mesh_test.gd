@@ -1,10 +1,11 @@
 extends SceneTree
 
 # PXTGI3D traces a skinned mesh with "pxtgi_traced" true as its own triangles, posed by its skeleton and colored by
-# its surfaces: the mirror demo (demo/editor/rendering/gi_mirror_character.tscn), its camera looking at the wall mirror
-# with the mannequin off screen. The mannequin's reflection: with the traced mesh, orange (its body) and purple (its
-# joint bands, a second surface) both show in the mirror, and the figure moves with the animation; with nothing traced,
-# no orange at all. Windowed only (PXTGI needs a RenderingDevice).
+# its surfaces: the mirror demo (demo/editor/rendering/gi_mirror_character.tscn) in first person, the mannequin
+# about a meter and a half from the wall mirror (its body isn't drawn for the camera, only traced). Its reflection:
+# with the traced mesh, orange (its body) and purple (its joint bands, a second surface) both show in the mirror, and
+# the figure moves with the animation; with nothing traced, no orange at all. Windowed only (PXTGI needs a
+# RenderingDevice).
 
 var failures := 0
 var _scene: Node
@@ -34,10 +35,10 @@ func _measure() -> Array:
 	var orange := 0
 	var purple := 0
 	var at := Vector2()
-	for y in range(80, 700, 2):
-		for x in range(80, 740, 2):
+	for y in range(0, img.get_height(), 2):
+		for x in range(0, img.get_width(), 2):
 			var c := img.get_pixel(x, y)
-			if c.r > 0.55 and c.g > 0.3 and c.g < 0.75 * c.r and c.b < 0.35 * c.r:
+			if c.r > 0.4 and c.g > 0.35 * c.r and c.g < 0.8 * c.r and c.b < 0.45 * c.r:
 				orange += 1
 				at += Vector2(x, y)
 			elif c.b > 0.3 and c.r > 0.6 * c.b and c.r < 1.1 * c.b and c.b > c.g + 0.12:
@@ -58,6 +59,8 @@ func _run() -> void:
 		return
 	_scene = (load("res://demo/editor/rendering/gi_mirror_character.tscn") as PackedScene).instantiate()
 	root.add_child(_scene)
+	await process_frame
+	_scene.get_node("Mannequin").position = Vector3(0, 0, -1.6)
 	await _frames(200)
 	var mesh: Array = await _measure()
 	print("[traced-mesh] traced mesh: orange %d purple %d at %s" % [mesh[0], mesh[1], mesh[2]])
