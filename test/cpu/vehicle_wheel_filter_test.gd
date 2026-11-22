@@ -52,6 +52,7 @@ func _initialize() -> void:
 	root.add_child(floor_body)
 
 	var area := Area3D.new()
+	area.monitoring = false # passive: its shapes aren't triggers (#34), the wheels must skip it all the same
 	area.add_child(_box_shape())
 	area.position = Vector3(-10, BOX_H * 0.5, 0)
 	root.add_child(area)
