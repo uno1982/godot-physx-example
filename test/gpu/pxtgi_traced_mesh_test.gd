@@ -4,8 +4,8 @@ extends SceneTree
 # its surfaces: the mirror demo (demo/editor/rendering/gi_mirror_character.tscn) in first person, the mannequin
 # about a meter and a half from the wall mirror (its body isn't drawn for the camera, only traced). Its reflection:
 # with the traced mesh, orange (its body) and purple (its joint bands, a second surface) both show in the mirror, and
-# the figure moves with the animation; with nothing traced, no orange at all. Windowed only (PXTGI needs a
-# RenderingDevice).
+# the figure moves with the animation; untagged (PXTGI sees its physical bones' capsules, gray), no orange at all.
+# Windowed only (PXTGI needs a RenderingDevice).
 
 var failures := 0
 var _scene: Node
@@ -76,13 +76,12 @@ func _run() -> void:
 		moved = moved or now.distance_to(last) > 4.0
 		last = now
 	_check(moved, "the reflection follows the animation")
-	# Nothing traced (M twice: capsules, then nothing): no mannequin in the mirror.
-	_key(KEY_M)
+	# Without the tag (M): PXTGI sees the physical bones' capsules, gray: no orange in the mirror.
 	_key(KEY_M)
 	await _frames(120)
 	var none: Array = await _measure()
-	print("[traced-mesh] nothing traced: orange %d purple %d" % [none[0], none[1]])
-	_check(none[0] < mesh[0] / 20, "with nothing traced the mirror shows no mannequin")
+	print("[traced-mesh] untagged (gray capsules): orange %d purple %d" % [none[0], none[1]])
+	_check(none[0] < mesh[0] / 20, "untagged, the mirror shows no orange mannequin (its capsules are gray)")
 	# The wall's blue reads a little purple at its edges: the joints are what the traced mesh adds.
 	_check(mesh[1] > none[1] + 100, "the traced mesh shows its purple joints too (a second surface's color)")
 	print("PASS" if failures == 0 else "FAIL: %d" % failures)
