@@ -120,6 +120,7 @@ viewport gizmo and inspector, then press Play.
 | `gi_courtyard_night.tscn` | Experimental: the courtyard by moonlight, lit mostly by a green emissive box that sweeps from wall to wall: bounce light from moving emissives. Same keys as `gi_courtyard.tscn`. |
 | `gi_reflections.tscn` | Experimental: PXTGI's traced reflections without a reflection probe: a wall mirror showing coloured boxes behind the camera (off screen, so traced against their collision shapes), a mirror sphere, and a row of metal spheres from roughness 0.1 to 0.6 across `reflection_roughness_cutoff` (the traced reflection fades into Godot's from 0.375 to 0.5). The probe starts off; same keys as `gi_courtyard.tscn`. |
 | `gi_cornell_box.tscn` | Experimental: PXTGI in the Cornell box (one light under the ceiling, no ambient light, so everything but the direct light is bounce light). `G` PXTGI / Godot's SDFGI / none, `B` debug views, `M` multi-bounce. Forward+ only. |
+| `gi_tunnel.tscn` | Experimental: PXTGI walking from light into dark: a sunlit room and a closed tunnel off it, sky ambient light and auto exposure on. Walk slowly down the tunnel and look down: it should stay dark (PXTGI used to carry the room's sky light in with the camera). `G` PXTGI / Godot's SDFGI / none, `B` debug views, `M` multi-bounce, `E` auto exposure, `R` back to the room. Forward+ only. |
 
 ### `demo/editor/flow/` — NVIDIA Flow
 
